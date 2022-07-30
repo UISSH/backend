@@ -1,0 +1,24 @@
+{
+  "certbot": {
+    "install": true,
+    "name": "certbot.py",
+    "config": {}
+  },
+  "database": {
+    "install": true,
+    "name": "mariadb.py",
+    "config": {
+      "set_root_password": "",
+      "remove_anonymous": true,
+      "disable_remote_login": true,
+      "remove_test_database": true
+    },
+    "nginx": {
+      "install": true,
+      "name": "nginx.py",
+      "config": {
+        "enable_nginx_repository": false
+      }
+    }
+  }
+}

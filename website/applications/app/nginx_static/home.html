@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{title}</title>
+
+    <style>
+
+        body {
+            background-color: #F5F5F7;
+            font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: calc(100vw - 16px);
+            height: calc(100vh - 16px);
+
+        }
+
+        .card {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 360px;
+            min-height: 180px;
+            border-radius: 18px;
+            background: #FFF !important;
+            box-shadow: 2px 4px 12px rgba(0, 0, 0, .02);
+        }
+
+
+    </style>
+</head>
+<body class="container">
+<div class="card">
+    <div style="padding: 8px 32px 32px 32px">
+        <h1>{title}</h1>
+        <p>{text}</p>
+        <p>{contact}</p>
+        <p style="font-size: small;color: darkgray">If you see this page, the <span style="color: black">{domain}</span>
+            website is <span style="color: green">successfully</span> created and
+            working. </p>
+    </div>
+</div>
+</body>
+
+</html>
