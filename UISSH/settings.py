@@ -70,7 +70,6 @@ DEFAULT_FROM_EMAIL = FROM_EMAIL_ADDRESS
 
 GEOIP_PATH = geo_ip.GEOIP_PATH
 INSTALLED_APPS += [
-    'revproxy',
     'websocket',
     'channels',
     'filebrowser.apps.FilebrowserConfig',
