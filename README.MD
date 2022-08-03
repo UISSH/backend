@@ -115,6 +115,6 @@ systemctl enable [name].service
 ## 运行
 
 ```bash
-gunicorn UISSH.wsgi
+gunicorn UISSH.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 
 ```
 
