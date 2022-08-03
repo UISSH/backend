@@ -79,6 +79,7 @@ INSTALLED_APPS += [
 MIDDLEWARE += [
 
 ]
+
 DEBUG_TOOL = config('DEBUG_TOOL', default=False, cast=bool)
 
 if DEBUG and DEBUG_TOOL:
@@ -109,7 +110,7 @@ CACHES = {
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

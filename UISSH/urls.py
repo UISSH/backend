@@ -21,6 +21,7 @@ from django.urls import path, include, re_path
 from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView, SpectacularAPIView
 from rest_framework.routers import DefaultRouter
 
+from common import views
 from common.apis import user, opreating
 from database.apis import database
 from filebrowser.apis.filebrowser import FileBrowserView
@@ -35,9 +36,10 @@ router.register(r"DataBase", database.DataBaseView)
 router.register(r'Admin/User', user.AdminUserView)
 router.register(r'FileBrowser', FileBrowserView)
 
-admin.site.site_title = "GGDashboard"
-admin.site.site_header = "GGDashboard"
+admin.site.site_title = "UI-SSH"
+admin.site.site_header = "UI-SSH"
 urlpatterns = [
+    path('', views.index, name='index'),
     path('websocket/', include('websocket.urls')),
     re_path(r'admin/', admin.site.urls),
     re_path(r'api/', include(router.urls))
@@ -47,7 +49,7 @@ urlpatterns = [
 if settings.DEBUG:
     from django.views import static
 
-    print("附加 debug 路由配置")
+    print("Additional debug routing configuration")
     urlpatterns += [
         path('docs/schema/', SpectacularAPIView.as_view(), name='schema'),
         # Optional UI:
