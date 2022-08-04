@@ -3,7 +3,9 @@ from django.db import models
 
 from base.model import BaseModel
 
-
+"""
+from common.models.Config import SystemConfig;SystemConfig.objects.get(key="SETTINGS");obj.value['database']['root_password'] = "root";obj.save()
+"""
 class SystemConfig(BaseModel):
     name = models.CharField(max_length=64, verbose_name="配置项")
     key = models.CharField(unique=True, max_length=32, verbose_name="配置键")

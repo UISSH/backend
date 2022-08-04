@@ -52,7 +52,6 @@ def listener_pre_save(sender, instance: Website, **kwargs):
         os.system(f'touch {nginx_config_path}')
 
         plog.debug(instance.ssl_config)
-
         if instance.ssl_config['certbot']["provider"] is None:
             instance.ssl_config = {
                 "certbot": {
@@ -65,11 +64,10 @@ def listener_pre_save(sender, instance: Website, **kwargs):
                 },
                 "method": "http-01"
             }
-
+        plog.debug(instance.ssl_config)
         app_factory = AppFactory
         app_factory.load()
-        config = NewWebSiteConfig(domain=instance.domain, root_dir=instance.index_root,
-                                  web_server_type=WebServerTypeEnum.Nginx)
+        config = instance.get_website_config()
 
         if instance.application is None:
             text = '与君初相识，犹如故人归。嗨，别来无恙！ <br> Hello World！'

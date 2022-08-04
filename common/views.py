@@ -11,7 +11,6 @@ def index(request):
     if template_index.exists():
         return render(request, 'common/index.html')
 
-    print(f'ln -s {static_index.absolute()} {static_index.absolute()}')
     if static_index.exists():
         os.system(f'ln -s {static_index.absolute()}  {template_index.absolute()}')
 

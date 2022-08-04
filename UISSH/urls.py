@@ -26,6 +26,7 @@ from common.apis import user, opreating
 from database.apis import database
 from filebrowser.apis.filebrowser import FileBrowserView
 from website.apis import website, application
+from django.conf.urls.static import static
 
 router = DefaultRouter()
 router.register(r'User', user.UserView)
@@ -46,10 +47,10 @@ urlpatterns = [
 
 ]
 
-if settings.DEBUG:
-    from django.views import static
 
+if settings.DEBUG:
     print("Additional debug routing configuration")
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += [
         path('docs/schema/', SpectacularAPIView.as_view(), name='schema'),
         # Optional UI:
@@ -58,8 +59,4 @@ if settings.DEBUG:
         path('api-auth/', include('rest_framework.urls')),
         path('__debug__/', include(debug_toolbar.urls)),
 
-    ]
-    urlpatterns += [
-        re_path(r'^static/(?P<path>.*)$', static.serve,
-                {'document_root': settings.STATIC_ROOT}, name='static'),
     ]

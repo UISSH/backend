@@ -1,3 +1,4 @@
+wheel
 uvicorn[standard]
 uwsgi==2.0.20
 aiohttp==3.8.1
