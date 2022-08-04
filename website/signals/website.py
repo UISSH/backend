@@ -9,6 +9,7 @@ from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeE
 from website.models import Website
 from website.models.utils import update_nginx_server_name, insert_section
 from website.models.website import website_pre_save
+from website.utils.certificate import issuing_certificate
 
 """
 from django.apps import AppConfig
@@ -65,6 +66,7 @@ def listener_pre_save(sender, instance: Website, **kwargs):
                 "method": "http-01"
             }
         plog.debug(instance.ssl_config)
+        p = issuing_certificate(instance)
         app_factory = AppFactory
         app_factory.load()
         config = instance.get_website_config()
