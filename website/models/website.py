@@ -163,7 +163,7 @@ class Website(BaseModel):
     def __str__(self):
         return self.name
 
-    def __or_create_ssl_config(self):
+    def or_create_ssl_config(self):
         if self.ssl_config is None or self.ssl_config['certbot']['email'] == '':
             self.log('debug', f'{self.name} - {self.domain} ssl is first enable.')
             ssl_config = {
@@ -189,8 +189,7 @@ class Website(BaseModel):
                                   web_server_type=WebServerTypeEnum.Nginx)
         if self.ssl_enable:
             plog.debug(f'enable {self.name} - {self.domain} ssl toggle.')
-
-            self.__or_create_ssl_config()
+            self.or_create_ssl_config()
             config.ssl_config = SSLConfig(ssl_certificate_path=self.ssl_config["path"]["certificate"],
                                           ssl_key_path=self.ssl_config["path"]["key"])
             plog.debug(config.ssl_config.__str__())
@@ -271,7 +270,7 @@ class Website(BaseModel):
         os.system('systemctl reload nginx')
 
 
-def website_pre_save(instance: Website):
+def sync_website_save(instance: Website):
     if instance.status == instance.StatusType.READY:
         plog.info('skip listener_website_save, because website status is ready.')
         return
