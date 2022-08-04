@@ -4,7 +4,38 @@
 
 # 安装
 
-todo
+可使用一键安装脚本快速部署，仅支持 Debian 11。
+
+- [安装脚本](https://github.com/UISSH/install-script)
+
+# 运行
+
+使用 systemd 管理
+
+```bash
+systemctl enable|disable|start|stop| ui-ssh
+```
+
+或者使用 gunicorn，_某些情况会找不到静态文件（404）_。
+
+```
+systemctl stop ui-ssh
+gunicorn UISSH.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 
+```
+
+# 目录结构
+
+安装后本项目的目录
+
+```bash
+# 程序默认位置
+/usr/local/uissh
+# systemd
+/lib/systemd/system/ui-ssh.service
+```
+
+其余程序目录以及配置文件（MariaDB、PHP、Nginx）结构都保持默认位置。
+
 
 # 规范标准
 
@@ -14,9 +45,9 @@ todo
 
 ## Linux
 
-第一版以最新 Debian (11) 长期支持版本约定俗成的规定为准。
+第一版基于 Debian 11 长期支持版本而开发并通过可用性测试，暂时不考虑支持其余发行版。
 
-一旦 Linux 长期版本停止维护，本项目也随之停止后续兼容开发以及支持。
+项目将在 Debian 11 生命周期进入最后两年对 Debian 11 仅仅提供安全更新不额外添加功能，并在 debian 12 长期支持版本上继续开发。
 
 ### Nginx
 
@@ -98,23 +129,18 @@ todo
 
 **配置文件**
 
-配置文件都应该遵循映射实际配置文件的做法
+部署应用都建议使用 systemd 来管理，遵循映射实际配置文件的做法
 
 ```bash
 
 # 如实际配置文件存放在
-touch /etc/systemd/system/multi-user.target.wants/[name].service
+touch /lib/systemd/system/[name].service
 
 # 应该创建系统软链接
-# /etc/systemd/system/multi-user.target.wants/[name].service → /lib/systemd/system/[name].service
-ln -s  /etc/systemd/system/multi-user.target.wants/[name].service /lib/systemd/system/[name].service
+ln -s  /lib/systemd/system/[name].service /etc/systemd/system/[name].service
 # 启用
 systemctl enable [name].service 
 ```
 
-## 运行
 
-```bash
-gunicorn UISSH.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 
-```
 
