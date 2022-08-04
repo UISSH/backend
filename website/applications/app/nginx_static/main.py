@@ -17,7 +17,7 @@ import uuid
 
 from website.applications.core.application import Application, ApplicationToolMinx
 from website.applications.core.dataclass import *
-from .install.variable import app_parameter, nginx_config
+from .src.variable import app_parameter, nginx_config
 
 abs_folder_path = pathlib.Path(__file__).parent.absolute()
 
