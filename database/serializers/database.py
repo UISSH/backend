@@ -14,6 +14,11 @@ class DataBaseModelSerializer(ICBaseModelSerializer):
         model = DataBase
         fields = '__all__'
 
+    def validate_name(self, val: str):
+        if "." in val:
+            raise serializers.ValidationError("Database name cannot contain '.' characters.")
+        return val
+
     @extend_schema_field(serializers.CharField(read_only=True, help_text="own username"))
     def _own_username(self, instance: DataBase):
         return instance.user.username
