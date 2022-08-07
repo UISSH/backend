@@ -8,8 +8,8 @@ class IBaseCache(object):
     cache = caches['default']
 
     def __init__(self, name='default'):
-        if not self.cache is caches[name]:
-            self.cache = caches['name']
+        if not  self.cache is  caches[name]:
+            self.cache = caches[name]
 
     def get_or_set(self, key, val, time_out=60):
         """

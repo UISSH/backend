@@ -1,18 +1,32 @@
 import os
 import pathlib
+import random
+import string
+import time
 import traceback
 
+import requests
 from django.db import transaction
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import permissions
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.response import Response
 
+from base.dataclass import BaseOperatingRes
+from base.utils import cache
+from base.utils.cache import IBaseCache
+from base.utils.format import format_completed_process
 from base.utils.logger import plog
 from base.viewset import BaseModelViewSet
 from common.models import User
+from common.serializers.operating import OperatingResSerializer
 from website.applications.core.dataclass import BaseSSLCertificate
 from website.models import Website
 from website.serializers.website import WebsiteModelSerializer
+from website.utils.certificate import issuing_certificate
+from website.utils.domain import domain_is_resolved
 
 
 class WebsiteView(BaseModelViewSet):
@@ -35,14 +49,11 @@ class WebsiteView(BaseModelViewSet):
     @action(methods=['get'], detail=True)
     def get_ssl_info(self, request, *args, **kwargs):
         instance = self.get_object()
-        valid = False
-
         certificate_path = instance.ssl_config['path']['certificate']
         if certificate_path != '' and pathlib.Path(certificate_path).exists():
             try:
                 cert = BaseSSLCertificate.get_certificate(certificate_path)
                 return Response(cert.__dict__)
-
             except Exception:
                 e = traceback.format_exc()
                 return Response(e, status=500)
@@ -74,6 +85,49 @@ class WebsiteView(BaseModelViewSet):
             instance._prefetched_objects_cache = {}
 
         return Response(serializer.data)
+
+    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
+    def enable_ssl(self, request):
+        obj: Website = self.get_object()
+        op = domain_is_resolved(obj.domain, request)
+        if op.is_success():
+            p = issuing_certificate(obj)
+            if p.returncode != 0:
+                op.msg = 'issue certificate error:\n' + format_completed_process(p)
+                op.set_failure()
+            else:
+                obj.ssl_enable = True
+                obj.save(update_fields=['ssl_enable'])
+
+        return Response(op.json())
+
+    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
+    def disable_ssl(self, request):
+        op = BaseOperatingRes()
+        obj = self.get_object()
+        obj.ssl_enable = False
+        obj.save(update_fields=['ssl_enable'])
+        op.set_success()
+        return Response(op.json())
+
+    @extend_schema(parameters=[OpenApiParameter(name='domain', type=str)])
+    @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
+    def verify_dns_records(self, request: Request, *args, **kwargs):
+        domain = request.query_params("domain")
+        op = domain_is_resolved(domain, request)
+        return Response(op.json())
+
+    @extend_schema(parameters=[OpenApiParameter(name='domain', type=str)])
+    @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
+    def domain_records(self, request: Request, *args, **kwargs):
+        _cache = IBaseCache()
+        op = BaseOperatingRes()
+        op.set_processing()
+        domain = request.query_params.get("domain")
+        random_str = _cache.get(domain, "null")
+        op.msg = random_str
+        op.set_success()
+        return Response(op.json())
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

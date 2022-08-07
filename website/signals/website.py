@@ -83,8 +83,7 @@ def created(instance: Website):
     create_file(instance)
 
     instance.or_create_ssl_config()
-
-    issuing_certificate(instance)
+    instance.ssl_enable = False
 
     load_app(instance)
 

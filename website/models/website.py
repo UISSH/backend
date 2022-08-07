@@ -275,16 +275,6 @@ def sync_website_save(instance: Website):
         plog.info('skip listener_website_save, because website status is ready.')
         return
 
-    if instance.ssl_enable:
-        p = issuing_certificate(instance)
-        if p.returncode != 0:
-            errors = {'ssl_enable': _('issue certificate error:\n') + format_completed_process(p)}
-
-            logger.error(errors)
-            raise serializers.ValidationError(errors)
-
-    plog.debug(f"ssl_enable:{instance.ssl_enable}")
-
     app = instance.get_application_module(instance.get_website_config())
     app.update()
     app.reload()
