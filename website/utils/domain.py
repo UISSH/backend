@@ -1,4 +1,5 @@
 import random
+import socket
 import string
 import traceback
 
@@ -18,17 +19,18 @@ def domain_is_resolved(domain, request):
     params = {"domain": domain}
     token = Token.objects.get(user=request.user)
     try:
-        url = "http://" + f"{domain}/api/Website/domain_records"
+        url = "http://" + f"{socket.gethostbyname(domain)}/api/Website/domain_records"
+
         headers = {"Authorization": f"token {token.key}"}
-        data = requests.get(url, params=params, headers=headers, timeout=60)
-        print(data.json())
+        data = requests.get(url, params=params, headers=headers, timeout=5)
+        print(url)
         if data.json()["msg"] == random_str:
             op.set_success()
         else:
             op.msg = "The domain name has not been resolved to this host."
             op.set_failure()
     except:
-        op.msg = f"{traceback.format_exc()}"
+        op.msg = f"{traceback.print_exc()}"
         op.set_failure()
 
     return op

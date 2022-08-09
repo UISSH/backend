@@ -87,22 +87,21 @@ class WebsiteView(BaseModelViewSet):
         return Response(serializer.data)
 
     @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
-    def enable_ssl(self, request):
+    def enable_ssl(self, request, *args, **kwargs):
         obj: Website = self.get_object()
-        op = domain_is_resolved(obj.domain, request)
-        if op.is_success():
-            p = issuing_certificate(obj)
-            if p.returncode != 0:
-                op.msg = 'issue certificate error:\n' + format_completed_process(p)
-                op.set_failure()
-            else:
-                obj.ssl_enable = True
-                obj.save(update_fields=['ssl_enable'])
+        op = BaseOperatingRes()
+        p = issuing_certificate(obj)
+        if p.returncode != 0:
+            op.msg = 'issue certificate error:\n' + format_completed_process(p)
+            op.set_failure()
+        else:
+            obj.ssl_enable = True
+            obj.save(update_fields=['ssl_enable'])
 
         return Response(op.json())
 
     @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
-    def disable_ssl(self, request):
+    def disable_ssl(self, request, *args, **kwargs):
         op = BaseOperatingRes()
         obj = self.get_object()
         obj.ssl_enable = False
@@ -113,7 +112,7 @@ class WebsiteView(BaseModelViewSet):
     @extend_schema(parameters=[OpenApiParameter(name='domain', type=str)])
     @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
     def verify_dns_records(self, request: Request, *args, **kwargs):
-        domain = request.query_params("domain")
+        domain = request.query_params.get("domain")
         op = domain_is_resolved(domain, request)
         return Response(op.json())
 

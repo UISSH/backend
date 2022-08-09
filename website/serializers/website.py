@@ -25,6 +25,7 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
     database_id = serializers.SerializerMethodField()
     database_name = serializers.SerializerMethodField()
     web_server_type_text = serializers.SerializerMethodField('_web_server_type_text')
+    status_text = serializers.SerializerMethodField('_status_text')
 
     class Meta:
         model = Website
@@ -40,6 +41,9 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
 
     def _web_server_type_text(self, obj: Website):
         return obj.get_web_server_type_display()
+
+    def _status_text(self, obj: Website):
+        return obj.get_status_display()
 
     def get_database_name(self, obj: Website):
 

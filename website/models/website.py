@@ -180,7 +180,7 @@ class Website(BaseModel):
 
             ssl_folder = pathlib.Path(f'/etc/letsencrypt/live/{self.domain}')
             if not ssl_folder.exists():
-                ssl_folder.mkdir()
+                ssl_folder.mkdir(parents=True, exist_ok=True)
 
             self.ssl_config = ssl_config
 
