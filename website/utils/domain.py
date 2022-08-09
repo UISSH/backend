@@ -19,11 +19,11 @@ def domain_is_resolved(domain, request):
     params = {"domain": domain}
     token = Token.objects.get(user=request.user)
     try:
-        url = "http://" + f"{socket.gethostbyname(domain)}/api/Website/domain_records"
-
+        # url = "http://" + f"{socket.gethostbyname(domain)}/api/Website/domain_records"
+        url = "http://" + f"{domain}/api/Website/domain_records"
         headers = {"Authorization": f"token {token.key}"}
         data = requests.get(url, params=params, headers=headers, timeout=5)
-        print(url)
+
         if data.json()["msg"] == random_str:
             op.set_success()
         else:
