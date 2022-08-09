@@ -2,6 +2,7 @@ import os
 import pathlib
 
 from django.shortcuts import render
+from rest_framework.response import Response
 
 
 def index(request):
@@ -13,5 +14,8 @@ def index(request):
 
     if static_index.exists():
         os.system(f'ln -s {static_index.absolute()}  {template_index.absolute()}')
+        return render(request, 'common/index.html')
+    else:
+        return Response("Frontend static files not found.",404)
 
-    return render(request, 'common/index.html')
+

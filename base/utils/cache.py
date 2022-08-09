@@ -8,7 +8,7 @@ class IBaseCache(object):
     cache = caches['default']
 
     def __init__(self, name='default'):
-        if not  self.cache is  caches[name]:
+        if not self.cache is caches[name]:
             self.cache = caches[name]
 
     def get_or_set(self, key, val, time_out=60):
@@ -42,3 +42,6 @@ class IBaseCache(object):
         :return:
         """
         return self.cache.get(key, default, version)
+
+    def delete(self, key, version=None):
+        return self.cache.delete(key, version)

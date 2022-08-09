@@ -1,3 +1,4 @@
+import hashlib
 import pathlib
 import shlex
 import subprocess
@@ -11,7 +12,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from base.dataclass import BaseOperatingRes
+from base.utils.cache import IBaseCache
 from base.utils.os_query import os_query_json
+from base.utils.random_utils import random_str
 from common.serializers.operating import OperatingResSerializer
 from filebrowser.serializers.file import FileSerializer, UploadFileSerializer, ActionFileSerializer, UserSerializer, \
     TextOperatingSerializer
@@ -68,15 +72,46 @@ class FileBrowserView(mixins.ListModelMixin,
 
     @extend_schema(parameters=[OpenApiParameter(name="path", description='absolute path')])
     @action(methods=['get'], detail=False)
+    def request_download_file(self, request, *args, **kwargs):
+        op = BaseOperatingRes()
+        path = request.query_params.get('path', None)
+        if path:
+            _key = hashlib.md5(path.encode()).hexdigest()
+            _cache = IBaseCache()
+            token = random_str(128)
+            _cache.set(_key, token)
+            op.msg = token
+            op.set_success()
+            return Response(op.json())
+        else:
+            op.msg = "'path' parameter is required."
+            op.set_failure()
+            return Response(op.json(), status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(parameters=[OpenApiParameter(name="path", description='absolute path'),
+                               OpenApiParameter(name="token", description='Download authorization')])
+    @action(methods=['get'], detail=False, permission_classes=[permissions.AllowAny])
     def download_file(self, request, *args, **kwargs):
         path = request.query_params.get('path', None)
+        token = request.query_params.get('token', None)
         if not path:
-            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': "'path' parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if token is None:
+            return Response({'detail': "'token' parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        _cache = IBaseCache()
+        _key = hashlib.md5(path.encode()).hexdigest()
+
+        if _cache.get(_key, None) != token:
+            return Response({'detail': f"invalid token."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            _cache.delete(_key)
+
         file = pathlib.Path(path)
         if not file.exists():
-            return Response(None, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': f"'{path}' does not exist."}, status=status.HTTP_404_NOT_FOUND)
         if file.is_dir():
-            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': f"'{path}' is folder."}, status=status.HTTP_400_BAD_REQUEST)
 
         return FileResponse(file.open("rb"), as_attachment=True)
 
