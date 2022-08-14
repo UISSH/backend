@@ -136,7 +136,7 @@ def listener_pre_delete(sender, instance: Website, **kwargs):
     # clean nginx config
 
     os_system_info(f'rm /etc/nginx/sites-available/{instance.domain}.conf')
-    os_system_info(f'rm /etc/nginx/sites-available/{instance.domain}.conf')
+    os_system_info(f'rm /etc/nginx/sites-enabled/{instance.domain}.conf')
 
     # reload nginx config
     os_system_info('systemctl reload nginx')
