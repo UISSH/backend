@@ -1,5 +1,8 @@
 import json
 import traceback
+from io import StringIO
+from pprint import pprint
+
 from threading import Thread
 
 import paramiko
@@ -28,10 +31,8 @@ class SshWebConsumer(WebsocketConsumer):
 
     def connect(self):
         self.accept()
-
         token = self.scope["query_string"].decode("utf-8").split("=")[1]
         try:
-
             token = Token.objects.get(key=token)
             user = token.user
             if not user.is_superuser:
@@ -44,11 +45,32 @@ class SshWebConsumer(WebsocketConsumer):
             self.disconnect(403)
             return
 
+    def disconnect(self, close_code):
+        pass
+
+    def __init_ssh(self, _format):
         self.client = paramiko.SSHClient()  # 创建连接对象
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+        private_key = _format.pop("private_key", None)
+        if private_key:
+            private_key_password = _format.pop("private_key_password", None)
+            private_key = StringIO(private_key)
+            if private_key_password:
+                pkey = paramiko.RSAKey.from_private_key(private_key, password=private_key_password)
+            else:
+                pkey = paramiko.RSAKey.from_private_key(private_key)
+
+            private_key.close()
+            del _format["password"]
+            auth_info = _format
+            auth_info["pkey"] = pkey
+        else:
+            del _format["private_key_password"]
+            auth_info = _format
+
         msg = "connection succeeded\r\n"
         try:
-            self.client.connect(hostname="127.0.0.1", port=22, username="admin", key_filename="./id_rsa")
+            self.client.connect(**auth_info)
         except:
             msg = "connection failed\r\n"
 
@@ -63,60 +85,19 @@ class SshWebConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
         print("ok")
 
-    def disconnect(self, close_code):
-        pass
-
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        message = 'echo "请求无效格式"\r'
-        try:
-            message = text_data_json['message']
-        except:
-            pass
-        self.ssh_session.send(message)
-        # self.send(text_data=json.dumps({'message': message}))
-        loop = Thread(target=self.ssh_recv, args=())
-        loop.start()
+        print(text_data_json)
 
-    # import json  # from channels.generic.websocket import AsyncWebsocketConsumer  #  # class ChatConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         self.room_name = self.scope['url_route']['kwargs']['room_name']
-#         self.room_group_name = 'chat_%s' % self.room_name
-#
-#         # Join room group
-#         await self.channel_layer.group_add(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#
-#         await self.accept()
-#
-#     async def disconnect(self, close_code):
-#         # Leave room group
-#         await self.channel_layer.group_discard(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#
-#     # Receive message from WebSocket
-#     async def receive(self, text_data):
-#         text_data_json = json.loads(text_data)
-#         message = text_data_json['message']
-#
-#         # Send message to room group
-#         await self.channel_layer.group_send(
-#             self.room_group_name,
-#             {
-#                 'type': 'chat_message',
-#                 'message': message
-#             }
-#         )
-#
-#     # Receive message from room group
-#     async def chat_message(self, event):
-#         message = event['message']
-#
-#         # Send message to WebSocket
-#         await self.send(text_data=json.dumps({
-#             'message': message
-#         }))
+        if self.client:
+            message = 'echo "请求无效格式"\r'
+            try:
+                message = text_data_json['message']
+            except:
+                pass
+            self.ssh_session.send(message)
+            # self.send(text_data=json.dumps({'message': message}))
+            loop = Thread(target=self.ssh_recv, args=())
+            loop.start()
+        else:
+            self.__init_ssh(text_data_json)
