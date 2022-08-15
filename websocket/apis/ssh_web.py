@@ -72,6 +72,7 @@ class SshWebConsumer(WebsocketConsumer):
         try:
             self.client.connect(**auth_info)
         except:
+            self.client = None
             msg = "connection failed\r\n"
 
         self.send(text_data=json.dumps({'message': msg}))
