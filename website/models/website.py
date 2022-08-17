@@ -6,18 +6,15 @@ import uuid
 from django.db import models
 from django.db.models import IntegerChoices
 from django.utils.translation import gettext_lazy as _
-from loguru import logger
 from rest_framework import serializers
 
 from base.base_model import BaseModel
-from base.utils.format import format_completed_process
 from base.utils.logger import plog
 from common.models.User import User
 from website.applications.app_factory import AppFactory
 from website.applications.core.application import Application
-from website.applications.core.dataclass import NewWebSiteConfig, SSLConfig, WebServerTypeEnum
-from website.models.utils import enable_section, disable_section, get_section, insert_section
-from website.utils.certificate import issuing_certificate
+from website.applications.core.dataclass import NewWebSiteConfig, SSLConfig, WebServerTypeEnum, DataBaseConfig
+from website.models.utils import enable_section, disable_section
 
 nginx_config_example = """
 server {
@@ -184,15 +181,20 @@ class Website(BaseModel):
 
             self.ssl_config = ssl_config
 
-    def get_website_config(self) -> NewWebSiteConfig:
+    def get_app_new_website_config(self) -> NewWebSiteConfig:
         config = NewWebSiteConfig(domain=self.domain, root_dir=self.index_root,
                                   web_server_type=WebServerTypeEnum.Nginx)
+
+        if hasattr(self, 'database') and self.database:
+            config.database_config = DataBaseConfig(self.database.name, self.database.username, self.database.password)
+
         if self.ssl_enable:
             plog.debug(f'enable {self.name} - {self.domain} ssl toggle.')
             self.or_create_ssl_config()
             config.ssl_config = SSLConfig(ssl_certificate_path=self.ssl_config["path"]["certificate"],
                                           ssl_key_path=self.ssl_config["path"]["key"])
             plog.debug(config.ssl_config.__str__())
+
         if self.valid_web_server_config is not None:
             config.web_server_config = self.valid_web_server_config
 
@@ -203,7 +205,7 @@ class Website(BaseModel):
         app_factory.load()
         return app_factory.get_application_module(self.application, config)
 
-    def is_valid_configuration(self):
+    def is_valid_configuration_001(self) -> subprocess.CompletedProcess:
 
         plog.info(f"verify {self.domain} configuration...\n\n{self.valid_web_server_config}")
 
@@ -234,17 +236,36 @@ class Website(BaseModel):
         cmd = f'nginx -t -c {tmp_config.absolute()}'
         r = subprocess.run(cmd, shell=True, capture_output=True)
 
-        nginx_config_path = f'/etc/nginx/sites-enabled/{self.domain}.conf'
+        return r
+
+    def is_valid_configuration_002(self, web_server_config) -> bool:
+
+        nginx_config_path = f'/etc/nginx/sites-available/{self.domain}.conf'
+        enable_nginx_config_path = f'/etc/nginx/sites-enabled/{self.domain}.conf'
+
+        old_web_server_config = ''
+        if pathlib.Path(nginx_config_path).exists():
+            with open(nginx_config_path, "r") as f:
+                old_web_server_config = f.read()
 
         with open(nginx_config_path, 'w') as f:
-            f.write(self.valid_web_server_config)
+            f.write(web_server_config)
 
-        return r
+        if not pathlib.Path(enable_nginx_config_path).exists():
+            os.system(f'ln -s {nginx_config_path} {enable_nginx_config_path}')
+        res = os.system('nginx -t')
+        if res == 0:
+            return True
+        else:
+            if old_web_server_config:
+                with open(nginx_config_path, 'w') as f:
+                    f.write(old_web_server_config)
+            return False
 
     def check_nginx_config(self):
 
         errors = {}
-        r = self.is_valid_configuration()
+        r = self.is_valid_configuration_001()
         if r.returncode != 0:
             msg = ''
             if r.stdout:
@@ -268,22 +289,3 @@ class Website(BaseModel):
     def clean(self):
         self.check_nginx_config()
         os.system('systemctl reload nginx')
-
-
-def sync_website_save(instance: Website):
-    if instance.status == instance.StatusType.READY:
-        plog.info('skip listener_website_save, because website status is ready.')
-        return
-
-    app = instance.get_application_module(instance.get_website_config())
-    app.update()
-    app.reload()
-
-    data = instance.get_nginx_config()
-    user_config = get_section(instance.valid_web_server_config, 'user')
-
-    data = insert_section(data, user_config, 'user')
-    data = insert_section(data, app.read(), 'app')
-
-    instance.valid_web_server_config = data
-    instance.clean()

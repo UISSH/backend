@@ -4,7 +4,6 @@ from django.apps import AppConfig
 
 from common.config import ABSDBConfig
 
-
 class BaseConfig(AppConfig):
 
     def ready(self):

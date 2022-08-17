@@ -12,6 +12,7 @@ print(GEOIP_PATH.absolute())
 
 
 def init():
+
     url = "https://ghproxy.com/https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb"
 
     if not GEOIP_CITY.exists():

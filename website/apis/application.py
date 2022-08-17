@@ -38,12 +38,23 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         op_res = app.update()
         return Response(op_res.json())
 
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
+    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
     def app_create(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
-        app = self._get_app_instance(obj)
-        data = app.create()
-        return Response(data.json())
+        instance: Website = self.get_object()
+        # 4.Create application instance
+        app_factory = AppFactory
+        app_factory.load()
+        app = app_factory.get_application_module(instance.application,
+                                                 instance.get_app_new_website_config(),
+                                                 instance.application_config)
+        res = app.create()
+        if not res.is_success():
+            err_msg = res.__str__()
+            instance.status = instance.StatusType.ERROR
+            instance.status_info = f"101:create appcation error. {err_msg}"
+
+        instance.save()
+        return Response(res.json())
 
     @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
     def app_update(self, request, *args, **kwargs):
