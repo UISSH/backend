@@ -44,16 +44,14 @@ server {
 
     ########USER########
 
-    # Please add your desired configuration here.
-
-    ########USER########
-
-    ########APP########
-
     index index.html;
     location / {
         try_files $uri $uri/ =404;
     }
+
+    ########USER########
+
+    ########APP########
 
     ########APP########
 

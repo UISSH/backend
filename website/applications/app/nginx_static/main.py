@@ -74,10 +74,7 @@ class NginxApplication(Application, ApplicationToolMinx):
 
     def read(self, *args, **kwargs):
         return """
-    index index.html;
-    location / {
-        try_files $uri $uri/ =404;
-    }
+
     """
 
     def update(self, *args, **kwargs):
