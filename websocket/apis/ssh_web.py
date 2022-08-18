@@ -72,7 +72,6 @@ class SshWebConsumer(WebsocketConsumer):
         try:
             self.client.connect(**auth_info)
         except paramiko.ssh_exception.BadAuthenticationType as e:
-
             self.client = None
             msg = f"connection failed: {e}\r\n"
         except:
@@ -81,6 +80,9 @@ class SshWebConsumer(WebsocketConsumer):
 
         self.send(text_data=json.dumps({'message': msg}))
 
+        if not hasattr(self.client, 'get_transport'):
+            self.close(500)
+
         self.ssh_session = self.client.get_transport().open_session()  # 成功连接后获取ssh通道
         self.ssh_session.get_pty()  # 获取一个终端
         self.ssh_session.invoke_shell()  # 激活终端
@@ -88,7 +90,6 @@ class SshWebConsumer(WebsocketConsumer):
         for i in range(2):  # 激活终端后会有信息流，一般都是lastlogin与bath目录，并获取其数据
             msg = self.ssh_session.recv(2048)
             self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
-        print("ok")
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
