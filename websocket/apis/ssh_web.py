@@ -70,7 +70,7 @@ class SshWebConsumer(WebsocketConsumer):
 
         msg = "connection succeeded\r\n"
         try:
-            self.client.connect(**auth_info)
+            self.client.connect(timeout=5, **auth_info)
         except paramiko.ssh_exception.BadAuthenticationType as e:
             self.client = None
             msg = f"connection failed: {e}\r\n"
@@ -81,7 +81,6 @@ class SshWebConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({'message': msg}))
 
         if not hasattr(self.client, 'get_transport'):
-            self.send(text_data=json.dumps({'message': 'connection failed.', 'code': 403}))
             return
 
         self.ssh_session = self.client.get_transport().open_session()  # 成功连接后获取ssh通道
