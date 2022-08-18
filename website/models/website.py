@@ -5,8 +5,6 @@ import uuid
 
 from django.db import models
 from django.db.models import IntegerChoices
-from django.utils.translation import gettext_lazy as _
-from rest_framework import serializers
 
 from base.base_model import BaseModel
 from base.utils.logger import plog
@@ -14,7 +12,7 @@ from common.models.User import User
 from website.applications.app_factory import AppFactory
 from website.applications.core.application import Application
 from website.applications.core.dataclass import NewWebSiteConfig, SSLConfig, WebServerTypeEnum, DataBaseConfig
-from website.models.utils import enable_section, disable_section
+from website.models.utils import enable_section, disable_section, get_section, insert_section
 
 nginx_config_example = """
 server {
@@ -262,22 +260,6 @@ class Website(BaseModel):
                     f.write(old_web_server_config)
             return False
 
-    def check_nginx_config(self):
-
-        errors = {}
-        r = self.is_valid_configuration_001()
-        if r.returncode != 0:
-            msg = ''
-            if r.stdout:
-                msg += r.stdout.decode('utf-8')
-            if r.stderr:
-                msg += '\n' + r.stderr.decode('utf-8')
-            errors['valid_web_server_config'] = _('Invalid configuration:') + msg
-
-        if errors:
-            plog.error(f'{errors}')
-            raise serializers.ValidationError(errors)
-
     def get_nginx_config(self):
         data = nginx_config_example.replace('{domain}', self.domain).replace('{dir_path}', self.index_root)
         if self.ssl_enable:
@@ -286,6 +268,14 @@ class Website(BaseModel):
             data = disable_section(data, 'ssl')
         return data
 
-    def clean(self):
-        self.check_nginx_config()
-        os.system('systemctl reload nginx')
+    def sync_web_config(self, save=False):
+
+        app = self.get_application_module(self.get_app_new_website_config())
+        data = self.get_nginx_config()
+        user_config = get_section(self.valid_web_server_config, 'user')
+        data = insert_section(data, user_config, 'user')
+        data = insert_section(data, app.read(), 'app')
+        self.valid_web_server_config = data
+        self.is_valid_configuration_002(self.valid_web_server_config)
+        if save:
+            self.save()

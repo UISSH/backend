@@ -61,20 +61,6 @@ class WebsiteView(BaseModelViewSet):
             data = serializer.save()
             return Response(data)
 
-    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
-    def enable_ssl(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
-        op = BaseOperatingRes()
-        p = issuing_certificate(obj)
-        if p.returncode != 0:
-            op.msg = 'issue certificate error:\n' + format_completed_process(p)
-            op.set_failure()
-        else:
-            obj.ssl_enable = True
-            obj.save(update_fields=['ssl_enable'])
-
-        return Response(op.json())
-
     @action(methods=['post'], detail=True, serializer_class=WebsiteConfigSerializer)
     def update_web_config(self, request, *args, **kwargs):
         op = BaseOperatingRes()
@@ -85,11 +71,26 @@ class WebsiteView(BaseModelViewSet):
             return Response({'web_server_config': data})
 
     @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
+    def enable_ssl(self, request, *args, **kwargs):
+        obj: Website = self.get_object()
+        op = BaseOperatingRes()
+        p = issuing_certificate(obj)
+        if p.returncode != 0:
+            op.msg = 'issue certificate error:\n' + format_completed_process(p)
+            op.set_failure()
+        else:
+            obj.ssl_enable = True
+            obj.sync_web_config(save=True)
+
+        return Response(op.json())
+
+    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
     def disable_ssl(self, request, *args, **kwargs):
         op = BaseOperatingRes()
-        obj = self.get_object()
+        obj: Website = self.get_object()
         obj.ssl_enable = False
-        obj.save(update_fields=['ssl_enable'])
+        obj.sync_web_config(save=True)
+
         op.set_success()
         return Response(op.json())
 
