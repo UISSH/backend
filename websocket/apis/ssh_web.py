@@ -82,6 +82,7 @@ class SshWebConsumer(WebsocketConsumer):
 
         if not hasattr(self.client, 'get_transport'):
             self.send(text_data=json.dumps({'message': 'connection failed.', 'code': 403}))
+            return
 
         self.ssh_session = self.client.get_transport().open_session()  # 成功连接后获取ssh通道
         self.ssh_session.get_pty()  # 获取一个终端
