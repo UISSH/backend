@@ -71,6 +71,10 @@ class SshWebConsumer(WebsocketConsumer):
         msg = "connection succeeded\r\n"
         try:
             self.client.connect(**auth_info)
+        except paramiko.ssh_exception.BadAuthenticationType as e:
+
+            self.client = None
+            msg = f"connection failed: {e}\r\n"
         except:
             self.client = None
             msg = "connection failed\r\n"
@@ -88,7 +92,6 @@ class SshWebConsumer(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        print(text_data_json)
 
         if self.client:
             message = 'echo "请求无效格式"\r'

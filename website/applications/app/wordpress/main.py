@@ -15,38 +15,24 @@
 import os
 import uuid
 
+from website.applications.app.wordpress.src.core import install_wordpress
+from website.applications.app.wordpress.src.variable import app_parameter
 from website.applications.core.application import Application, ApplicationToolMinx
 from website.applications.core.dataclass import *
-from .src.variable import app_parameter
-
-abs_folder_path = pathlib.Path(__file__).parent.absolute()
-
-with open(abs_folder_path / 'home.html', "r") as f:
-    html = f.read()
 
 app_parameter = app_parameter
 
 
-class NginxApplication(Application, ApplicationToolMinx):
+class WordPressApplication(Application, ApplicationToolMinx):
 
     def create(self):
         if self._config.web_server_type != WebServerTypeEnum.Nginx:
             raise RuntimeError(f"This app does not support {self._config.web_server_type.name} web server.")
+        download_url = self._app_config.get("wordpress", 'https://wordpress.org/wordpress-6.0.1.zip')
 
-        title = self._app_config.get("name", 'default')
-        text = self._app_config.get("text", '与君初相识，犹如故人归。嗨，别来无恙！<br>Hello World!')
-        email = self._app_config.get("email", '')
+        install_wordpress(download_url, self._config.root_dir, self._config.database_config.db_name,
+                          self._config.database_config.username, self._config.database_config.password)
 
-        with open(f"{self._config.root_dir}/index.html", "w") as f:
-            index_html = html.replace('{title}', title) \
-                .replace('{domain}', self._config.domain) \
-                .replace('{text}', text)
-            if email:
-                index_html = index_html.replace('{contact}', email)
-            else:
-                index_html = index_html.replace('{contact}', '')
-
-            f.write(index_html)
         os.system(f"chown www-data.www-data -R {self._config.root_dir}")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
@@ -55,28 +41,30 @@ class NginxApplication(Application, ApplicationToolMinx):
         return app_parameter
 
     def start(self):
-        os.system(f"mv  {self._config.root_dir}/index.html.bak {self._config.root_dir}/index.html -f")
+        # todo
         data = self._storage.read()
         data["status"]["run_status"] = ApplicationRunStatusEnum.Running.value
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def stop(self):
-        os.system(f"mv {self._config.root_dir}/index.html {self._config.root_dir}/index.html.bak")
-        with open(abs_folder_path / 'maintenance.html', "r") as maintenance:
-            _html = maintenance.read()
-
-        with open(f"{self._config.root_dir}/index.html", "w") as index_f:
-            index_f.write(_html)
-
+        # todo
         data = self._storage.read()
         data["status"]["run_status"] = ApplicationRunStatusEnum.Stopped.value
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def read(self, *args, **kwargs):
         return """
-    index index.html;
+    index  index.php;
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/ /index.php?$args;
+    }
+    
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_pass  unix:/run/php/php-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include /etc/nginx/fastcgi_params;
     }
     """
 
@@ -119,9 +107,9 @@ class NginxApplication(Application, ApplicationToolMinx):
 
     @classmethod
     def version(cls) -> ApplicationVersion:
-        name = 'Nginx'
+        name = 'WordPress'
         return ApplicationVersion(name=name, name_version="0.0.1 alpha", code_version=1, author="zmaplex@gmail.com",
-                                  description="用于创建基本的 Nginx 网页")
+                                  description="用于创建 WordPress 博客")
 
     def get_data(self) -> dict:
         return self._storage.read()
