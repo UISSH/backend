@@ -162,6 +162,9 @@ class FileBrowserView(mixins.ListModelMixin,
             if i in ret.stdout.decode():
                 allow = True
                 break
+        # file < 1MB
+        if file_path.stat().st_size < 1024 * 1024:
+            allow = True
 
         if not allow:
             return Response({'detail': f'non text files are not supported.  {ret.stdout.decode()}'},
