@@ -1,7 +1,7 @@
+import base64
 import json
 import traceback
 from io import StringIO
-from pprint import pprint
 
 from threading import Thread
 
@@ -9,6 +9,7 @@ import paramiko
 from channels.generic.websocket import WebsocketConsumer
 from rest_framework.authtoken.models import Token
 
+from base.utils.logger import plog
 from common.models import User
 
 
@@ -19,14 +20,15 @@ class SshWebConsumer(WebsocketConsumer):
         self.user: User = None
         self.client = None
         self.ssh_session = None
+        self.connect_status = False
 
-    def ssh_recv(self):  # 从ssh通道获取输出data，并发送到前端
-        print("ssh_recv")
+    def ssh_recv(self):
         while True:
+            if self.connect_status is False:
+                break
             msg = self.ssh_session.recv(2048)
             if not len(msg):
-                print('退出监听发送循环')
-                return
+                break
             self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
 
     def connect(self):
@@ -44,16 +46,18 @@ class SshWebConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
             self.disconnect(403)
             return
+        self.connect_status = True
 
     def disconnect(self, close_code):
-        pass
+        self.connect_status = False
 
     def __init_ssh(self, _format):
         self.client = paramiko.SSHClient()  # 创建连接对象
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
         private_key = _format.pop("private_key", None)
+        private_key_password = _format.pop("private_key_password", None)
+
         if private_key:
-            private_key_password = _format.pop("private_key_password", None)
             private_key = StringIO(private_key)
             if private_key_password:
                 pkey = paramiko.RSAKey.from_private_key(private_key, password=private_key_password)
@@ -64,18 +68,28 @@ class SshWebConsumer(WebsocketConsumer):
             del _format["password"]
             auth_info = _format
             auth_info["pkey"] = pkey
+
+        elif not _format.get('password', None):
+            # If there is no password and certificate,
+            # try to use the certificate file in the project root directory for testing.
+            plog.warning("Use project root certificate.")
+            pkey = paramiko.RSAKey.from_private_key(open('./test.pem'))
+            auth_info = _format
+            auth_info["pkey"] = pkey
+
         else:
-            del _format["private_key_password"]
             auth_info = _format
 
+        plog.debug(auth_info)
         msg = "connection succeeded\r\n"
         try:
             self.client.connect(timeout=5, **auth_info)
         except paramiko.ssh_exception.BadAuthenticationType as e:
             self.client = None
             msg = f"connection failed: {e}\r\n"
-        except:
+        except Exception as e:
             self.client = None
+            plog.critical(e.__str__())
             msg = "connection failed\r\n"
 
         self.send(text_data=json.dumps({'message': msg}))
