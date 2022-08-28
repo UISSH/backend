@@ -105,7 +105,7 @@ class SshWebConsumer(WebsocketConsumer):
             return
 
         self.ssh_session = self.client.get_transport().open_session()  # 成功连接后获取ssh通道
-
+        self.ssh_session.settimeout(120)
         self.ssh_session.get_pty()  # 获取一个终端
         self.ssh_session.invoke_shell()  # 激活终端
         self.send(text_data=json.dumps({'message': '', 'code': 201}))
@@ -117,7 +117,7 @@ class SshWebConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
 
         if self.client:
-            message = 'echo "请求无效格式"\r'
+            message = 'echo "invalid format request"\r'
             try:
                 message = text_data_json['message']
             except:
