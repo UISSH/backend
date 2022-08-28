@@ -25,6 +25,7 @@ class SshWebConsumer(WebsocketConsumer):
     def ssh_recv(self):
         while True:
             if self.connect_status is False:
+                plog.debug("ssh_recv and websocket is closed.")
                 break
             msg = self.ssh_session.recv(2048)
             if not len(msg):
@@ -38,17 +39,23 @@ class SshWebConsumer(WebsocketConsumer):
             token = Token.objects.get(key=token)
             user = token.user
             if not user.is_superuser:
-                self.send(text_data=json.dumps({'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
+                self.send(text_data=json.dumps(
+                    {'message': "No authorization, this session has been terminated.\r\n", "code": 403}))
                 self.disconnect(403)
                 return
         except Exception:
             print(traceback.format_exc())
-            self.send(text_data=json.dumps({'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
+            self.send(text_data=json.dumps(
+                {'message': "No authorization, this session has been terminated.\r\n", "code": 403}))
             self.disconnect(403)
             return
         self.connect_status = True
 
     def disconnect(self, close_code):
+        room_name = self.scope['url_route']['kwargs']['room_name']
+        self.ssh_session.close()
+        self.client.close()
+        plog.debug(f'{room_name} websocket is closed.')
         self.connect_status = False
 
     def __init_ssh(self, _format):
@@ -98,6 +105,7 @@ class SshWebConsumer(WebsocketConsumer):
             return
 
         self.ssh_session = self.client.get_transport().open_session()  # 成功连接后获取ssh通道
+
         self.ssh_session.get_pty()  # 获取一个终端
         self.ssh_session.invoke_shell()  # 激活终端
         self.send(text_data=json.dumps({'message': '', 'code': 201}))
@@ -118,5 +126,6 @@ class SshWebConsumer(WebsocketConsumer):
             # self.send(text_data=json.dumps({'message': message}))
             loop = Thread(target=self.ssh_recv, args=())
             loop.start()
+
         else:
             self.__init_ssh(text_data_json)
