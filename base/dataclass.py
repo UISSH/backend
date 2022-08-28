@@ -38,7 +38,7 @@ class BaseOperatingRes:
             obj = BaseOperatingRes.get_instance(event_id, self)
             obj.__dict__[key] = value
             # _CACHE.set(self.event_id, self)
-            plog.debug(f"set {self.__dict__['event_id']} {key}={value}")
+            # plog.debug(f"set {self.__dict__['event_id']} {key}={value}")
             _CACHE.set(event_id, obj)
         else:
             self.__dict__[key] = value

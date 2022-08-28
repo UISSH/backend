@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from base.dataclass import BaseOperatingRes
 from base.serializer import ICBaseSerializer
+from base.utils.logger import plog
 from base.utils.os_query import os_query_json
 
 
@@ -73,13 +74,19 @@ class ActionFileSerializer(serializers.Serializer):
 
         current_directory = validated_data.get('current_directory')
         operation_command = validated_data.get('operation_command').replace("  ", " ").replace("  ", " ")
-        ret = subprocess.run(shlex.split(operation_command), cwd=current_directory, capture_output=True)
-        if ret.returncode == 0:
-            operator_res.msg = ret.stdout
+        ret = subprocess.Popen(operation_command, shell=True, cwd=current_directory,
+                               stdout=subprocess.PIPE)
+
+        if ret.stdout:
+            msg = ret.stdout.read().decode('utf-8')
             operator_res.set_success()
-        else:
-            print(ret.args)
-            print(f"{ret.returncode}::{ret.stderr}")
+
+        elif ret.stderr:
+            msg = ret.stderr.read().decode('utf-8')
             operator_res.set_failure()
+        else:
+            msg = ""
+
+        operator_res.msg = msg
 
         return operator_res.json()
