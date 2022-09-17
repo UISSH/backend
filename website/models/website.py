@@ -241,6 +241,7 @@ class Website(BaseModel):
             os.system(f'ln -s {nginx_config_path} {enable_nginx_config_path}')
         res = os.system('nginx -t')
         if res == 0:
+            os.system('systemctl reload nginx')
             return True
         else:
             if old_web_server_config:
