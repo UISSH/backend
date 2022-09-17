@@ -46,7 +46,7 @@ CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=lambda v: [s.strip() 
                               default=["http://localhost:8080"])
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
-    "anonymous"
+    "anonymous",
 ]
 
 if DEBUG:

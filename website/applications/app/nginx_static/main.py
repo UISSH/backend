@@ -28,6 +28,9 @@ app_parameter = app_parameter
 
 
 class NginxApplication(Application, ApplicationToolMinx):
+    """
+
+    """
 
     def create(self):
         if self._config.web_server_type != WebServerTypeEnum.Nginx:
@@ -55,54 +58,21 @@ class NginxApplication(Application, ApplicationToolMinx):
         return app_parameter
 
     def start(self):
-        os.system(f"mv  {self._config.root_dir}/index.html.bak {self._config.root_dir}/index.html -f")
-        data = self._storage.read()
-        data["status"]["run_status"] = ApplicationRunStatusEnum.Running.value
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def stop(self):
-        os.system(f"mv {self._config.root_dir}/index.html {self._config.root_dir}/index.html.bak")
-        with open(abs_folder_path / 'maintenance.html', "r") as maintenance:
-            _html = maintenance.read()
-
-        with open(f"{self._config.root_dir}/index.html", "w") as index_f:
-            index_f.write(_html)
-
-        data = self._storage.read()
-        data["status"]["run_status"] = ApplicationRunStatusEnum.Stopped.value
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def read(self, *args, **kwargs):
         return """
-
+    index index.html;
+    location / {
+        try_files $uri $uri/ =404;
+    }
     """
-
-    def update(self, *args, **kwargs):
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
 
     def delete(self, *args, **kwargs):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
-
-    def reload(self, *args, **kwargs):
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
-
-    def disable(self, *args, **kwargs):
-        """
-        There is no need to do
-        """
-        data = self._storage.read()
-        data["status"]["boot_startup"] = ApplicationBootStatusEnum.Disable.value
-        self._storage.write(data)
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
-
-    def enable(self, *args, **kwargs):
-        """
-        There is no need to do
-        """
-        data = self._storage.read()
-        data["status"]["boot_startup"] = ApplicationBootStatusEnum.Enable.value
-        self._storage.write(data)
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def backup(self, backup_path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All):
         os.system(f'tar zcvf {backup_path} {self._config.root_dir}')

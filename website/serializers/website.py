@@ -34,7 +34,6 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
         domain = validated_data.get('domain')
         extra_domain = validated_data.get('extra_domain')
 
-
         if domain and domain != instance.domain:
             os.system(f"rm -rf  /etc/nginx/sites-enabled/{instance.domain}.conf")
             os.system(f"rm -rf  /etc/nginx/sites-available/{instance.domain}.conf")
@@ -155,12 +154,15 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
                                                      instance.application_config)
 
         web_server_config = instance.get_nginx_config()
-        web_server_config = insert_section(web_server_config, app.read(), 'app')
+        web_server_config = insert_section(web_server_config, app.read(), 'user')
         old_config = instance.valid_web_server_config
         instance.valid_web_server_config = web_server_config
 
-        if instance.is_valid_configuration_001().returncode == 0:
+        is_valid_configuration_001 = instance.is_valid_configuration_001()
+        print(is_valid_configuration_001)
 
+        if is_valid_configuration_001.returncode == 0:
+            print("instance.is_valid_configuration_001()")
             if instance.is_valid_configuration_002(web_server_config):
                 os.system('systemctl reload nginx')
                 instance.status = instance.StatusType.VALID
@@ -170,6 +172,9 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
                 instance.status_info = '002:nginx configuration error.r'
 
         else:
+            if old_config is None:
+                raise serializers.ValidationError({'cmd': format_completed_process(is_valid_configuration_001),
+                                                   'valid_web_server_config': instance.valid_web_server_config})
             instance.valid_web_server_config = old_config
             instance.status = instance.StatusType.ERROR
             instance.status_info = '001:nginx configuration error.'

@@ -179,7 +179,7 @@ class NewWebSiteConfig(BaseData):
         root_dir = pathlib.Path(self.root_dir)
 
         if not root_dir.exists():
-            raise RuntimeError(f"The 'root_dir' ({root_dir}) path does not exist.")
+            root_dir.mkdir(parents=True, exist_ok=True)
         if not root_dir.is_absolute():
             raise RuntimeError("The 'root_dir' attribute must be an absolute directory path.")
         if root_dir.is_file():

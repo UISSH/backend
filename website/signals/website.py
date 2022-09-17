@@ -32,7 +32,6 @@ def listener_pre_delete(sender, instance: Website, **kwargs):
     if instance.application:
         app = instance.get_application_module(instance.get_app_new_website_config())
         app.stop()
-        app.disable()
         app.delete()
 
     if instance.index_root.startswith('/var/www/'):

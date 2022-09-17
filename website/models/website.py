@@ -44,17 +44,7 @@ server {
 
     ########USER########
 
-    index index.html;
-    location / {
-        try_files $uri $uri/ =404;
-    }
-
     ########USER########
-
-    ########APP########
-
-    ########APP########
-
 
 }"""
 
@@ -203,7 +193,7 @@ class Website(BaseModel):
 
     def is_valid_configuration_001(self) -> subprocess.CompletedProcess:
 
-        plog.info(f"verify {self.domain} configuration...\n\n{self.valid_web_server_config}")
+        plog.info(f"001:verify {self.domain} configuration...\n\n{self.valid_web_server_config}")
 
         minimum_config = f"""user www-data;
               worker_processes auto;
@@ -266,13 +256,17 @@ class Website(BaseModel):
             data = disable_section(data, 'ssl')
         return data
 
-    def sync_web_config(self, save=False):
-
+    def get_default_config(self):
         app = self.get_application_module(self.get_app_new_website_config())
+        data = self.get_nginx_config()
+        user_config = app.read()
+        data = insert_section(data, user_config, 'user')
+        return data
+
+    def sync_web_config(self, save=False):
         data = self.get_nginx_config()
         user_config = get_section(self.valid_web_server_config, 'user')
         data = insert_section(data, user_config, 'user')
-        data = insert_section(data, app.read(), 'app')
         self.valid_web_server_config = data
         self.is_valid_configuration_002(self.valid_web_server_config)
         if save:

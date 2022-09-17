@@ -28,8 +28,8 @@ SPECTACULAR_DEFAULTS = {
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
     },
-    'SWAGGER_UI_DIST': '//unpkg.com/swagger-ui-dist@3.35.1',
-    'SWAGGER_UI_FAVICON_HREF': '//unpkg.com/swagger-ui-dist@3.35.1/favicon-32x32.png',
+    'SWAGGER_UI_DIST': '//unpkg.com/swagger-ui-html@3.35.1',
+    'SWAGGER_UI_FAVICON_HREF': '//unpkg.com/swagger-ui-html@3.35.1/favicon-32x32.png',
 
     # Append OpenAPI objects to path and components in addition to the generated objects
     'APPEND_PATHS': {},

@@ -102,8 +102,6 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
     """
 
     def __init__(self, config: NewWebSiteConfig, app_config: dict = None, storage_cls=LocalStorage):
-
-        self.before_init()
         not_allow = [":", "/", " "]
         for i in not_allow:
             if i in config.domain:
@@ -111,7 +109,6 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
 
         self._config: NewWebSiteConfig = config.instance
         super().__init__(config, app_config, storage_cls)
-        self.after_init()
 
     @classmethod
     @abstractmethod
@@ -142,22 +139,7 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         """
         pass
 
-    def before_init(self):
-        """
-        Will be called before __init__
-        """
-        pass
 
-    def after_init(self):
-        """
-        Will be called after __init__
-        """
-        data = self._storage.read()
-        if data is {} or 'status' not in data:
-            data.update({
-                "status": {"boot_startup": ApplicationBootStatusEnum.Disable.value,
-                           "run_status": ApplicationRunStatusEnum.Stopped.value}
-            })
 
     @abstractmethod
     def create(self) -> OperatingRes:
@@ -180,24 +162,9 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update(self) -> OperatingRes:
-        """
-        Update related configuration according to 'self._config'.
-        """
-        pass
-
-    @abstractmethod
     def delete(self) -> OperatingRes:
         """
         Delete all data, include(application)
-        """
-        pass
-
-    @abstractmethod
-    def reload(self) -> OperatingRes:
-        """
-        When calling this method, make sure that the relevant application can load the latest configuration. such as:
-        - if you update systemd config, you need run command "systemctl daemon-reload".
         """
         pass
 
@@ -212,22 +179,6 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
     def stop(self) -> OperatingRes:
         """
         It is recommended to ues systemd service to stop your application.
-        """
-        pass
-
-    @abstractmethod
-    def disable(self) -> OperatingRes:
-        """
-        Cancel the app to start with the system boot.
-        it is recommended to ues systemd service to disable your application.
-        """
-        pass
-
-    @abstractmethod
-    def enable(self) -> OperatingRes:
-        """
-        Set the app to start with the system boot.
-        it is recommended to ues systemd service to enable your application.
         """
         pass
 
@@ -250,14 +201,6 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
     def version(cls) -> ApplicationVersion:
         """
         Returns plugin version information.
-        """
-        pass
-
-    @abstractmethod
-    def migrate(self, old_code_version: int, new_code_version: int):
-        """
-        After the plugin is upgraded,
-        this method will be called for upgrade migration to resolve incompatibility issues.
         """
         pass
 

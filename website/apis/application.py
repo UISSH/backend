@@ -1,7 +1,10 @@
+import os
+
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from base.utils.shell import LinuxShell
 from base.viewset import BaseReadOnlyModelViewSet
 from common.serializers.operating import OperatingResSerializer
 from website.applications.app_factory import AppFactory
@@ -17,6 +20,11 @@ class ApplicationView(BaseReadOnlyModelViewSet):
     queryset = Website.objects.all()
     serializer_class = WebsiteModelSerializer
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.app_factory.MODULES == {}:
+            self.app_factory.load()
+
     def _get_app_instance(self, website: Website, data: dict = None) -> Application:
         name = website.application
         config = NewWebSiteConfig(domain=website.domain, root_dir=website.index_root,
@@ -31,13 +39,6 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         data = self.app_factory.get_application_list()
         return Response(data)
 
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
-    def upgrade_app(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
-        app = self._get_app_instance(obj)
-        op_res = app.update()
-        return Response(op_res.json())
-
     @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
     def app_create(self, request, *args, **kwargs):
         instance: Website = self.get_object()
@@ -51,17 +52,10 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         if not res.is_success():
             err_msg = res.__str__()
             instance.status = instance.StatusType.ERROR
-            instance.status_info = f"101:create appcation error. {err_msg}"
+            instance.status_info = f"101:create application error. {err_msg}"
 
         instance.save()
         return Response(res.json())
-
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
-    def app_update(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
-        app = self._get_app_instance(obj)
-        data = app.update()
-        return Response(data.json())
 
     @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
     def app_delete(self, request, *args, **kwargs):
@@ -71,36 +65,28 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         return Response(data.json())
 
     @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
-    def app_reload(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
-        app = self._get_app_instance(obj)
-        data = app.reload()
-        return Response(data.json())
-
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
     def app_start(self, request, *args, **kwargs):
+
         obj: Website = self.get_object()
         app = self._get_app_instance(obj)
+
+        cmd = f"ln -s /etc/nginx/sites-available/{obj.domain}.conf /etc/nginx/sites-enabled/{obj.domain}.conf" \
+              f" && systemctl reload nginx "
+
+        ret = LinuxShell(cmd)
         data = app.start()
+        obj.status = obj.StatusType.VALID
+        obj.save()
         return Response(data.json())
 
     @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
     def app_stop(self, request, *args, **kwargs):
+
         obj: Website = self.get_object()
         app = self._get_app_instance(obj)
+        cmd = f"rm -rf  /etc/nginx/sites-enabled/{obj.domain}.conf && systemctl reload nginx"
+        ret = LinuxShell(cmd)
         data = app.stop()
-        return Response(data.json())
-
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
-    def app_disable(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
-        app = self._get_app_instance(obj)
-        data = app.disable()
-        return Response(data.json())
-
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
-    def app_enable(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
-        app = self._get_app_instance(obj)
-        data = app.enable()
+        obj.status = obj.StatusType.SUSPEND
+        obj.save()
         return Response(data.json())

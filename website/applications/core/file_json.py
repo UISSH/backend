@@ -4,7 +4,8 @@ import pathlib
 
 class FileJson(dict):
     """
-    数据被修改自动同步到文件
+    打开 JSON 文件，并返回该文件 FileJson 实例的引用
+    todo：由于读取文件会被缓存导致对象销毁时无法释放实例会造成内存泄露，需要修复。
     """
     _CACHE = {}
 
@@ -28,7 +29,7 @@ class FileJson(dict):
         return data
 
     @classmethod
-    def get_instance(cls, path: str) -> dict:
+    def get_instance(cls, path: str) -> "FileJson":
         if path in cls._CACHE:
             instance = cls._CACHE[path]
         else:

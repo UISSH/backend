@@ -63,7 +63,6 @@ class WebsiteView(BaseModelViewSet):
 
     @action(methods=['post'], detail=True, serializer_class=WebsiteConfigSerializer)
     def update_web_config(self, request, *args, **kwargs):
-        op = BaseOperatingRes()
         obj = self.get_object()
         serializer = WebsiteConfigSerializer(data=request.data, instance=obj)
         if serializer.is_valid(raise_exception=True):
@@ -90,7 +89,6 @@ class WebsiteView(BaseModelViewSet):
         obj: Website = self.get_object()
         obj.ssl_enable = False
         obj.sync_web_config(save=True)
-
         op.set_success()
         return Response(op.json())
 

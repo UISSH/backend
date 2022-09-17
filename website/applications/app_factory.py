@@ -7,11 +7,11 @@ from pprint import pprint
 
 from loguru import logger
 
+from base.utils.logger import plog
 from website.applications.core.application import Application, Storage
 from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
 
 filepath = 'website/applications/app'
-
 
 class AppFactory:
     MODULES = {}
@@ -32,7 +32,6 @@ class AppFactory:
 
     @staticmethod
     def load():
-        os.system('pwd')
         files = os.listdir(filepath)
         for fi in files:
             fi_d = os.path.join(filepath, fi)
@@ -50,12 +49,13 @@ class AppFactory:
                         if _obj.__name__ == "Application" \
                                 and _obj.__module__ == "website.applications.core.application":
                             continue
-
+                        plog.debug(f"{_obj.__name__} Loaded.")
                         AppFactory.MODULES[_obj.__name__] = {'module': _obj, "info": _obj.version().__dict__}
 
                 except Exception as e:
                     print(f"Failed to import plugin：{_module}")
                     print(traceback.format_exc())
+
         return AppFactory.MODULES
 
     @staticmethod

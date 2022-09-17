@@ -100,6 +100,7 @@ def get_section(full_nginx_config_data: str, section_name: str) -> SectionNginxC
     @param section_name:str
     @return: a part of full nginx config.
     """
+
     section_name = f'########{section_name.upper()}########'
     _data = full_nginx_config_data.split(section_name)[1]
     return _data

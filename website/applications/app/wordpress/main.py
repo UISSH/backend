@@ -41,15 +41,9 @@ class WordPressApplication(Application, ApplicationToolMinx):
         return app_parameter
 
     def start(self):
-        # todo
-        data = self._storage.read()
-        data["status"]["run_status"] = ApplicationRunStatusEnum.Running.value
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def stop(self):
-        # todo
-        data = self._storage.read()
-        data["status"]["run_status"] = ApplicationRunStatusEnum.Stopped.value
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def read(self, *args, **kwargs):
@@ -76,24 +70,6 @@ class WordPressApplication(Application, ApplicationToolMinx):
 
     def reload(self, *args, **kwargs):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
-
-    def disable(self, *args, **kwargs):
-        """
-        There is no need to do
-        """
-        data = self._storage.read()
-        data["status"]["boot_startup"] = ApplicationBootStatusEnum.Disable.value
-        self._storage.write(data)
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
-
-    def enable(self, *args, **kwargs):
-        """
-        There is no need to do
-        """
-        data = self._storage.read()
-        data["status"]["boot_startup"] = ApplicationBootStatusEnum.Enable.value
-        self._storage.write(data)
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def backup(self, backup_path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All):
         os.system(f'tar zcvf {backup_path} {self._config.root_dir}')
