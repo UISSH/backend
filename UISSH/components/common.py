@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'common.apps.CommonConfig',
     'website.apps.WebsiteConfig',
-    'database.apps.DatabaseConfig'
+    'database.apps.DatabaseConfig',
+    'webdav.apps.WebdavConfig'
 ]
 
 SPECTACULAR_SETTINGS = spectacular.SPECTACULAR_DEFAULTS
