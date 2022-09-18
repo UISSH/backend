@@ -1,0 +1,13 @@
+[Unit]
+Description=WebDAV server, it is managed by uissh.
+After=network.target
+
+[Service]
+Type=simple
+User=root
+
+ExecStart=/usr/local/uissh/webdav/webdav_server.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

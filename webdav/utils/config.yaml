@@ -1,0 +1,22 @@
+address: unix:/run/ui-ssh-webdav.socket
+auth: true
+cors:
+  allowed_headers:
+  - Depth
+  allowed_hosts:
+  - http://localhost:8080
+  allowed_methods:
+  - GET
+  credentials: true
+  enabled: false
+  exposed_headers:
+  - Content-Length
+  - Content-Range
+debug: false
+modify: true
+port: 1271
+prefix: /webdav/
+rules: []
+scope: .
+tls: false
+users: []
