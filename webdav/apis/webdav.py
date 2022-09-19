@@ -45,6 +45,8 @@ class WebDAVView(BaseModelViewSet):
     @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
     def sync_account(self, request):
         WebDAVModel.sync_account()
+        webdav.stop_service()
+        webdav.start_service()
         return Response(WebDAVPongSerializer.get_data())
 
     @extend_schema(responses=WebDAVPongSerializer)
