@@ -57,12 +57,11 @@ def start_service():
 
 def stop_service():
     os.system('systemctl stop webdav_server')
-    os.system('rm -rf  /run/ui-ssh-webdav.socket')
 
 
-def download(version="v4.2.0"):
+def download(version="v4.2.1"):
     os.system(f"mkdir {PROJECT_ROOT}/webdav")
-    url = f"https://github.com/hacdias/webdav/releases/download/{version}/linux-amd64-webdav.tar.gz"
+    url = f"https://github.com/UISSH/webdav/releases/download/{version}/linux-amd64-webdav.tar.gz"
     os.system(f"wget {url} -O {PROJECT_ROOT}/webdav/linux-amd64-webdav.tar.gz ")
     os.system(f"cd {PROJECT_ROOT}/webdav/ && tar zxvf linux-amd64-webdav.tar.gz ")
     os.system("touch /run/ui-ssh-webdav.socket && chown www-data.www-data /run/ui-ssh-webdav.socket")
@@ -134,13 +133,8 @@ def ping():
     return (bool,bool)
     """
     installed = pathlib.Path(WEBDAV_CONFIG_YAML).exists()
-    status = False
     res = os.system('systemctl is-active --quiet webdav_server')
-    print(type(res))
-
-    if res == 0:
-        print(res)
-        status = True
+    status = res == 0
     return installed, status
 
 
