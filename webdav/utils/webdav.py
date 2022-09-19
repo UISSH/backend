@@ -71,7 +71,7 @@ def download(version="v4.2.1"):
 def install_service():
     webdav_server_lib = '/lib/systemd/system/webdav_server.service'
     webdav_server_etc = '/etc/systemd/system/webdav_server.service'
-    os.system(f'mv {PROJECT_ROOT}/backend/webdav/utils/webdav_server.sh {PROJECT_ROOT}/webdav/webdav_server.sh')
+    os.system(f'cp {PROJECT_ROOT}/backend/webdav/utils/webdav_server.sh {PROJECT_ROOT}/webdav/webdav_server.sh')
     os.system(f'chmod a+x {PROJECT_ROOT}/webdav/webdav_server.sh')
     os.system(f'cp  {PROJECT_ROOT}/backend/webdav/utils/webdav.service.example {webdav_server_lib}')
     os.system(f'rm -rf {webdav_server_etc}')
@@ -133,8 +133,7 @@ def ping():
     return (bool,bool)
     """
     installed = pathlib.Path(WEBDAV_CONFIG_YAML).exists()
-    res = os.system('systemctl is-active --quiet webdav_server')
-    status = res == 0
+    status = os.system('systemctl is-active --quiet webdav_server') == 0
     return installed, status
 
 

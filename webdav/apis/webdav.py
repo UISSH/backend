@@ -1,10 +1,11 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from base.viewset import BaseModelViewSet
 from webdav.models.webdav import WebDAVModel
-from webdav.serializers.webdav import WebDAVModelSerializer, WebDAVPongSerializer
+from webdav.serializers.webdav import WebDAVModelSerializer, WebDAVPongSerializer, EmptySerializer
 from webdav.utils import webdav
 
 
@@ -13,32 +14,35 @@ class WebDAVView(BaseModelViewSet):
     queryset = WebDAVModel.objects.all()
     serializer_class = WebDAVModelSerializer
 
-    @action(methods=['get'], detail=False, serializer_class=WebDAVPongSerializer)
+    @extend_schema(responses=WebDAVPongSerializer)
+    @action(methods=['get'], detail=False, )
     def ping(self, request):
         return Response(WebDAVPongSerializer.get_data())
 
-    @action(methods=['post'], detail=False, serializer_class=WebDAVPongSerializer)
+    @extend_schema(responses=WebDAVPongSerializer)
+    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
     def install(self, request):
-
         webdav.install()
         return Response(WebDAVPongSerializer.get_data())
 
-    @action(methods=['post'], detail=False, serializer_class=WebDAVPongSerializer)
+    @extend_schema(responses=WebDAVPongSerializer)
+    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
     def reload_service(self, request):
 
         webdav.stop_service()
         webdav.start_service()
         return Response(WebDAVPongSerializer.get_data())
 
-    @action(methods=['post'], detail=False, serializer_class=WebDAVPongSerializer)
+    @extend_schema(responses=WebDAVPongSerializer)
+    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
     def start_service(self, request):
 
         webdav.start_service()
         return Response(WebDAVPongSerializer.get_data())
 
-    @action(methods=['post'], detail=False, serializer_class=WebDAVPongSerializer)
+    @extend_schema(responses=WebDAVPongSerializer)
+    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
     def stop_service(self, request):
-
         webdav.stop_service()
         return Response(WebDAVPongSerializer.get_data())
 

@@ -10,9 +10,12 @@ class WebDAVModelSerializer(ICBaseModelSerializer):
         fields = '__all__'
 
 
+class EmptySerializer(ICBaseSerializer):
+    pass
+
 class WebDAVPongSerializer(ICBaseSerializer):
-    installed = serializers.BooleanField(default=False, read_only=True)
-    run_status = serializers.BooleanField(default=False, read_only=True)
+    installed = serializers.BooleanField(default=False, required=False)
+    run_status = serializers.BooleanField(default=False, required=False)
 
     def create(self, validated_data):
         return validated_data
