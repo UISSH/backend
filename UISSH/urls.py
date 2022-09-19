@@ -25,6 +25,7 @@ from common import views
 from common.apis import user, opreating
 from database.apis import database
 from filebrowser.apis.filebrowser import FileBrowserView
+from ftpserver.apis.ftpserver import FtpServerView
 from webdav.apis.webdav import WebDAVView
 from website.apis import website, application
 from django.conf.urls.static import static
@@ -38,6 +39,7 @@ router.register(r"DataBase", database.DataBaseView)
 router.register(r'Admin/User', user.AdminUserView)
 router.register(r'FileBrowser', FileBrowserView)
 router.register(r'WebDAV', WebDAVView)
+router.register(r'FtpServer', FtpServerView)
 
 admin.site.site_title = "UI-SSH"
 admin.site.site_header = "UI-SSH"

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "listen_address": "0.0.0.0:21",
+  "passive_transfer_port_range": {
+    "start": 2122,
+    "end": 2130
+  },
+  "tls": {
+    "server_cert": {
+      "cert": "cert.pem",
+      "key": "key.pem"
+    }
+  },
+  "accesses": []
+}

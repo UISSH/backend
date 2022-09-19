@@ -1,0 +1,14 @@
+[Unit]
+Description=ftp server, it is managed by uissh.
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/local/uissh/ftpserver/
+
+ExecStart=/usr/local/uissh/ftpserver/ftpserver --conf /usr/local/uissh/ftpserver/config.json
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

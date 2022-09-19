@@ -77,6 +77,6 @@ class WebDAVView(BaseModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         res = super(WebDAVView, self).destroy(request, *args, **kwargs)
-        if res.status_code == 200:
+        if res.status_code == 204:
             WebDAVModel.sync_account()
         return res

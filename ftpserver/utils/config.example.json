@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "listen_address": "0.0.0.0:21",
+  "passive_transfer_port_range": {
+    "start": 2122,
+    "end": 2130
+  },
+  "tls": {
+    "server_cert": {
+      "cert": "cert.pem",
+      "key": "key.pem"
+    }
+  },
+  "accesses": [
+    {
+      "user": "test",
+      "pass": "test",
+      "fs": "os",
+      "params": {
+        "basePath": "/tmp"
+      }
+    },
+    {
+      "user": "test",
+      "pass": "test",
+      "fs": "os",
+      "params": {
+        "basePath": "/tmp"
+      }
+    },
+    {
+      "user": "dropbox",
+      "pass": "dropbox",
+      "fs": "dropbox",
+      "params": {
+        "token": "..."
+      }
+    },
+    {
+      "user": "gdrive",
+      "pass": "gdrive",
+      "fs": "gdrive",
+      "params": {
+        "google_client_id": "***.apps.googleusercontent.com",
+        "google_client_secret": "****",
+        "base_path": "ftp"
+      }
+    },
+    {
+      "user": "s3",
+      "pass": "s3",
+      "fs": "s3",
+      "params": {
+        "endpoint": "https://s3.amazonaws.com",
+        "region": "eu-west-1",
+        "bucket": "my-bucket",
+        "access_key_id": "AKIA....",
+        "secret_access_key": "IDxd....",
+        "disable_ssl": "false",
+        "path_style": "false"
+      }
+    },
+    {
+      "user": "sftp",
+      "pass": "sftp",
+      "fs": "sftp",
+      "params": {
+        "username": "user",
+        "password": "password",
+        "hostname": "192.168.168.11:22"
+      }
+    }
+  ]
+}
