@@ -22,6 +22,8 @@ class FtpServerModel(BaseModel):
         for item in FtpServerModel.objects.all():
 
             data = {"user": item.username, "pass": item.password, "fs": item.file_system, "params": item.params}
+            if isinstance(item.params, str):
+                data['params'] = json.loads(item.params)
 
             if isinstance(item.params, str):
                 data['params'] = json.loads(item.params)
