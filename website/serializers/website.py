@@ -80,7 +80,6 @@ class WebsiteConfigSerializer(ICBaseSerializer):
         data = instance.get_nginx_config()
         user_config = get_section(web_server_config, 'user')
         data = insert_section(data, user_config, 'user')
-        data = insert_section(data, app.read(), 'app')
 
         instance.valid_web_server_config = data
         r = instance.is_valid_configuration_001()
