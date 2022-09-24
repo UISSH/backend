@@ -20,7 +20,14 @@ class FtpServerModel(BaseModel):
     def sync_account():
         accesses = []
         for item in FtpServerModel.objects.all():
+
             data = {"user": item.username, "pass": item.password, "fs": item.file_system, "params": item.params}
+            if isinstance(item.params, str):
+                data['params'] = json.loads(item.params)
+
+            if isinstance(item.params, str):
+                data['params'] = json.loads(item.params)
+
             accesses.append(data)
 
         with open(f"{FTP_SERVER_CONFIG}", "r") as f:
@@ -28,4 +35,4 @@ class FtpServerModel(BaseModel):
 
         account_data['accesses'] = accesses
         with open(f"{FTP_SERVER_CONFIG}", "w") as f:
-            json.dump(account_data, f)
+            json.dump(account_data, f, indent=2)
