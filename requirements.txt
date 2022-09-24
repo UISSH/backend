@@ -1,5 +1,4 @@
 wheel
-pyyaml
 nginxfmt
 uvicorn[standard]
 uwsgi==2.0.20
