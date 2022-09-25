@@ -1,5 +1,9 @@
 # 介绍
 
+![django ci](https://github.com/UISSH/backend/actions/workflows/django.yml/badge.svg)
+![install debian 11](https://github.com/UISSH/install-script/actions/workflows/install_debian11.yml/badge.svg)
+
+
 本项目旨在摆脱繁琐的编译安装、命令行配置的运维工作，并尽最大的努力遵循 Linux 通用规范的一个可视化界面。
 
 # 安装
