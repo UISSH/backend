@@ -23,6 +23,12 @@ class FtpServerView(BaseModelViewSet):
     @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
     def install(self, request):
         ftpserver.install()
+
+        if len(self.queryset.all()) > 0:
+            FtpServerModel.sync_account()
+            ftpserver.stop_service()
+            ftpserver.start_service()
+
         return Response(FtpServerPongSerializer.get_data())
 
     @extend_schema(responses=FtpServerPongSerializer)
