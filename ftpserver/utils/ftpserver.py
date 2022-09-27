@@ -32,15 +32,13 @@ def install():
     os.system(f'cd {FTP_SERVER_ROOT} && make && make install ')
 
     # try setup website ssl
-    file_fd = pathlib.Path(f'{FTP_SERVER_ROOT}/config.json')
-    conf = json.loads(file_fd.read_text())
+
     tls_config = {"server_cert": {
         "cert": "cert.pem",
         "key": "key.pem"
     }}
 
     if len(WEBSITE_ADDRESS)>4 and 'https:' in WEBSITE_ADDRESS:
-        print(WEBSITE_ADDRESS)
         domain = WEBSITE_ADDRESS.replace("https://", "").replace("/", "")
         cert = pathlib.Path(f"/etc/letsencrypt/live/{domain}/fullchain.pem")
         privkey = pathlib.Path(f"/etc/letsencrypt/live/{domain}/privkey.pem")
@@ -49,6 +47,8 @@ def install():
                 "cert": cert.__str__(),
                 "key": privkey.__str__()
             }}
+    file_fd = pathlib.Path(f'{FTP_SERVER_ROOT}/config.json')
+    conf = json.loads(file_fd.read_text())
     conf['tls'] = tls_config
     file_fd.write_text(json.dumps(conf,indent=2))
     stop_service()
