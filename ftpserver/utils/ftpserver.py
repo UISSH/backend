@@ -1,5 +1,12 @@
+import json
 import os
 import pathlib
+
+try:
+    from django.conf import settings
+    WEBSITE_ADDRESS = settings.WEBSITE_ADDRESS
+except:
+    WEBSITE_ADDRESS = 'https://demo.uissh.com'
 
 PROJECT_ROOT = '/usr/local/uissh'
 FTP_SERVER_ROOT = f'{PROJECT_ROOT}/ftp-server'
@@ -24,6 +31,27 @@ def install():
     os.system('cd /usr/local/uissh/ && git clone https://github.com/UISSH/ftp-server.git')
     os.system(f'cd {FTP_SERVER_ROOT} && make && make install ')
 
+    # try setup website ssl
+    file_fd = pathlib.Path(f'{FTP_SERVER_ROOT}/config.json')
+    conf = json.loads(file_fd.read_text())
+    tls_config = {"server_cert": {
+        "cert": "cert.pem",
+        "key": "key.pem"
+    }}
+
+    if len(WEBSITE_ADDRESS)>4 and 'https:' in WEBSITE_ADDRESS:
+        print(WEBSITE_ADDRESS)
+        domain = WEBSITE_ADDRESS.replace("https://", "").replace("/", "")
+        cert = pathlib.Path(f"/etc/letsencrypt/live/{domain}/fullchain.pem")
+        privkey = pathlib.Path(f"/etc/letsencrypt/live/{domain}/privkey.pem")
+        if cert.exists() and privkey.exists():
+            tls_config = {"server_cert": {
+                "cert": cert.__str__(),
+                "key": privkey.__str__()
+            }}
+    conf['tls'] = tls_config
+    file_fd.write_text(json.dumps(conf,indent=2))
+    stop_service()
     start_service()
 
 
