@@ -28,8 +28,8 @@ SPECTACULAR_DEFAULTS = {
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
     },
-    'SWAGGER_UI_DIST': '//unpkg.com/swagger-ui-html@3.35.1',
-    'SWAGGER_UI_FAVICON_HREF': '//unpkg.com/swagger-ui-html@3.35.1/favicon-32x32.png',
+    'SWAGGER_UI_DIST': '//fastly.jsdelivr.net/npm/swagger-ui-dist@3.51.1',
+    'SWAGGER_UI_FAVICON_HREF': '//fastly.jsdelivr.net/npm/swagger-ui-dist@3.51.1/favicon-32x32.png',
 
     # Append OpenAPI objects to path and components in addition to the generated objects
     'APPEND_PATHS': {},
@@ -71,7 +71,7 @@ SPECTACULAR_DEFAULTS = {
 
     # General schema metadata. Refer to spec for valid inputs
     # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#openapi-object
-    'TITLE': 'GGPanel',
+    'TITLE': 'UISSH',
     'DESCRIPTION': '轻量、简约的面板',
     'TOS': None,
     # Optional: MAY contain "name", "url", "email"
