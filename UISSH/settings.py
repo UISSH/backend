@@ -83,7 +83,6 @@ MIDDLEWARE += [
 DEBUG_TOOL = config('DEBUG_TOOL', default=False, cast=bool)
 
 if DEBUG and DEBUG_TOOL:
-    print("增加调试工具包")
     INSTALLED_APPS += ['django_extensions', 'debug_toolbar']
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware', ]
 
