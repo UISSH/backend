@@ -15,3 +15,4 @@ class KVStorageView(BaseModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = KVStorage.objects.all()
     serializer_class = KVStorageSerializer
+    lookup_field = 'key'
