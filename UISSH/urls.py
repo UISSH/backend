@@ -22,9 +22,11 @@ from django.urls import path, include, re_path
 from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView, SpectacularAPIView
 from rest_framework.routers import DefaultRouter
 
+import common
 from common import views
 from common.apis import user, opreating
 from common.apis.kv_storage import KVStorageView
+from common.apis.version import VersionView
 from database.apis import database
 from filebrowser.apis.filebrowser import FileBrowserView
 from ftpserver.apis.ftpserver import FtpServerView
@@ -43,13 +45,16 @@ router.register(r'WebDAV', WebDAVView)
 router.register(r'FtpServer', FtpServerView)
 router.register(r'KVStorage', KVStorageView)
 
+
 admin.site.site_title = "UI-SSH"
 admin.site.site_header = "UI-SSH"
 urlpatterns = [
     path('', views.index, name='index'),
     path('websocket/', include('websocket.urls')),
+    path('version/', include('common.urls')),
     re_path(r'admin/', admin.site.urls),
-    re_path(r'api/', include(router.urls))
+    re_path(r'api/', include(router.urls)),
+
 
 ]
 
