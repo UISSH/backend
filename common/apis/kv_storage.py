@@ -1,12 +1,7 @@
-from django.db import transaction
-from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-from rest_framework import filters, status
 from rest_framework import permissions
-from rest_framework.decorators import action
-from rest_framework.request import Request
+from rest_framework.response import Response
 
-from base.viewset import BaseModelViewSet, BaseReadOnlyModelViewSet
+from base.viewset import BaseModelViewSet
 from common.models import KVStorage
 from common.serializers.kv_storage import KVStorageSerializer
 
@@ -16,3 +11,13 @@ class KVStorageView(BaseModelViewSet):
     queryset = KVStorage.objects.all()
     serializer_class = KVStorageSerializer
     lookup_field = 'key'
+
+    def retrieve(self, request, *args, **kwargs):
+        _key = self.kwargs['key']
+        KVStorage.objects.get_or_create(key=_key)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+
