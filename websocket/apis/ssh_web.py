@@ -1,36 +1,43 @@
-import base64
 import json
 import traceback
-from io import StringIO
-
 from threading import Thread
+from typing import Optional
 
 import paramiko
 from channels.generic.websocket import WebsocketConsumer
+from paramiko.channel import Channel
 from rest_framework.authtoken.models import Token
 
 from base.utils.logger import plog
 from common.models import User
+from websocket.utils import format_ssh_auth_data
 
 
 class SshWebConsumer(WebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.user: User = None
-        self.client = None
-        self.ssh_session = None
+        self.user: Optional[User] = None
+        self.client: Optional[paramiko.SSHClient] = None
+        self.ssh_session: Optional[Channel] = None
         self.connect_status = False
+        self.loop: Optional[Thread] = None
+        self.suspended_interactive = False
+        self.current_work_dir = '/'
 
     def ssh_recv(self):
-        while True:
+        while 1:
+            if self.suspended_interactive:
+                continue
             if self.connect_status is False:
                 plog.debug("ssh_recv and websocket is closed.")
+                self.loop = None
                 break
-            msg = self.ssh_session.recv(2048)
-            if not len(msg):
-                break
-            self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
+            if self.ssh_session.recv_ready() is True:
+                # it is Non blocking.
+                msg = self.ssh_session.recv(2048)
+                self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
+        print("terminal thread is ended.")
 
     def connect(self):
         self.accept()
@@ -61,32 +68,7 @@ class SshWebConsumer(WebsocketConsumer):
     def __init_ssh(self, _format):
         self.client = paramiko.SSHClient()  # 创建连接对象
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
-        private_key = _format.pop("private_key", None)
-        private_key_password = _format.pop("private_key_password", None)
-
-        if private_key:
-            private_key = StringIO(private_key)
-            if private_key_password:
-                pkey = paramiko.RSAKey.from_private_key(private_key, password=private_key_password)
-            else:
-                pkey = paramiko.RSAKey.from_private_key(private_key)
-
-            private_key.close()
-            del _format["password"]
-            auth_info = _format
-            auth_info["pkey"] = pkey
-
-        elif not _format.get('password', None):
-            # If there is no password and certificate,
-            # try to use the certificate file in the project root directory for testing.
-            plog.warning("Use project root certificate.")
-            pkey = paramiko.RSAKey.from_private_key(open('./test.pem'))
-            auth_info = _format
-            auth_info["pkey"] = pkey
-
-        else:
-            auth_info = _format
-
+        auth_info = format_ssh_auth_data(_format)
         plog.debug(auth_info)
         msg = "connection succeeded\r\n"
         try:
@@ -106,26 +88,45 @@ class SshWebConsumer(WebsocketConsumer):
 
         self.ssh_session = self.client.get_transport().open_session()  # 成功连接后获取ssh通道
         self.ssh_session.settimeout(120)
-        self.ssh_session.get_pty()  # 获取一个终端
-        self.ssh_session.invoke_shell()  # 激活终端
+        self.ssh_session.get_pty()
+        self.ssh_session.invoke_shell()
         self.send(text_data=json.dumps({'message': '', 'code': 201}))
-        for i in range(2):  # 激活终端后会有信息流，一般都是lastlogin与bath目录，并获取其数据
+
+        for i in range(2):
             msg = self.ssh_session.recv(2048)
             self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
 
+    def get_work_dir(self):
+        self.ssh_session.send('pwd \r')
+        msg = self.ssh_session.recv(2048).decode("utf-8").split('\n')[1]
+        msg = msg.split('\r')[1]
+        self.current_work_dir = msg
+        self.send(text_data=json.dumps(
+            {'work_dir': msg, 'message': '', 'code': 200}))
+
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-
         if self.client:
             message = 'echo "invalid format request"\r'
             try:
                 message = text_data_json['message']
             except:
                 pass
-            self.ssh_session.send(message)
-            # self.send(text_data=json.dumps({'message': message}))
-            loop = Thread(target=self.ssh_recv, args=())
-            loop.start()
+            method = text_data_json.pop("method", "interactive")
 
+            if method == "interactive":
+                self.suspended_interactive = False
+                self.ssh_session.send(message)
+                if self.loop is None:
+                    loop = Thread(target=self.ssh_recv, args=())
+                    loop.start()
+                    self.loop = loop
+            elif hasattr(self, method):
+                try:
+                    self.suspended_interactive = True
+                    getattr(self, method)()
+                except Exception:
+                    self.send(text_data=json.dumps(
+                        {'work_dir': traceback.format_exc(), 'message': '', 'code': 500}))
         else:
             self.__init_ssh(text_data_json)
