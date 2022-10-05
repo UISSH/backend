@@ -50,7 +50,6 @@ admin.site.site_title = "UI-SSH"
 admin.site.site_header = "UI-SSH"
 urlpatterns = [
     path('', views.index, name='index'),
-    path('websocket/', include('websocket.urls')),
     path('version/', include('common.urls')),
     re_path(r'admin/', admin.site.urls),
     re_path(r'api/', include(router.urls)),
