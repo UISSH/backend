@@ -64,7 +64,7 @@ python-decouple==3.6
 pytz==2022.1
 PyYAML==6.0
 redis==4.2.0
-requests==2.27.1
+requests==2.28.1
 sentry-sdk==1.5.12
 service-identity==21.1.0
 six==1.16.0
