@@ -3,7 +3,6 @@ import time
 
 import paramiko
 from django.core.files import File
-from paramiko.sftp_client import SFTPClient
 from rest_framework import serializers
 
 from base.serializer import ICBaseSerializer, ICBaseModelSerializer
@@ -33,7 +32,7 @@ class SSHAuthorization(ICBaseSerializer):
         pass
 
 
-def get_sftp(_format) -> SFTPClient:
+def get_ssh_client(_format) -> paramiko.SSHClient:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
     auth_info = format_ssh_auth_data(_format)
@@ -45,7 +44,7 @@ def get_sftp(_format) -> SFTPClient:
     except Exception as e:
         raise serializers.ValidationError(f'{e}')
 
-    return client.open_sftp()
+    return client
 
 
 class UploadFileSerializer(ICBaseSerializer):
@@ -71,12 +70,15 @@ class UploadFileSerializer(ICBaseSerializer):
                 f.write(chunk)
 
         plog.debug("put file to remote.")
-        sftp = get_sftp(auth)
+        client = get_ssh_client(auth)
+        sftp = client.open_sftp()
         sftp.put(tmp_file, target_path)
 
         obj.status = obj.StatusType.SUCCESSFUL
         obj.save()
         os.system(f'rm -rf {tmp_file}')
+        sftp.close()
+        client.close()
         return SFTPUploadSerializer(obj).data
 
     def update(self, instance, validated_data):
