@@ -30,6 +30,7 @@ from common.apis.version import VersionView
 from database.apis import database
 from filebrowser.apis.filebrowser import FileBrowserView
 from ftpserver.apis.ftpserver import FtpServerView
+from terminal.apis.main import TerminalView
 from webdav.apis.webdav import WebDAVView
 from website.apis import website, application
 
@@ -44,6 +45,7 @@ router.register(r'FileBrowser', FileBrowserView)
 router.register(r'WebDAV', WebDAVView)
 router.register(r'FtpServer', FtpServerView)
 router.register(r'KVStorage', KVStorageView)
+router.register(r'Terminal', TerminalView)
 
 
 admin.site.site_title = "UI-SSH"

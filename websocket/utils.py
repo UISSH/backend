@@ -6,6 +6,14 @@ from base.utils.logger import plog
 
 
 def format_ssh_auth_data(_format):
+    """{
+       hostname: "127.0.0.1",
+       port: "22",
+       username: "root",
+       password: "",
+       private_key: "",
+       private_key_password: ""}
+   """
     private_key = _format.pop("private_key", None)
     private_key_password = _format.pop("private_key_password", None)
 

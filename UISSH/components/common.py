@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'database.apps.DatabaseConfig',
     'webdav.apps.WebdavConfig',
     'ftpserver.apps.FtpserverConfig',
+    'terminal.apps.TerminalConfig'
 ]
 
 SPECTACULAR_SETTINGS = spectacular.SPECTACULAR_DEFAULTS

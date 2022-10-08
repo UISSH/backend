@@ -66,7 +66,7 @@ class SshWebConsumer(WebsocketConsumer):
         self.connect_status = False
 
     def __init_ssh(self, _format):
-        self.client = paramiko.SSHClient()  # 创建连接对象
+        self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
         auth_info = format_ssh_auth_data(_format)
         plog.debug(auth_info)
