@@ -1,9 +1,13 @@
+import os
+import time
+
 import paramiko
 from django.core.files import File
 from paramiko.sftp_client import SFTPClient
 from rest_framework import serializers
 
 from base.serializer import ICBaseSerializer, ICBaseModelSerializer
+from base.utils.logger import plog
 from terminal.models import SFTPUploadModel
 from websocket.utils import format_ssh_auth_data
 
@@ -30,7 +34,6 @@ class SSHAuthorization(ICBaseSerializer):
 
 
 def get_sftp(_format) -> SFTPClient:
-    print({'_format': _format})
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
     auth_info = format_ssh_auth_data(_format)
@@ -51,7 +54,7 @@ class UploadFileSerializer(ICBaseSerializer):
     target_path = serializers.CharField(max_length=768)
 
     def create(self, validated_data):
-        file: File = validated_data.get('file')
+        file_obj: File = validated_data.get('file')
         target_path = validated_data.get('target_path')
         auth = validated_data.get('auth')
         obj = SFTPUploadModel()
@@ -60,17 +63,20 @@ class UploadFileSerializer(ICBaseSerializer):
         obj.hostname = auth.get("hostname")
         obj.save()
 
-        print(dict(auth))
         auth = format_ssh_auth_data(dict(auth))
-        sftp = get_sftp(dict(auth))
-
-        with sftp.file(target_path, "w") as f:
-            for chunk in file.chunks():
+        tmp_file = f"/tmp/{time.time()}"
+        plog.debug("write file to local.")
+        with open(tmp_file, "wb") as f:
+            for chunk in file_obj.chunks():
                 f.write(chunk)
+
+        plog.debug("put file to remote.")
+        sftp = get_sftp(auth)
+        sftp.put(tmp_file, target_path)
 
         obj.status = obj.StatusType.SUCCESSFUL
         obj.save()
-
+        os.system(f'rm -rf {tmp_file}')
         return SFTPUploadSerializer(obj).data
 
     def update(self, instance, validated_data):
