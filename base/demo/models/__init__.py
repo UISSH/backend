@@ -1,1 +1,1 @@
-from .demo import *
+from .main import *
