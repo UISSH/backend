@@ -11,6 +11,7 @@ class KVStorageView(BaseModelViewSet):
     queryset = KVStorage.objects.all()
     serializer_class = KVStorageSerializer
     lookup_field = 'key'
+    search_fields = ['key']
 
     def retrieve(self, request, *args, **kwargs):
         _key = self.kwargs['key']
@@ -18,6 +19,3 @@ class KVStorageView(BaseModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
-
-
-
