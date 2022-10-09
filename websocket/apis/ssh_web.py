@@ -1,4 +1,5 @@
 import json
+import time
 import traceback
 from threading import Thread
 from typing import Optional
@@ -24,20 +25,6 @@ class SshWebConsumer(WebsocketConsumer):
         self.loop: Optional[Thread] = None
         self.suspended_interactive = False
         self.current_work_dir = '/'
-
-    def ssh_recv(self):
-        while 1:
-            if self.suspended_interactive:
-                continue
-            if self.connect_status is False:
-                plog.debug("ssh_recv and websocket is closed.")
-                self.loop = None
-                break
-            if self.ssh_session.recv_ready() is True:
-                # it is Non blocking.
-                msg = self.ssh_session.recv(2048)
-                self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
-        print("terminal thread is ended.")
 
     def connect(self):
         self.accept()
@@ -96,6 +83,20 @@ class SshWebConsumer(WebsocketConsumer):
             msg = self.ssh_session.recv(2048)
             self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
 
+    def ssh_recv(self):
+        while 1:
+            if self.suspended_interactive:
+                continue
+            if self.connect_status is False:
+                plog.debug("ssh_recv and websocket is closed.")
+                self.loop = None
+                break
+            time.sleep(0.1)
+            if self.ssh_session.recv_ready() is True:
+                msg = self.ssh_session.recv(2048)
+                self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
+        print("terminal thread is ended.")
+
     def get_work_dir(self):
         self.ssh_session.send('pwd \r')
         msg = self.ssh_session.recv(2048).decode("utf-8").split('\n')[1]
@@ -125,6 +126,7 @@ class SshWebConsumer(WebsocketConsumer):
                 try:
                     self.suspended_interactive = True
                     getattr(self, method)()
+                    self.suspended_interactive = False
                 except Exception:
                     self.send(text_data=json.dumps(
                         {'work_dir': traceback.format_exc(), 'message': '', 'code': 500}))
