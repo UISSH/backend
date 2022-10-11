@@ -16,19 +16,23 @@ Including another URLconf
 
 import debug_toolbar
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include, re_path
 from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView, SpectacularAPIView
 from rest_framework.routers import DefaultRouter
 
+import common
 from common import views
 from common.apis import user, opreating
+from common.apis.kv_storage import KVStorageView
+from common.apis.version import VersionView
 from database.apis import database
 from filebrowser.apis.filebrowser import FileBrowserView
 from ftpserver.apis.ftpserver import FtpServerView
+from terminal.apis.main import TerminalView
 from webdav.apis.webdav import WebDAVView
 from website.apis import website, application
-from django.conf.urls.static import static
 
 router = DefaultRouter()
 router.register(r'User', user.UserView)
@@ -40,17 +44,20 @@ router.register(r'Admin/User', user.AdminUserView)
 router.register(r'FileBrowser', FileBrowserView)
 router.register(r'WebDAV', WebDAVView)
 router.register(r'FtpServer', FtpServerView)
+router.register(r'KVStorage', KVStorageView)
+router.register(r'Terminal', TerminalView)
+
 
 admin.site.site_title = "UI-SSH"
 admin.site.site_header = "UI-SSH"
 urlpatterns = [
     path('', views.index, name='index'),
-    path('websocket/', include('websocket.urls')),
+    path('version/', include('common.urls')),
     re_path(r'admin/', admin.site.urls),
-    re_path(r'api/', include(router.urls))
+    re_path(r'api/', include(router.urls)),
+
 
 ]
-
 
 if settings.DEBUG:
     print("Additional debug routing configuration")

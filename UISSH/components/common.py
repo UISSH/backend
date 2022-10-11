@@ -4,7 +4,11 @@ from . import sentry
 from . import spectacular
 from .. import BASE_DIR, config
 
-sentry.__init__()
+try:
+    sentry.__init__()
+except:
+    pass
+
 AUTH_USER_MODEL = 'common.User'
 
 INTERNAL_IPS = [
@@ -31,6 +35,7 @@ INSTALLED_APPS = [
     'database.apps.DatabaseConfig',
     'webdav.apps.WebdavConfig',
     'ftpserver.apps.FtpserverConfig',
+    'terminal.apps.TerminalConfig'
 ]
 
 SPECTACULAR_SETTINGS = spectacular.SPECTACULAR_DEFAULTS
