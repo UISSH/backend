@@ -15,12 +15,16 @@ def cmd(command):
 
 
 def upgrade_backend_project():
+    cmd('systemctl stop ui-ssh')
+    cmd(f'cd {BACKEND_DIR} && rm -rf venv')
     cmd(f'cd {BACKEND_DIR} && wget https://github.com/UISSH/backend/archive/refs/tags/v{CURRENT_VERSION}.zip')
     cmd(f'cd {BACKEND_DIR} && unzip v{CURRENT_VERSION}.zip')
     cmd(f'cd {BACKEND_DIR} && cp backend-{CURRENT_VERSION}/* ./ -r')
     cmd(f'cd {BACKEND_DIR} && rm  backend-{CURRENT_VERSION}  *.zip -rf')
+    cmd(f'cd {BACKEND_DIR} && python3 -m venv venv && venv/bin/pip install -r requirements.txt')
     cmd(f'{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations')
     cmd(f'{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate')
+    cmd('systemctl start ui-ssh')
 
 
 def upgrade_front_project():
