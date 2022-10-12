@@ -62,7 +62,7 @@ class UploadFileSerializer(ICBaseSerializer):
         obj.hostname = auth.get("hostname")
         obj.save()
 
-        auth = format_ssh_auth_data(dict(auth))
+
         tmp_file = f"/tmp/{time.time()}"
         plog.debug("write file to local.")
         with open(tmp_file, "wb") as f:

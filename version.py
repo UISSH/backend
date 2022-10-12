@@ -1,6 +1,6 @@
 import os
 
-CURRENT_VERSION = '0.0.3-alpha'
+CURRENT_VERSION = '0.0.4-alpha'
 FRONTED_MINIMUM_VERSION = '0.0.3-alpha'
 MIRROR_URL = 'https://mirror-cloudflare.uissh.com/'
 FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
@@ -24,6 +24,7 @@ def upgrade_backend_project():
     cmd(f'cd {BACKEND_DIR} && python3 -m venv venv && venv/bin/pip install -r requirements.txt')
     cmd(f'{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations')
     cmd(f'{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate')
+    cmd(f'{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py collectstatic --noinput')
     cmd('systemctl start ui-ssh')
 
 
