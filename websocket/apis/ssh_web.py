@@ -91,10 +91,10 @@ class SshWebConsumer(WebsocketConsumer):
                 plog.debug("ssh_recv and websocket is closed.")
                 self.loop = None
                 break
-            time.sleep(0.1)
             if self.ssh_session.recv_ready() is True:
                 msg = self.ssh_session.recv(2048)
                 self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
+            time.sleep(0.1)
         print("terminal thread is ended.")
 
     def get_work_dir(self):
