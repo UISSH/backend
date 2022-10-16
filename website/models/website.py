@@ -74,6 +74,7 @@ class Website(BaseModel):
     """
     定义网站属性
     """
+    APP_FACTORY = AppFactory
 
     class StatusType(IntegerChoices):
         READY = 0, "准备中"
@@ -145,6 +146,12 @@ class Website(BaseModel):
 
     def __str__(self):
         return self.name
+
+    def get_application(self, data: dict = None) -> Application:
+        if self.APP_FACTORY.MODULES == {}:
+            self.APP_FACTORY.load()
+        app = self.APP_FACTORY.get_application_module(self.application, self.get_app_new_website_config(), data)
+        return app
 
     def or_create_ssl_config(self):
         if self.ssl_config is None or self.ssl_config['certbot']['email'] == '':
@@ -250,7 +257,20 @@ class Website(BaseModel):
             return False
 
     def get_nginx_config(self):
-        data = nginx_config_example.replace('{domain}', self.domain).replace('{dir_path}', self.index_root)
+        # set domain
+        data = nginx_config_example.replace('{domain}', self.domain)
+        # set nginx root field.
+        data = data.replace('{dir_path}', self.index_root)
+        # set enter folder.
+        app = self.get_application_module(self.get_app_new_website_config())
+        app_config = app.read()
+        plog.debug(app_config)
+        if hasattr(app_config, 'enter_folder_name') and app_config.enter_folder_name:
+            old_field = f'root {self.index_root};'
+            new_field = f'root {self.index_root}/{app_config.enter_folder_name};'
+            if new_field not in data:
+                data = data.replace(old_field, new_field)
+        # set ssl
         if self.ssl_enable:
             data = enable_section(data, 'ssl')
         else:
@@ -259,10 +279,14 @@ class Website(BaseModel):
 
     def get_default_config(self):
         app = self.get_application_module(self.get_app_new_website_config())
-        data = self.get_nginx_config()
-        user_config = app.read()
-        data = insert_section(data, user_config, 'user')
-        return data
+        nginx_data = self.get_nginx_config()
+        app_config = app.read()
+
+        if not isinstance(app_config, str):
+            app_config = app.read().nginx
+
+        nginx_data = insert_section(nginx_data, app_config, 'user')
+        return nginx_data
 
     def sync_web_config(self, save=False):
         data = self.get_nginx_config()

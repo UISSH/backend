@@ -1,5 +1,11 @@
+import os
+import pathlib
+import time
+
 from django.test import TestCase
 
+from website.applications.app_factory import AppFactory
+from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
 # Create your tests here.
 from website.models.utils import update_nginx_server_name, disable_section, get_section, insert_section, enable_section
 
@@ -117,3 +123,35 @@ class TestNginxConfigTools(TestCase):
         _data = disable_section(nginx_data, "ssl")
 
         self.assertEqual(nginx_data, enable_section(_data, "ssl"))
+
+
+class TestApplication(TestCase):
+
+    def test_load_app(self):
+        app_factory = AppFactory
+        app_factory.load()
+
+        target_dir = f"/tmp/{int(time.time())}.com/"
+        text = "Python is a high-level, interpreted, general-purpose programming language. " \
+               "Its design philosophy emphasizes code readability with the use of significant indentation."
+        path = pathlib.Path(target_dir)
+        if not path.exists():
+            pathlib.Path(target_dir).mkdir()
+
+        config = NewWebSiteConfig(domain="hello11.com", root_dir=target_dir,
+                                  web_server_type=WebServerTypeEnum.Nginx)
+
+        app = app_factory.get_application_module('NginxApplication', config, {"name": "hello",
+                                                                              "text": text,
+                                                                              "email": "hello@hello.com"})
+        for item in ['name', 'author', 'website_url', 'docs_url', 'download_url', 'name_version', 'code_version',
+                     'agreement_name', 'description', 'agreement_url']:
+            self.assertIn(item, app.version().__dict__)
+        res = app.create()
+        self.assertTrue(res.is_success())
+        os.system(f'rm -rf {target_dir}')
+
+    def __t(self):
+        #  todo 测试关键应用接口是否实现
+        pass
+
