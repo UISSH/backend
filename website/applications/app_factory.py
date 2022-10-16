@@ -3,7 +3,6 @@ import inspect
 import os
 import pathlib
 import traceback
-from pprint import pprint
 
 from loguru import logger
 
@@ -12,6 +11,7 @@ from website.applications.core.application import Application, Storage
 from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
 
 filepath = 'website/applications/app'
+
 
 class AppFactory:
     MODULES = {}
@@ -73,32 +73,4 @@ class AppFactory:
 
 
 if __name__ == '__main__':
-
-    filepath = 'app'
-
-    AppFactory.load()
-    pprint(AppFactory.get_application_list())
-    item = AppFactory.get_application('NginxApplication')  # ["module"]
-
-    StaticApplication = item["module"]
-    text = "Python is a high-level, interpreted, general-purpose programming language. " \
-           "Its design philosophy emphasizes code readability with the use of significant indentation."
-    path = pathlib.Path("/tmp/hello11.com/")
-    if not path.exists():
-        pathlib.Path("/tmp/hello11.com/").mkdir()
-
-    config = NewWebSiteConfig(domain="hello11.com", root_dir="/tmp/hello11.com/",
-                              web_server_type=WebServerTypeEnum.Nginx)
-    app = StaticApplication(config, {"name": "hello",
-                                     "text": text,
-                                     "email": "hello@hello.com"})
-    app.create()
-    print(app.version().__dict__)
-    print(app.disable().__dict__)
-    print(app.get_data())
-    print(app.enable().__dict__)
-    print(app.get_data())
-
-    _path = f'/home/z/test.tar.gz'
-    print(app.backup(_path))
-    print(app.size())
+    pass

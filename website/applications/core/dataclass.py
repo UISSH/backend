@@ -144,6 +144,13 @@ class BaseSSLCertificate:
 
 
 @dataclass
+class ApplicationWebServerConfig:
+    nginx: str
+    # For example: flarum enter folder is 'public'.
+    enter_folder_name: Optional[str] = None
+
+
+@dataclass
 class ApplicationVersion:
     name: str
     author: str = ""
@@ -167,8 +174,8 @@ class DataBaseConfig:
 
 @dataclass
 class NewWebSiteConfig(BaseData):
-    domain: str
-    root_dir: str
+    domain: str  # domain.com
+    root_dir: str  # absolute path
     web_server_type: WebServerTypeEnum = WebServerTypeEnum.Nginx
     extra_domain: Optional[List[str]] = None
     ssl_config: Optional[SSLConfig] = None

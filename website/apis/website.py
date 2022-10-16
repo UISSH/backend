@@ -73,13 +73,16 @@ class WebsiteView(BaseModelViewSet):
     def enable_ssl(self, request, *args, **kwargs):
         obj: Website = self.get_object()
         op = BaseOperatingRes()
+
         p = issuing_certificate(obj)
         if p.returncode != 0:
             op.msg = 'issue certificate error:\n' + format_completed_process(p)
             op.set_failure()
+            obj.get_application().toggle_ssl(False)
         else:
             obj.ssl_enable = True
             obj.sync_web_config(save=True)
+            obj.get_application().toggle_ssl(True)
 
         return Response(op.json())
 

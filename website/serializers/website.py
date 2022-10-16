@@ -153,7 +153,13 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
                                                      instance.application_config)
 
         web_server_config = instance.get_nginx_config()
-        web_server_config = insert_section(web_server_config, app.read(), 'user')
+
+        if isinstance(app.read(),str):
+            user_area_config = app.read()
+        else:
+            user_area_config = app.read().nginx
+
+        web_server_config = insert_section(web_server_config, user_area_config, 'user')
         old_config = instance.valid_web_server_config
         instance.valid_web_server_config = web_server_config
 

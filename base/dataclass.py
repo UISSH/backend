@@ -4,15 +4,24 @@ from datetime import datetime
 from enum import Enum
 from typing import Type
 
-from base.utils.logger import plog
-
 try:
     from django.core.cache import caches, cache
 
     _DEFAULT_TIMEOUT = 60 * 60 * 24
     _CACHE: cache = caches["GlobalOperationResCache"]
 except:
-    pass
+    class Cache(dict):
+        def set(self, k, v):
+            self[k] = v
+
+        def get(self, k, default):
+            if k in self:
+                return self[k]
+            else:
+                return default
+
+
+    _CACHE = Cache()
 
 
 class BaseOperatingResEnum(Enum):
@@ -28,6 +37,7 @@ class BaseOperatingRes:
     event_id: str = uuid.uuid4().__str__()
 
     result: BaseOperatingResEnum = BaseOperatingResEnum.PENDING
+    name: str = 'default'
     msg: str = ''
     create_at: str = datetime.now().__str__()
 
@@ -37,8 +47,6 @@ class BaseOperatingRes:
             event_id = self.__dict__["event_id"]
             obj = BaseOperatingRes.get_instance(event_id, self)
             obj.__dict__[key] = value
-            # _CACHE.set(self.event_id, self)
-            # plog.debug(f"set {self.__dict__['event_id']} {key}={value}")
             _CACHE.set(event_id, obj)
         else:
             self.__dict__[key] = value
@@ -102,3 +110,4 @@ class BaseOperatingResTest:
 
 if __name__ == '__main__':
     print(BaseOperatingResTest().json())
+    print(BaseOperatingRes().json())

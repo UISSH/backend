@@ -2,6 +2,7 @@ import hashlib
 import json
 import os.path
 import sys
+import uuid
 
 from website.applications.core.dataclass import *
 from website.applications.core.file_json import FileJson
@@ -95,8 +96,8 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
     - self._storage
 
     Note 1: By default a unique application data is identified by the 'config.domain' and 'config.root_dir'.
-    Note 2: Global application data read and write is not provided, You can implement one yourself based on the
-            Storage(in 'website/applications/core/application.py') abstract class.
+    Note 2: You can implement one yourself based on the Storage(in 'website/applications/core/application.py')
+     abstract class.
             Example:
             app = AppName(config=NewWebSiteConfig(...),app_config={...},storage_cls=you_storage_class)
     """
@@ -139,8 +140,6 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         """
         pass
 
-
-
     @abstractmethod
     def create(self) -> OperatingRes:
         """
@@ -155,7 +154,7 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def read(self) -> str:
+    def read(self) -> ApplicationWebServerConfig:
         """
         Returns the configuration file of the web server.
         """
@@ -209,6 +208,22 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         """
         Returns the instance data size, include database size, website folder size etc.
         """
+
+    def toggle_ssl(self, toggle: bool) -> OperatingRes:
+        """
+        Args:
+            toggle (bool): When ssl is enabled successfully its value is True
+        """
+        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
+
+    def update_domain(self, old_domain: str, new_domain: str) -> OperatingRes:
+        """
+
+        Args:
+            old_domain:
+            new_domain:
+        """
+        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
 
     def status(self, status_type: ApplicationStatusTypeEnum) -> Enum:
         """

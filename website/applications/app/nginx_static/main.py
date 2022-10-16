@@ -63,13 +63,14 @@ class NginxApplication(Application, ApplicationToolMinx):
     def stop(self):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
-    def read(self, *args, **kwargs):
-        return """
+    def read(self, *args, **kwargs) -> ApplicationWebServerConfig:
+        nginx = """
     index index.html;
     location / {
         try_files $uri $uri/ =404;
     }
     """
+        return ApplicationWebServerConfig(nginx)
 
     def delete(self, *args, **kwargs):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)

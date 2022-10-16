@@ -15,24 +15,24 @@
 import os
 import uuid
 
-from website.applications.app.wordpress.src.core import install_wordpress
-from website.applications.app.wordpress.src.variable import app_parameter
+from website.applications.app.flarum.src.core import install_composer, install_flarum
+from website.applications.app.flarum.src.parameters import app_parameter
+from website.applications.app.flarum.src.parameters import flarum_nginx_config
 from website.applications.core.application import Application, ApplicationToolMinx
 from website.applications.core.dataclass import *
 
-app_parameter = app_parameter
 
-
-class WordPressApplication(Application, ApplicationToolMinx):
+class FlarumApplication(Application, ApplicationToolMinx):
 
     def create(self):
         if self._config.web_server_type != WebServerTypeEnum.Nginx:
             raise RuntimeError(f"This app does not support {self._config.web_server_type.name} web server.")
-        download_url = self._app_config.get("wordpress", 'https://wordpress.org/wordpress-6.0.1.zip')
 
-        install_wordpress(download_url, self._config.root_dir, self._config.database_config.db_name,
-                          self._config.database_config.username, self._config.database_config.password)
+        if not self._config.database_config:
+            raise RuntimeError(f"Need to configure database.")
 
+        install_composer()
+        install_flarum(self._config, self._app_config)
         os.system(f"chown www-data.www-data -R {self._config.root_dir}")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
@@ -41,27 +41,18 @@ class WordPressApplication(Application, ApplicationToolMinx):
         return app_parameter
 
     def start(self):
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
+        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT, msg="This operation is not supported.")
 
     def stop(self):
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
+        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT, msg="This operation is not supported.")
 
     def read(self, *args, **kwargs) -> ApplicationWebServerConfig:
-        nginx = """
-    index  index.php;
-    location / {
-        try_files $uri $uri/ /index.php?$args;
-    }
-    
-    location ~ \.php$ {
-        try_files $uri =404;
-        fastcgi_pass  unix:/run/php/php-fpm.sock;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include /etc/nginx/fastcgi_params;
-    }
-    """
-        return ApplicationWebServerConfig(nginx)
+        config = ApplicationWebServerConfig(flarum_nginx_config.replace('{root_dir}', self._config.root_dir))
+        config.enter_folder_name = 'public'
+        dot_nginx_config = pathlib.Path(f'{self._config.root_dir}/.nginx.conf')
+        if not dot_nginx_config.exists():
+            dot_nginx_config.touch()
+        return config
 
     def update(self, *args, **kwargs):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
@@ -84,15 +75,40 @@ class WordPressApplication(Application, ApplicationToolMinx):
 
     @classmethod
     def version(cls) -> ApplicationVersion:
-        name = 'WordPress'
+        name = 'Flarum'
         return ApplicationVersion(name=name, name_version="0.0.1 alpha", code_version=1, author="zmaplex@gmail.com",
-                                  description="用于创建 WordPress 博客")
+                                  description="Deploy Flarum program")
 
     def get_data(self) -> dict:
         return self._storage.read()
 
     def size(self) -> int:
         return self._storage.size() + self.get_folder_size(self._config.root_dir)
+
+    def toggle_ssl(self, toggle: bool):
+        config_php = pathlib.Path(self._config.root_dir) / 'config.php'
+        with open(config_php, "r") as f:
+            data = f.read()
+        if toggle:
+            data = data.replace(f"http://{self._config.domain}", f"https://{self._config.domain}")
+        else:
+            data = data.replace(f"https://{self._config.domain}", f"http://{self._config.domain}")
+        with open(config_php, "w") as f:
+            f.write(data)
+        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
+
+    def update_domain(self, old_domain: str, new_domain: str) -> OperatingRes:
+        if old_domain is None or new_domain is None:
+            return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
+
+        config_php = pathlib.Path(self._config.root_dir) / 'config.php'
+        with open(config_php, "r") as f:
+            data = f.read()
+
+        data = data.replace(f"{old_domain}", f"{new_domain}")
+        with open(config_php, "w") as f:
+            f.write(data)
+        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
 
 if __name__ == '__main__':
