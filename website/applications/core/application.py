@@ -170,7 +170,7 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
     @abstractmethod
     def start(self) -> OperatingRes:
         """
-        It is recommended to ues  systemd service to start your application.
+        It is recommended to ues systemd service to start your application.
         """
         pass
 
@@ -218,10 +218,10 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
 
     def update_domain(self, old_domain: str, new_domain: str) -> OperatingRes:
         """
-
+        This method will be called when the domain name is successfully updated.
         Args:
-            old_domain:
-            new_domain:
+            old_domain: Update the previous domain name.
+            new_domain: The domain name after successful update.
         """
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
 

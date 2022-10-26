@@ -14,7 +14,7 @@ class FtpServerModel(BaseModel):
     username = models.CharField(max_length=32)
     password = models.CharField(max_length=64)
     file_system = models.CharField(default='os', max_length=32)
-    params = models.JSONField(default=_get_default_params())
+    params = models.JSONField(default=_get_default_params)
 
     @staticmethod
     def sync_account():

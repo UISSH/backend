@@ -33,7 +33,7 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
     def update(self, instance: Website, validated_data):
         domain = validated_data.get('domain')
         extra_domain = validated_data.get('extra_domain')
-
+        old_domain = instance.domain
         if domain and domain != instance.domain:
             os.system(f"rm -rf  /etc/nginx/sites-enabled/{instance.domain}.conf")
             os.system(f"rm -rf  /etc/nginx/sites-available/{instance.domain}.conf")
@@ -43,6 +43,12 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
         if extra_domain and extra_domain != instance.extra_domain:
             instance.ssl_enable = False
             instance.extra_domain = extra_domain
+            # 1.domain.com,2.domain,3.domain -> 1.domain.com 2.domain 3.domain
+            # or
+            # 1.domain.com
+            # 2.domain
+            # 3.domain
+            # -> 1.domain.com 2.domain 3.domain
             extra_domain = instance.extra_domain.replace(",", " ").replace("\n", " ")
 
             instance.valid_web_server_config = update_nginx_server_name(instance.valid_web_server_config,
@@ -61,6 +67,7 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
         os.system('systemctl reload nginx')
 
         instance.save()
+        instance.get_application().update_domain(old_domain, instance.domain)
         return validated_data
 
     def validate_extra_domain(self, val: str):
@@ -154,7 +161,7 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
 
         web_server_config = instance.get_nginx_config()
 
-        if isinstance(app.read(),str):
+        if isinstance(app.read(), str):
             user_area_config = app.read()
         else:
             user_area_config = app.read().nginx

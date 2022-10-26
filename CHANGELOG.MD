@@ -7,7 +7,7 @@
 - Add `toggle_ssl(self, toggle: bool) -> OperatingRes` method.
   - It is called when the user switches the ssl state of the website.
 - Add `update_domain(self, old_domain: str, new_domain: str) -> OperatingRes` method.
-  - The website's main domain name is called when it is updated. 
+  - This method is called when the website domain name (excluding subdomains) is updated.
 
 ## Breaking
 
