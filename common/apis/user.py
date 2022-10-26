@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from base.viewset import BaseModelViewSet, BaseReadOnlyModelViewSet
 from common.models.User import User
 from common.serializers.user import CreateUserSerializer, AdminUserSerializer, UserLoginSerializer, UserSerializer, \
-    UpdatePasswordSerializer
+    UpdatePasswordSerializer, UserLoginResSerializer
 
 
 class AdminUserView(BaseModelViewSet):
@@ -46,6 +46,7 @@ class UserView(BaseReadOnlyModelViewSet):
         serializer.save()
         return self.base_response(data=serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(responses={"200": UserLoginResSerializer})
     @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny],
             serializer_class=UserLoginSerializer)
     def login(self, request, *args, **kwargs):

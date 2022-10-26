@@ -143,6 +143,12 @@ class UserRegisterSerializer(serializers.Serializer):
     #     return attrs
 
 
+class UserLoginResSerializer(serializers.Serializer):
+    token = serializers.CharField(min_length=1, label="token")
+    email = serializers.EmailField(required=False, label="邮箱", help_text="邮箱与用户名必填一项")
+    username = serializers.CharField(min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
+
+
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, label="邮箱", help_text="邮箱与用户名必填一项")
     username = serializers.CharField(min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
