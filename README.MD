@@ -1,14 +1,15 @@
 # 介绍
 
 ![django ci](https://github.com/UISSH/backend/actions/workflows/django.yml/badge.svg)
-![install debian 11](https://github.com/UISSH/install-script/actions/workflows/install_debian11.yml/badge.svg)
+[![Debian 11 CI](https://github.com/UISSH/install-script/actions/workflows/debian_11.yml/badge.svg)](https://github.com/UISSH/install-script/actions/workflows/debian_11.yml)
+[![Ubuntu 22.04 CI](https://github.com/UISSH/install-script/actions/workflows/ubuntu_22.04.yml/badge.svg)](https://github.com/UISSH/install-script/actions/workflows/ubuntu_22.04.yml)
 
 
 本项目旨在摆脱繁琐的编译安装、命令行配置的运维工作，并尽最大的努力遵循 Linux 通用规范的一个可视化界面。
 
 # 安装
 
-可使用一键安装脚本快速部署，仅支持 Debian 11。
+可使用一键安装脚本快速部署，仅支持 Debian 11 与 Ubuntu 22.04。
 
 - [安装脚本](https://github.com/UISSH/install-script)
 
@@ -20,7 +21,7 @@
 systemctl enable|disable|start|stop| ui-ssh
 ```
 
-或者使用 gunicorn，_某些情况会找不到静态文件（404）_。
+用于开发目的，使用 gunicorn 运行，_某些情况会找不到静态文件（404）_。
 
 ```
 systemctl stop ui-ssh
@@ -103,30 +104,6 @@ certbot certonly \
 # 所有网站目录应该创建在 /var/www/[name folder] 下
 # 权限应默认为 www-data
 chown www-data.www-data -R /var/www/
-```
-
-### MySql
-
-todo
-
-```bash
-
-```
-
-### PHP
-
-todo
-
-```bash
-
-```
-
-### phpmyadmin
-
-todo
-
-```bash
-
 ```
 
 ### Systemd
