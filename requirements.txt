@@ -1,6 +1,6 @@
 celery==5.2.7
 channels==3.0.5
-django==4.1.7
+django==4.2
 django-cors-headers==3.14.0
 django-debug-toolbar==3.8.1
 django-extensions==3.2.1
