@@ -18,7 +18,7 @@ from website.applications.core.dataclass import BaseSSLCertificate
 from website.models import Website
 from website.serializers.website import WebsiteModelSerializer, WebsiteConfigSerializer, WebsiteDomainConfigSerializer
 from website.utils.certificate import issuing_certificate
-from website.utils.domain import domain_is_resolved
+from website.utils.domain import domain_is_resolved, find_domain_in_nginx
 
 
 class WebsiteView(BaseModelViewSet):
@@ -56,7 +56,8 @@ class WebsiteView(BaseModelViewSet):
     @action(methods=['post'], detail=True, serializer_class=WebsiteDomainConfigSerializer)
     def update_domain(self, request, *args, **kwargs):
         obj: Website = self.get_object()
-        serializer = WebsiteDomainConfigSerializer(data=request.data, instance=obj)
+        serializer = WebsiteDomainConfigSerializer(
+            data=request.data, instance=obj)
         if serializer.is_valid(raise_exception=True):
             data = serializer.save()
             return Response(data)
@@ -98,6 +99,19 @@ class WebsiteView(BaseModelViewSet):
     @extend_schema(parameters=[OpenApiParameter(name='domain', type=str)])
     @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
     def verify_dns_records(self, request: Request, *args, **kwargs):
+        """
+        如果 UISSH 没有启用SSL直接返回失败，否则进行域名解析判断流程。
+        
+        If SSL is not enabled for UISSH, it returns a failure directly; 
+        otherwise, the domain name resolution and verification process are carried out.
+        """
+        if not find_domain_in_nginx():
+            op = BaseOperatingRes()
+            # op.set_failure("UISSH 没有启用SSL，无法进行域名解析判断。")
+            op.set_failure("Without enabling SSL " 
+                           "UISSH cannot perform domain name resolution and verification.")
+            return Response(op.json())
+
         domain = request.query_params.get("domain")
         op = domain_is_resolved(domain, request)
         return Response(op.json())

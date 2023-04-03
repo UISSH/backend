@@ -5,6 +5,9 @@ test.pem
 /.idea
 db.sqlite3
 /venv/
+/static/
+**/migrations/**
+website/applications/app/**/data/**
 
 __pycache__/
 *.py[cod]
