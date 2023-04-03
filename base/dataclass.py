@@ -20,7 +20,6 @@ except:
             else:
                 return default
 
-
     _CACHE = Cache()
 
 
@@ -76,7 +75,9 @@ class BaseOperatingRes:
     def set_success(self):
         self.result = BaseOperatingResEnum.SUCCESS
 
-    def set_failure(self):
+    def set_failure(self, msg=None):
+        if msg:
+            self.msg = msg
         self.result = BaseOperatingResEnum.FAILURE
 
     def set_processing(self):

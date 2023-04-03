@@ -50,18 +50,24 @@ class ServerStatusConsumer(WebsocketConsumer):
             token = Token.objects.get(key=token)
             user = token.user
             if not user.is_superuser:
-                self.send(text_data=json.dumps({'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
+                self.send(text_data=json.dumps(
+                    {'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
                 self.disconnect(403)
                 return
         except Exception:
             print(traceback.format_exc())
-            self.send(text_data=json.dumps({'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
+            self.send(text_data=json.dumps(
+                {'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
             self.disconnect(403)
             return
 
         msg = "connection succeeded\r\n"
-
-        self.send(text_data=json.dumps({'message': msg, 'code': 201}))
+        try:
+            self.send(text_data=json.dumps({'message': msg, 'code': 201}))
+        except Exception:
+            print(traceback.format_exc())
+            self.disconnect(403)
+            return
 
     def disconnect(self, close_code):
         print("disconnect")
@@ -74,7 +80,8 @@ class ServerStatusConsumer(WebsocketConsumer):
         interval = int(interval)
         if query_sql not in self.cache:
             self.cache[query_sql] = interval
-            loop = Thread(target=self.monitoring_information, args=(query_sql,))
+            loop = Thread(target=self.monitoring_information,
+                          args=(query_sql,))
             loop.start()
             print(f"start new threading {loop.native_id}:{query_sql}")
         else:
