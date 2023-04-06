@@ -1,5 +1,5 @@
 import subprocess
-from iptables.serializers.main import IPTablesRuleListSerializer
+from iptables.serializers.main import IPTablesRuleSerializer
 from rest_framework import permissions
 
 from rest_framework.decorators import action
@@ -12,7 +12,7 @@ from drf_spectacular.utils import extend_schema
 class IPTablesView(GenericViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
-    @extend_schema(responses=IPTablesRuleListSerializer)
+    @extend_schema(responses=IPTablesRuleSerializer(many=True))
     @action(methods=['get'], detail=False)
     def get_rules(self, request):
         result = subprocess.run(
@@ -31,9 +31,9 @@ class IPTablesView(GenericViewSet):
             From = line[third:]
             data = {
                 "ID": index+1,
-                "to": To.strip(),
-                "action": Action.strip(),
-                "from": From.strip(),
+                "To": To.strip(),
+                "Action": Action.strip(),
+                "From": From.strip(),
             }
             area.append(data)
-        return Response(area)
+        return Response({"pagination": {"total_pages": 1, "total": len(area), "page": 1, "per_page": len(area)}, "results": area})
