@@ -1,8 +1,11 @@
-# 2022/10/16
+# 2023/04/05
+## Update
+### New features
 
 - Add flarum application.
+- Add 'iptables' django app
 
-## Application
+### Application interface
 
 - Add `toggle_ssl(self, toggle: bool) -> OperatingRes` method.
   - It is called when the user switches the ssl state of the website.
@@ -12,3 +15,4 @@
 ## Breaking
 
 - Update `read(*args, **kwargs)-> ApplicationWebServerConfig` abstract method.
+- rename 'api/OperatingRes' to 'api/Operating' and 'Operating.query' method to 'get' from 'post'.
