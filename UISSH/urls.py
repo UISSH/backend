@@ -18,13 +18,14 @@ import debug_toolbar
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include, re_path
-from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView, SpectacularAPIView
+from django.urls import include, path, re_path
+from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
+                                   SpectacularSwaggerView)
 from rest_framework.routers import DefaultRouter
 
 import common
 from common import views
-from common.apis import user, opreating
+from common.apis import opreating, user
 from common.apis.kv_storage import KVStorageView
 from common.apis.version import VersionView
 from database.apis import database
@@ -32,13 +33,16 @@ from filebrowser.apis.filebrowser import FileBrowserView
 from ftpserver.apis.ftpserver import FtpServerView
 from terminal.apis.main import TerminalView
 from webdav.apis.webdav import WebDAVView
-from website.apis import website, application
+from website.apis import application, website
+from iptables.apis.main import IPTablesView
 
 router = DefaultRouter()
 router.register(r'User', user.UserView)
-router.register(r'OperatingRes', opreating.OperatingResView, basename="OperatingRes")
+router.register(r'Operating', opreating.OperatingView,
+                basename="Operating")
 router.register(r'Website', website.WebsiteView)
-router.register(r'Application', application.ApplicationView, basename="Application")
+router.register(r'Application', application.ApplicationView,
+                basename="Application")
 router.register(r"DataBase", database.DataBaseView)
 router.register(r'Admin/User', user.AdminUserView)
 router.register(r'FileBrowser', FileBrowserView)
@@ -46,6 +50,7 @@ router.register(r'WebDAV', WebDAVView)
 router.register(r'FtpServer', FtpServerView)
 router.register(r'KVStorage', KVStorageView)
 router.register(r'Terminal', TerminalView)
+router.register(r'IPTables', IPTablesView, basename="IPTables")
 
 
 admin.site.site_title = "UI-SSH"
@@ -59,12 +64,15 @@ urlpatterns = [
 
 if settings.DEBUG:
     print("Additional debug routing configuration")
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
     urlpatterns += [
         path('docs/schema/', SpectacularAPIView.as_view(), name='schema'),
         # Optional UI:
-        path('docs/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-        path('docs/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+        path('docs/schema/swagger-ui/',
+             SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+        path('docs/schema/redoc/',
+             SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
         path('api-auth/', include('rest_framework.urls')),
         path('__debug__/', include(debug_toolbar.urls)),
 
