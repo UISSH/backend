@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from rest_framework import serializers
 from base.dataclass import BaseOperatingRes
 from base.dataclass import BaseOperatingResEnum
@@ -38,7 +39,7 @@ class ExecuteCommandSyncSerializer(serializers.Serializer):
             'command').replace("  ", " ").replace("  ", " ")
 
         ret = subprocess.Popen(command, shell=True, cwd=cwd,
-                               stdout=subprocess.PIPE)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if ret.stdout:
             msg = ret.stdout.read().decode('utf-8').strip()
@@ -48,7 +49,7 @@ class ExecuteCommandSyncSerializer(serializers.Serializer):
             msg = ret.stderr.read().decode('utf-8').strip()
             operator_res.set_failure()
         else:
-            msg = ""
+            msg = f"ExecuteCommandSyncSerializer#{sys._getframe().f_lineno}: unknown error."
 
         operator_res.msg = msg
 
@@ -69,7 +70,7 @@ class ExecuteCommandAsyncSerializer(serializers.Serializer):
         command = validated_data.get('command').replace(
             "  ", " ").replace("  ", " ")
         ret = subprocess.Popen(command, shell=True, cwd=cwd,
-                               stdout=subprocess.PIPE)
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if ret.stdout:
             msg = ret.stdout.read().decode('utf-8')

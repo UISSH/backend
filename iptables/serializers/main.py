@@ -3,8 +3,7 @@ from rest_framework import serializers
 
 
 class IPTablesRuleSerializer(ICBaseSerializer):
-    ID = serializers.IntegerField(help_text=1)
-    To = serializers.CharField(help_text="22/tcp")
-    Action = serializers.CharField(help_text="ALLOW")
-    From = serializers.CharField(help_text="Anywhere")
-
+    id = serializers.IntegerField(help_text=1)
+    to = serializers.CharField(help_text="22/tcp")
+    action = serializers.CharField(help_text="ALLOW")
+    from_src = serializers.CharField(help_text="Anywhere")

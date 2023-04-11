@@ -3,48 +3,75 @@
 主要利用 UFW 提供对系统防火墙规则基本的增删改查，这样可以无视网络包过滤工具的差异。
 
 
-## 功能实现
-
-需要实现的功能
-
-### 安装 UFW 工具
+## 安装 UFW 工具
 
 需要判断系统是否已经安装了 UFW 工具，如果没有安装则需要安装。
 
-### 配置 UFW 工具
+## 配置 UFW 工具
 
 需要配置 UFW 工具的默认策略，以及默认的日志级别。开放默认的端口 22,80,443,8080。
 
-### 列出防火墙规则
+## 列出防火墙规则
 
-```python
-import subprocess
+基于 `ufw status numbered`，可以列出当前系统的防火墙规则。
+```
+Status: active
 
-# 获取规则列表
-def get_rules():
-    result = subprocess.run(['ufw', 'status', 'numbered'], capture_output=True, text=True)
-    output = result.stdout
-    lines = output.strip().split('\n')[4:]  # 跳过前4行输出，获取规则行列表
-    rules = []
-    for line in lines:
-        # 解析规则行
-        parts = line.strip().split()
-        number = parts[0]
-        status = parts[1]
-        port = parts[2]
-        rules.append({'id': number, 'status': status, 'port': port})
-    return rules
+     To                         Action      From
+     --                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    Anywhere                  
+[ 2] 80/tcp                     ALLOW IN    Anywhere                  
+[ 3] 443/tcp                    ALLOW IN    Anywhere                  
+[ 4] 8080/tcp                   ALLOW IN    Anywhere                  
+[ 5] 22/tcp (v6)                ALLOW IN    Anywhere (v6)             
+[ 6] 80/tcp (v6)                ALLOW IN    Anywhere (v6)             
+[ 7] 443/tcp (v6)               ALLOW IN    Anywhere (v6)             
+[ 8] 8080/tcp (v6)              ALLOW IN    Anywhere (v6)
+```
+## 删除防火墙规则
+```bash
+# 比如要删除第 8 条规则
+echo "y" | ufw delete 8
+```
+## 添加防火墙规则
+
+### 端口
+
+```bash
+# 允许/拒绝 8080 端口
+ufw allow/deny 8080
+```
+
+### 端口范围
+
+```bash
+# 允许/拒绝 8080-8090 端口范围
+ufw allow/deny 8080:8090
+```
+
+### 协议
+
+```bash
+#  允许/拒绝 8080 端口的 TCP 协议
+ufw allow/deny 8080/tcp
+```
+
+### IP 地址
+
+```bash
+#  允许/拒绝 8.8.8.8
+ufw allow/deny from 8.8.8.8
 ```
 
 
-
-### 删除防火墙规则
-
-### 添加防火墙规则
-
 ### 清空防火墙规则
+
+```
+# 清空防火墙规则
+ufw --force reset
+```
 
 ### 重启防火墙
 
-## 测试
+
 

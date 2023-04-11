@@ -30,10 +30,10 @@ class IPTablesView(GenericViewSet):
             Action = line[second:third]
             From = line[third:]
             data = {
-                "ID": index+1,
-                "To": To.strip(),
-                "Action": Action.strip(),
-                "From": From.strip(),
+                "id": index+1,
+                "to": To.strip(),
+                "action": Action.strip(),
+                "from_src": From.strip(),
             }
             area.append(data)
         return Response({"pagination": {"total_pages": 1, "total": len(area), "page": 1, "per_page": len(area)}, "results": area})
