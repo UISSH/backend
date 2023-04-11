@@ -40,13 +40,13 @@ class OperatingView(GenericViewSet):
         return Response(data)
 
     @extend_schema(responses=OperatingResSerializer)
-    @action(methods=['post'], detail=False, serializer_class=ExecuteCommandSyncSerializer, permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['POST'], detail=False, serializer_class=ExecuteCommandSyncSerializer, permission_classes=[permissions.IsAuthenticated])
     def excute_command_sync(self, request):
         serializer = ExecuteCommandSyncSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             return Response(serializer.save())
 
     @extend_schema(responses=OperatingResSerializer)
-    @action(methods=['post'], detail=False, serializer_class=QueryOperatingResSerializer, permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['POST'], detail=False, serializer_class=QueryOperatingResSerializer, permission_classes=[permissions.IsAuthenticated])
     def excute_command_async(self, request):
         pass
