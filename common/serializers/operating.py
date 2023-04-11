@@ -33,7 +33,7 @@ class ExecuteCommandSyncSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=1024)
 
     def create(self, validated_data):
-        operator_res = BaseOperatingRes()
+        operator_res = BaseOperatingRes(name="ExecuteCommandSync")
         cwd = validated_data.get('cwd')
         command = validated_data.get(
             'command').replace("  ", " ").replace("  ", " ")
@@ -42,17 +42,21 @@ class ExecuteCommandSyncSerializer(serializers.Serializer):
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if ret.stdout:
-            msg = ret.stdout.read().decode('utf-8').strip()
-            operator_res.set_success()
+            stdout = ret.stdout.read().decode('utf-8')
+            if stdout != "":
+                msg = stdout
+                operator_res.set_success()
 
-        elif ret.stderr:
-            msg = ret.stderr.read().decode('utf-8').strip()
-            operator_res.set_failure()
+        if ret.stderr:
+            stderr = ret.stderr.read().decode('utf-8')
+            if stderr != "":
+                msg = stderr
+                operator_res.set_failure()
         else:
             msg = f"ExecuteCommandSyncSerializer#{sys._getframe().f_lineno}: unknown error."
+            operator_res.set_failure()
 
         operator_res.msg = msg
-
         return operator_res.json()
 
 
@@ -66,22 +70,5 @@ class ExecuteCommandAsyncSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         operator_res = BaseOperatingRes()
-        cwd = validated_data.get('cwd')
-        command = validated_data.get('command').replace(
-            "  ", " ").replace("  ", " ")
-        ret = subprocess.Popen(command, shell=True, cwd=cwd,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        if ret.stdout:
-            msg = ret.stdout.read().decode('utf-8')
-            operator_res.set_success()
-
-        elif ret.stderr:
-            msg = ret.stderr.read().decode('utf-8')
-            operator_res.set_failure()
-        else:
-            msg = ""
-
-        operator_res.msg = msg
-
+        operator_res.set_not_support()
         return operator_res.json()
