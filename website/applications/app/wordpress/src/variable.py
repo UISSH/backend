@@ -6,7 +6,7 @@ app_parameter = [
             "default": "wordpress",
             "en-US": "wordpress"
         },
-        'value': 'https://wordpress.org/wordpress-6.0.1.zip',
+        'value': 'https://wordpress.org/wordpress-6.2.zip',
         "required": True,
         "description": {
             "default": "download WordPress.",

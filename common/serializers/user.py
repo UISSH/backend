@@ -59,7 +59,8 @@ class CreateUserSerializer(ICBaseModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.get('password', None)
-        instance: User = super(CreateUserSerializer, self).create(validated_data)
+        instance: User = super(CreateUserSerializer,
+                               self).create(validated_data)
         instance.set_password(password)
         instance.save()
         return instance
@@ -145,26 +146,31 @@ class UserRegisterSerializer(serializers.Serializer):
 
 class UserLoginResSerializer(serializers.Serializer):
     token = serializers.CharField(min_length=1, label="token")
-    email = serializers.EmailField(required=False, label="邮箱", help_text="邮箱与用户名必填一项")
-    username = serializers.CharField(min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
+    email = serializers.EmailField(
+        required=False, label="邮箱", help_text="邮箱与用户名必填一项")
+    username = serializers.CharField(
+        min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
 
 
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=False, label="邮箱", help_text="邮箱与用户名必填一项")
-    username = serializers.CharField(min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
+    email = serializers.EmailField(
+        required=False, label="邮箱", help_text="邮箱与用户名必填一项")
+    username = serializers.CharField(
+        min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
     password = serializers.CharField(min_length=1, label="密码")
 
     def create(self, validated_data):
         """
         save() 调用的方法，返回用户的Token
         """
-        m_user = User.objects.get(Q(username=validated_data.get('username')) | Q(email=validated_data.get('email')))
+        m_user = User.objects.get(Q(username=validated_data.get(
+            'username')) | Q(email=validated_data.get('email')))
         m_user.last_login = timezone.now()
         m_user.save()
         token, created = Token.objects.get_or_create(user=m_user)
 
         single_point_login = False
-        # 存在 todo 且用户打开单点登陆开关 则更新 token 使上一个 key 失效
+        # TODO 存在且用户打开单点登陆开关 则更新 token 使上一个 key 失效
         if not created and single_point_login:
             Token.objects.filter(pk=token.key).update(key=token.generate_key())
             token = Token.objects.get(user=m_user)
@@ -191,7 +197,8 @@ class UserLoginSerializer(serializers.Serializer):
             elif email:
                 raise serializers.ValidationError({'email': "邮箱不存在"})
             else:
-                raise serializers.ValidationError({'username': "用户不存在", 'email': "用户不存在"})
+                raise serializers.ValidationError(
+                    {'username': "用户不存在", 'email': "用户不存在"})
 
         user = authenticate(username=m_user.username, password=password)
 

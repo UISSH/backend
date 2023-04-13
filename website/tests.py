@@ -151,7 +151,4 @@ class TestApplication(TestCase):
         self.assertTrue(res.is_success())
         os.system(f'rm -rf {target_dir}')
 
-    def __t(self):
-        #  todo 测试关键应用接口是否实现
-        pass
 
