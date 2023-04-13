@@ -4,7 +4,15 @@
 
 - Add flarum application.
 - Add 'iptables' django app
+- Add execute command api
 
+### Changes
+
+application:
+  - change `localStorage` to `dbStorage` for application config, and mark `localStorage` as deprecated.
+
+wordpress application:
+  - update version to 6.2 from 6.0.1
 ### Application interface
 
 - Add `toggle_ssl(self, toggle: bool) -> OperatingRes` method.

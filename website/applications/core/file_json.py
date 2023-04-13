@@ -1,13 +1,17 @@
 import json
 import pathlib
+import warnings
 
 
 class FileJson(dict):
     """
     打开 JSON 文件，并返回该文件 FileJson 实例的引用
-    todo：由于读取文件会被缓存导致对象销毁时无法释放实例会造成内存泄露，需要修复。
+    TODO：由于读取文件会被缓存导致对象销毁时无法释放实例会造成内存泄露，需要修复。
+    2023/04/12: 数据存储方式从文件变更为数据库，此类将被废弃
+
     """
     _CACHE = {}
+    warnings.warn("FileJson is deprecated.")
 
     def __init__(self, path: str, data: dict = None):
         """

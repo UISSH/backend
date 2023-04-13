@@ -3,12 +3,17 @@ import json
 import os.path
 import sys
 import uuid
+import warnings
 
 from website.applications.core.dataclass import *
+
 from website.applications.core.file_json import FileJson
 
 
 class Storage(metaclass=ABCMeta):
+
+    def __init__(hash_key: str, *args, **kwargs):
+        pass
 
     @abstractmethod
     def read(self, *args, **kwargs):
@@ -26,8 +31,14 @@ class Storage(metaclass=ABCMeta):
     def calc_text_hash(data: str) -> str:
         return hashlib.md5(data.encode(encoding="UTF-8")).hexdigest()
 
+    @abstractmethod
+    def release(self):
+        pass
+
 
 class LocalStorage(Storage):
+    warnings.warn(
+        "LocalStorage is not recommended for production environments.")
 
     def __init__(self, unique, dir_path: pathlib.Path = pathlib.Path('local_storage')):
 
@@ -50,6 +61,34 @@ class LocalStorage(Storage):
         else:
             return 0
 
+    def release(self):
+        if self.file.exists():
+            self.file.unlink()
+
+
+class DBStorage(Storage):
+    from website.models.application import ApplicationData
+
+    def __init__(self, unique):
+        if not self.ApplicationData.objects.filter(name=unique).exists():
+            self.obj = self.ApplicationData.objects.create(name=unique)
+        else:
+            self.obj = self.ApplicationData.objects.get(name=unique)
+
+    def read(self, *args, **kwargs) -> dict:
+        from website.applications.core.db_json import DBJson
+        return DBJson.get_instance(self.obj.unique)
+
+    def write(self, data):
+        self.obj.data = data
+        self.obj.save()
+
+    def size(self) -> int:
+        return len(self.obj.data)
+
+    def release(self):
+        self.obj.delete()
+
 
 class ApplicationToolMinx:
 
@@ -66,10 +105,15 @@ class ApplicationToolMinx:
 
 class ApplicationStorage:
 
-    def __init__(self, config: NewWebSiteConfig, app_config: dict = None, storage_cls=LocalStorage):
+    def __init__(self, config: NewWebSiteConfig, app_config: dict = None, storage_cls=Storage):
         app_path = pathlib.Path(sys.modules[self.__module__].__file__).parent
-        hash_key = storage_cls.calc_text_hash(f"{self.__class__.__name__.__str__()}{config.domain}{config.root_dir}")
-        self._storage = storage_cls(hash_key, dir_path=app_path / 'data')
+        hash_key = storage_cls.calc_text_hash(
+            f"{self.__class__.__name__.__str__()}{config.domain}{config.root_dir}")
+
+        if (storage_cls == LocalStorage):
+            self._storage = storage_cls(hash_key, dir_path=app_path / 'data')
+        else:
+            self._storage = storage_cls(hash_key)
 
         if app_config is not None:
             self._app_config = app_config
@@ -106,7 +150,8 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         not_allow = [":", "/", " "]
         for i in not_allow:
             if i in config.domain:
-                raise RuntimeError(f"Invalid parameter: {config.domain} include '{i}' char")
+                raise RuntimeError(
+                    f"Invalid parameter: {config.domain} include '{i}' char")
 
         self._config: NewWebSiteConfig = config.instance
         super().__init__(config, app_config, storage_cls)

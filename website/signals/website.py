@@ -28,7 +28,7 @@ def listener_pre_delete(sender, instance: Website, **kwargs):
         plog.info(cmd)
         os.system(cmd)
 
-    # todo backup all data on before delete.
+    # TODO backup all data on before delete.
     if instance.application:
         app = instance.get_application_module(instance.get_app_new_website_config())
         app.stop()

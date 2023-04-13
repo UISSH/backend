@@ -28,7 +28,7 @@ class WordPressApplication(Application, ApplicationToolMinx):
     def create(self):
         if self._config.web_server_type != WebServerTypeEnum.Nginx:
             raise RuntimeError(f"This app does not support {self._config.web_server_type.name} web server.")
-        download_url = self._app_config.get("wordpress", 'https://wordpress.org/wordpress-6.0.1.zip')
+        download_url = self._app_config.get("wordpress", 'https://wordpress.org/wordpress-6.2.zip')
 
         install_wordpress(download_url, self._config.root_dir, self._config.database_config.db_name,
                           self._config.database_config.username, self._config.database_config.password)
