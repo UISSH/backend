@@ -13,13 +13,16 @@ from website.models.utils import insert_section, get_section, update_nginx_serve
 
 class SSLConfigSerializer(ICBaseSerializer):
     class CertbotSerializer(ICBaseSerializer):
-        email = serializers.EmailField(required=False, allow_null=True, help_text='defaults to current user.')
-        provider = serializers.CharField(default='letsencrypt', allow_null=True)
+        email = serializers.EmailField(
+            required=False, allow_null=True, help_text='defaults to current user.')
+        provider = serializers.CharField(
+            default='letsencrypt', allow_null=True)
 
     class PathSerializer(ICBaseSerializer):
         certificate = serializers.CharField(required=False, allow_null=True,
                                             help_text='specify the path to save the certificate.')
-        key = serializers.CharField(required=False, allow_null=True, help_text='specify the path to save the key.')
+        key = serializers.CharField(
+            required=False, allow_null=True, help_text='specify the path to save the key.')
 
     certbot = CertbotSerializer(required=False, allow_null=True, )
     path = PathSerializer(required=False, allow_null=True, )
@@ -35,8 +38,10 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
         extra_domain = validated_data.get('extra_domain')
         old_domain = instance.domain
         if domain and domain != instance.domain:
-            os.system(f"rm -rf  /etc/nginx/sites-enabled/{instance.domain}.conf")
-            os.system(f"rm -rf  /etc/nginx/sites-available/{instance.domain}.conf")
+            os.system(
+                f"rm -rf  /etc/nginx/sites-enabled/{instance.domain}.conf")
+            os.system(
+                f"rm -rf  /etc/nginx/sites-available/{instance.domain}.conf")
             instance.ssl_enable = False
             instance.domain = domain
 
@@ -49,7 +54,8 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
             # 2.domain
             # 3.domain
             # -> 1.domain.com 2.domain 3.domain
-            extra_domain = instance.extra_domain.replace(",", " ").replace("\n", " ")
+            extra_domain = instance.extra_domain.replace(
+                ",", " ").replace("\n", " ")
 
             instance.valid_web_server_config = update_nginx_server_name(instance.valid_web_server_config,
                                                                         instance.domain,
@@ -82,13 +88,17 @@ class WebsiteConfigSerializer(ICBaseSerializer):
 
     def update(self, instance: Website, validated_data):
         web_server_config = validated_data.get("web_server_config")
-        app = instance.get_application_module(instance.get_app_new_website_config())
+
+        app = instance.get_application_module(
+            instance.get_app_new_website_config())
 
         data = instance.get_nginx_config()
         user_config = get_section(web_server_config, 'user')
         data = insert_section(data, user_config, 'user')
+    
 
         instance.valid_web_server_config = data
+        
         r = instance.is_valid_configuration_001()
         if r.returncode != 0:
             raise serializers.ValidationError(
@@ -107,7 +117,8 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
     # ssl_config = serializers.SerializerMethodField('_ssl_config')
     database_id = serializers.SerializerMethodField()
     database_name = serializers.SerializerMethodField()
-    web_server_type_text = serializers.SerializerMethodField('_web_server_type_text')
+    web_server_type_text = serializers.SerializerMethodField(
+        '_web_server_type_text')
     status_text = serializers.SerializerMethodField('_status_text')
 
     class Meta:
@@ -115,7 +126,8 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        instance: Website = super(WebsiteModelSerializer, self).create(validated_data)
+        instance: Website = super(
+            WebsiteModelSerializer, self).create(validated_data)
 
         # 1.Create folder and file
         if instance.index_root == "/var/www/html":
@@ -166,7 +178,8 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
         else:
             user_area_config = app.read().nginx
 
-        web_server_config = insert_section(web_server_config, user_area_config, 'user')
+        web_server_config = insert_section(
+            web_server_config, user_area_config, 'user')
         old_config = instance.valid_web_server_config
         instance.valid_web_server_config = web_server_config
 
@@ -194,7 +207,8 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
         if instance.extra_domain is None:
             extra_domain = None
         else:
-            extra_domain = instance.extra_domain.replace(",", " ").replace("\n", " ")
+            extra_domain = instance.extra_domain.replace(
+                ",", " ").replace("\n", " ")
 
         instance.valid_web_server_config = update_nginx_server_name(instance.valid_web_server_config,
                                                                     instance.domain,
