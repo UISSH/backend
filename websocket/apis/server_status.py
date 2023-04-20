@@ -1,11 +1,14 @@
 import json
+import logging
 import time
 import traceback
 from threading import Thread
+from typing import Optional
 
 from channels.generic.websocket import WebsocketConsumer
 from rest_framework.authtoken.models import Token
 
+from base.utils.logger import plog
 from base.utils.os_query import os_query_json
 from common.models import User
 
@@ -19,18 +22,18 @@ class ServerStatusConsumer(WebsocketConsumer):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
-        self.user: User = None
-        self.loop: Thread = None
+        super().__init__(*args, **kwargs)
+        self.user: Optional[User] = None
+        self.loop: Optional[Thread] = None
         self.stop = False
         self.cache = {}
 
-    def monitoring_information(self, sql):
-
+    def monitoring_information(self, sql: str) -> None:
+        start_time = time.time()
+        run_count = 0
+        max_run_count = 60 * 15
         while not self.stop:
             total_sec = 0
-            # interval = self.cache.get(sql)
-            # print(f"execute {sql}, interval {interval}")
             msg = os_query_json(sql)
             self.send(text_data=json.dumps(
                 {'doc': 'https://osquery.io/schema/5.3.0/', 'action': 'query', 'sql': sql, 'message': msg.__dict__,
@@ -38,10 +41,14 @@ class ServerStatusConsumer(WebsocketConsumer):
             while 1:
                 interval = self.cache.get(sql)
                 total_sec += 1
-                if total_sec > interval:
+                if total_sec > interval or self.stop or run_count > max_run_count:
                     break
                 time.sleep(1)
-        print('线程结束')
+                run_count += 1
+
+            if self.stop or run_count > max_run_count:
+                break
+        plog.info(f'monitoring_information thread is stop, cost {time.time() - start_time} seconds.')
 
     def connect(self):
         self.accept()
@@ -55,7 +62,7 @@ class ServerStatusConsumer(WebsocketConsumer):
                 self.disconnect(403)
                 return
         except Exception:
-            print(traceback.format_exc())
+            plog.error("Failed to authenticate user with token")
             self.send(text_data=json.dumps(
                 {'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
             self.disconnect(403)
@@ -65,15 +72,15 @@ class ServerStatusConsumer(WebsocketConsumer):
         try:
             self.send(text_data=json.dumps({'message': msg, 'code': 201}))
         except Exception:
-            print(traceback.format_exc())
+            plog.error("Failed to send message to client")
             self.disconnect(403)
             return
 
-    def disconnect(self, close_code):
-        print("disconnect")
+    def disconnect(self, close_code: int) -> None:
+        logging.info("disconnect")
         self.stop = True
 
-    def receive(self, text_data=None, bytes_data=None):
+    def receive(self, text_data: str, bytes_data=None) -> None:
         text_data_json = json.loads(text_data)
         query_sql = text_data_json.get('query_sql')
         interval = text_data_json.get('interval', 5)
@@ -83,6 +90,6 @@ class ServerStatusConsumer(WebsocketConsumer):
             loop = Thread(target=self.monitoring_information,
                           args=(query_sql,))
             loop.start()
-            print(f"start new threading {loop.native_id}:{query_sql}")
+            plog.debug(f"start new threading {loop.native_id}")
         else:
             self.cache[query_sql] = interval
