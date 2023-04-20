@@ -12,7 +12,7 @@ from common.models.User import User
 from website.applications.app_factory import AppFactory
 from website.applications.core.application import Application
 from website.applications.core.dataclass import NewWebSiteConfig, SSLConfig, WebServerTypeEnum, DataBaseConfig
-from website.models.utils import enable_section, disable_section, get_section, insert_section
+from website.models.utils import enable_section, disable_section, get_section, insert_section, update_nginx_server_name
 
 nginx_config_example = """
 server {
@@ -257,8 +257,15 @@ class Website(BaseModel):
             return False
 
     def get_nginx_config(self):
-        # set domain
+        # set domain and ssl path.
         data = nginx_config_example.replace('{domain}', self.domain)
+        
+        # set extra domain.
+        if self.extra_domain:
+            extra_domain = " ".join(self.extra_domain.split(','))
+            server_name = f'{extra_domain}'
+            data = update_nginx_server_name(data,self.domain,server_name)
+        
         # set nginx root field.
         data = data.replace('{dir_path}', self.index_root)
         # set enter folder.
