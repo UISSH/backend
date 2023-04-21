@@ -6,8 +6,15 @@ from django.test import TestCase
 
 from website.applications.app_factory import AppFactory
 from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
+
 # Create your tests here.
-from website.models.utils import update_nginx_server_name, disable_section, get_section, insert_section, enable_section
+from website.models.utils import (
+    update_nginx_server_name,
+    disable_section,
+    get_section,
+    insert_section,
+    enable_section,
+)
 
 nginx_data = """server {
 
@@ -59,22 +66,22 @@ nginx_data = """server {
 
 
 class TestUpdateNginxServerName(TestCase):
-
     def test_domain(self):
         domain = "test.domain.com"
-        sub_domain = "test1.domain.com test2.domain.com test3.domain.com test4.domain.com"
+        sub_domain = (
+            "test1.domain.com test2.domain.com test3.domain.com test4.domain.com"
+        )
         data = update_nginx_server_name(nginx_data, domain, sub_domain)
-        self.assertIn(f'server_name {domain} {sub_domain};', data)
+        self.assertIn(f"server_name {domain} {sub_domain};", data)
 
     def test_null_sub_domain(self):
         domain = "test.domain.com"
         sub_domain = None
         data = update_nginx_server_name(nginx_data, domain, sub_domain)
-        self.assertIn(f'server_name {domain};', data)
+        self.assertIn(f"server_name {domain};", data)
 
 
 class TestNginxConfigTools(TestCase):
-
     def test_get_section(self):
         _data = """       listen 443 ssl http2;
        listen [::]:443 ssl http2;
@@ -88,7 +95,7 @@ class TestNginxConfigTools(TestCase):
        ssl_session_cache shared:SSL:10m;
        ssl_session_timeout 10m;
        error_page 497  https://$host$request_uri;"""
-        data = get_section(nginx_data, 'ssl')
+        data = get_section(nginx_data, "ssl")
         self.assertIn(_data, data)
 
     def test_insert_section(self):
@@ -98,7 +105,7 @@ class TestNginxConfigTools(TestCase):
     }"""
         data2 = "########USER########" + _data + "########USER########"
 
-        self.assertIn(data2, insert_section(nginx_data, _data, 'user'))
+        self.assertIn(data2, insert_section(nginx_data, _data, "user"))
 
     def test_disable_section(self):
         _data = """       ########SSL########
@@ -126,29 +133,43 @@ class TestNginxConfigTools(TestCase):
 
 
 class TestApplication(TestCase):
-
     def test_load_app(self):
         app_factory = AppFactory
         app_factory.load()
 
         target_dir = f"/tmp/{int(time.time())}.com/"
-        text = "Python is a high-level, interpreted, general-purpose programming language. " \
-               "Its design philosophy emphasizes code readability with the use of significant indentation."
+        text = (
+            "Python is a high-level, interpreted, general-purpose programming language. "
+            "Its design philosophy emphasizes code readability with the use of significant indentation."
+        )
         path = pathlib.Path(target_dir)
         if not path.exists():
             pathlib.Path(target_dir).mkdir()
 
-        config = NewWebSiteConfig(domain="hello11.com", root_dir=target_dir,
-                                  web_server_type=WebServerTypeEnum.Nginx)
+        config = NewWebSiteConfig(
+            domain="hello11.com",
+            root_dir=target_dir,
+            web_server_type=WebServerTypeEnum.Nginx,
+        )
 
-        app = app_factory.get_application_module('NginxApplication', config, {"name": "hello",
-                                                                              "text": text,
-                                                                              "email": "hello@hello.com"})
-        for item in ['name', 'author', 'website_url', 'docs_url', 'download_url', 'name_version', 'code_version',
-                     'agreement_name', 'description', 'agreement_url']:
+        app = app_factory.get_application_module(
+            "NginxApplication",
+            config,
+            {"name": "hello", "text": text, "email": "hello@hello.com"},
+        )
+        for item in [
+            "name",
+            "author",
+            "website_url",
+            "docs_url",
+            "download_url",
+            "name_version",
+            "code_version",
+            "agreement_name",
+            "description",
+            "agreement_url",
+        ]:
             self.assertIn(item, app.version().__dict__)
         res = app.create()
         self.assertTrue(res.is_success())
-        os.system(f'rm -rf {target_dir}')
-
-
+        os.system(f"rm -rf {target_dir}")

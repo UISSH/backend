@@ -7,19 +7,19 @@ import yaml
 
 from website.applications.core.dataclass import NewWebSiteConfig
 
-letters = string.ascii_letters + string.digits + string.punctuation.replace("'", '')
+letters = string.ascii_letters + string.digits + string.punctuation.replace("'", "")
 
 
 def random_str(length: 16):
-    return ''.join(random.choice(letters) for _ in range(length))
+    return "".join(random.choice(letters) for _ in range(length))
 
 
 def cmd(command: str, directory: pathlib.Path):
-    os.system(f'cd {directory} && {command}')
+    os.system(f"cd {directory} && {command}")
 
 
 def install_composer():
-    target_bin = pathlib.Path('/usr/local/bin/composer')
+    target_bin = pathlib.Path("/usr/local/bin/composer")
     if target_bin.exists():
         return
 
@@ -36,21 +36,31 @@ def install_composer():
 
 def install_flarum(config: NewWebSiteConfig, app_config: dict):
     directory = pathlib.Path(config.root_dir)
-    os.system(f'cd {directory.__str__()} && rm -rf * .*')
-    cmd('composer create-project flarum/flarum . -n', directory)
+    os.system(f"cd {directory.__str__()} && rm -rf * .*")
+    cmd("composer create-project flarum/flarum . -n", directory)
 
-    install_yaml_config = {"debug": False, "baseUrl": f"http://{config.domain}",
-                           "databaseConfiguration": {"driver": "mysql", "host": "localhost", "port": 3306,
-                                                     "database": config.database_config.db_name,
-                                                     "username": config.database_config.username,
-                                                     "password": config.database_config.password,
-                                                     "prefix": False},
-                           "adminUser": {"username": app_config.get('username'),
-                                         "password": app_config.get('password'), "email": app_config.get('email')}}
+    install_yaml_config = {
+        "debug": False,
+        "baseUrl": f"http://{config.domain}",
+        "databaseConfiguration": {
+            "driver": "mysql",
+            "host": "localhost",
+            "port": 3306,
+            "database": config.database_config.db_name,
+            "username": config.database_config.username,
+            "password": config.database_config.password,
+            "prefix": False,
+        },
+        "adminUser": {
+            "username": app_config.get("username"),
+            "password": app_config.get("password"),
+            "email": app_config.get("email"),
+        },
+    }
 
-    with open(pathlib.Path(config.root_dir) / 'config.yaml', 'w') as f:
+    with open(pathlib.Path(config.root_dir) / "config.yaml", "w") as f:
         yaml.dump(install_yaml_config, f)
 
-    cmd('php flarum install -f config.yaml', directory)
-    os.system(f'chmod 775 -R {directory.absolute()}')
-    os.system(f'chown -R www-data:www-data {directory.absolute()}')
+    cmd("php flarum install -f config.yaml", directory)
+    os.system(f"chmod 775 -R {directory.absolute()}")
+    os.system(f"chown -R www-data:www-data {directory.absolute()}")

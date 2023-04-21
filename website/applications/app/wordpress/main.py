@@ -24,14 +24,22 @@ app_parameter = app_parameter
 
 
 class WordPressApplication(Application, ApplicationToolMinx):
-
     def create(self):
         if self._config.web_server_type != WebServerTypeEnum.Nginx:
-            raise RuntimeError(f"This app does not support {self._config.web_server_type.name} web server.")
-        download_url = self._app_config.get("wordpress", 'https://wordpress.org/wordpress-6.2.zip')
+            raise RuntimeError(
+                f"This app does not support {self._config.web_server_type.name} web server."
+            )
+        download_url = self._app_config.get(
+            "wordpress", "https://wordpress.org/wordpress-6.2.zip"
+        )
 
-        install_wordpress(download_url, self._config.root_dir, self._config.database_config.db_name,
-                          self._config.database_config.username, self._config.database_config.password)
+        install_wordpress(
+            download_url,
+            self._config.root_dir,
+            self._config.database_config.db_name,
+            self._config.database_config.username,
+            self._config.database_config.password,
+        )
 
         os.system(f"chown www-data.www-data -R {self._config.root_dir}")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
@@ -72,11 +80,15 @@ class WordPressApplication(Application, ApplicationToolMinx):
     def reload(self, *args, **kwargs):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
 
-    def backup(self, backup_path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All):
-        os.system(f'tar zcvf {backup_path} {self._config.root_dir}')
+    def backup(
+        self, backup_path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All
+    ):
+        os.system(f"tar zcvf {backup_path} {self._config.root_dir}")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
-    def recover(self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All) -> OperatingRes:
+    def recover(
+        self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All
+    ) -> OperatingRes:
         pass
 
     def migrate(self, old_code_version: int, new_code_version: int):
@@ -84,9 +96,14 @@ class WordPressApplication(Application, ApplicationToolMinx):
 
     @classmethod
     def version(cls) -> ApplicationVersion:
-        name = 'WordPress'
-        return ApplicationVersion(name=name, name_version="0.0.1 alpha", code_version=1, author="zmaplex@gmail.com",
-                                  description="用于创建 WordPress 博客")
+        name = "WordPress"
+        return ApplicationVersion(
+            name=name,
+            name_version="0.0.1 alpha",
+            code_version=1,
+            author="zmaplex@gmail.com",
+            description="用于创建 WordPress 博客",
+        )
 
     def get_data(self) -> dict:
         return self._storage.read()
@@ -95,5 +112,5 @@ class WordPressApplication(Application, ApplicationToolMinx):
         return self._storage.size() + self.get_folder_size(self._config.root_dir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

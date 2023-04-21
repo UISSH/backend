@@ -6,6 +6,8 @@ from base.model import BaseModel
 """
 from common.models.Config import SystemConfig;SystemConfig.objects.get(key="SETTINGS");obj.value['database']['root_password'] = "root";obj.save()
 """
+
+
 class SystemConfig(BaseModel):
     name = models.CharField(max_length=64, verbose_name="配置项")
     key = models.CharField(unique=True, max_length=32, verbose_name="配置键")
@@ -43,8 +45,7 @@ class SystemConfig(BaseModel):
         return data
 
     def __str__(self):
-
-        return f'{self.name}'
+        return f"{self.name}"
 
     def __unicode__(self):
         return self.name
@@ -54,6 +55,6 @@ class SystemConfig(BaseModel):
         verbose_name_plural = "系统配置"
 
     class Config(object):
-        HOST = 'HOST'
-        ALIPAY_CALL = 'ALIPAY_CALL'
+        HOST = "HOST"
+        ALIPAY_CALL = "ALIPAY_CALL"
         CACHE_TIME = 30

@@ -27,6 +27,7 @@ class BackupTypeEnum(Enum):
     - PROGRAM
       Website Program code etc.
     """
+
     All = 1
     DATABASE = 2
     PROGRAM = 3
@@ -76,8 +77,8 @@ class BaseData(metaclass=ABCMeta):
     @property
     def data(self) -> dict:
         """
-          Verify the data, and return itself.__dict__ after the verification is passed.
-          """
+        Verify the data, and return itself.__dict__ after the verification is passed.
+        """
         self.check_validity()
         return self.__dict__
 
@@ -104,37 +105,52 @@ class SSLConfig:
 
 @dataclass
 class BaseSSLCertificate:
-    issued_common_name: str = ''
+    issued_common_name: str = ""
 
-    issuer_common_name: str = ''
-    issuer_country_name: str = ''
-    issuer_organization_name: str = ''
-    subject_alt_name: str = ''
+    issuer_common_name: str = ""
+    issuer_country_name: str = ""
+    issuer_organization_name: str = ""
+    subject_alt_name: str = ""
     not_before: datetime.datetime = 0
     not_after: datetime.datetime = 0
-    signature_algorithm: str = ''
-    serial_number_hex: str = ''
+    signature_algorithm: str = ""
+    serial_number_hex: str = ""
 
     @classmethod
     def get_certificate(cls, certificate_path: str) -> "BaseSSLCertificate":
-        cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(certificate_path).read())
+        cert = crypto.load_certificate(
+            crypto.FILETYPE_PEM, open(certificate_path).read()
+        )
         date_format, encoding = "%Y%m%d%H%M%SZ", "ascii"
-        not_before = datetime.datetime.strptime(cert.get_notBefore().decode(encoding), date_format)
-        not_after = datetime.datetime.strptime(cert.get_notAfter().decode(encoding), date_format)
+        not_before = datetime.datetime.strptime(
+            cert.get_notBefore().decode(encoding), date_format
+        )
+        not_after = datetime.datetime.strptime(
+            cert.get_notAfter().decode(encoding), date_format
+        )
         subject = cert.get_subject()
         issuer = cert.get_issuer()
-        serial_number_hex = '{0:x}'.format(cert.get_serial_number())
+        serial_number_hex = "{0:x}".format(cert.get_serial_number())
         serial_number_hex = re.findall(".{2}", serial_number_hex.upper())
         serial_number_hex = ":".join(serial_number_hex)
-        san = ''
+        san = ""
         for i in range(0, cert.get_extension_count()):
             ext = cert.get_extension(i)
-            if 'subjectAltName' in str(ext.get_short_name()):
+            if "subjectAltName" in str(ext.get_short_name()):
                 san = ext.__str__()
                 continue
 
-        return cls(subject.CN, issuer.CN, issuer.C, issuer.O, san, not_before, not_after,
-                   cert.get_signature_algorithm().decode('utf-8'), serial_number_hex)
+        return cls(
+            subject.CN,
+            issuer.CN,
+            issuer.C,
+            issuer.O,
+            san,
+            not_before,
+            not_after,
+            cert.get_signature_algorithm().decode("utf-8"),
+            serial_number_hex,
+        )
 
     def valid(self) -> bool:
         return self.not_before < datetime.datetime.now() < self.not_after
@@ -188,14 +204,20 @@ class NewWebSiteConfig(BaseData):
         if not root_dir.exists():
             root_dir.mkdir(parents=True, exist_ok=True)
         if not root_dir.is_absolute():
-            raise RuntimeError("The 'root_dir' attribute must be an absolute directory path.")
+            raise RuntimeError(
+                "The 'root_dir' attribute must be an absolute directory path."
+            )
         if root_dir.is_file():
-            raise RuntimeError("The 'root_dir' attribute value is file path , Expected is a directory path.")
+            raise RuntimeError(
+                "The 'root_dir' attribute value is file path , Expected is a directory path."
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pprint(ApplicationRunStatusEnum(1))
-    instance = BaseSSLCertificate.get_certificate('/etc/letsencrypt/live/ggdbacked.jcpumiao.com/fullchain.pem')
+    instance = BaseSSLCertificate.get_certificate(
+        "/etc/letsencrypt/live/ggdbacked.jcpumiao.com/fullchain.pem"
+    )
     pprint(instance.__dict__)
     print(instance.valid())
     print(instance.expire_after_days())

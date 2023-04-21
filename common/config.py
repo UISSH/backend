@@ -3,10 +3,10 @@ from base.config import ABSDBConfig
 
 class DBConfig(ABSDBConfig):
     from common.models.Config import SystemConfig
+
     model = SystemConfig
 
     def init_data(self, module_name):
-
         obj, created = self.model.objects.get_or_create(key=self._key)
 
         if created or obj.name != self._name:
@@ -35,8 +35,11 @@ HOST_URL = DBConfig('域名', 'HOST', {'HOST_URL':'http://129.226.227.90:6006})
 # API_URL = DBConfig('API域名', 'API_HOST', {'HOST_URL': 'http://127.0.0.1:7000'})
 # FRONT_URL = DBConfig('前端域名', 'FRONT_HOST', {'HOST_URL': 'http://127.0.0.1:7000'})
 
-DB_SETTINGS = DBConfig('Settings', 'SETTINGS',
-                       {'database': {'root_username': "root", "root_password": "*-*-*root_password*-*-*"}})
+DB_SETTINGS = DBConfig(
+    "Settings",
+    "SETTINGS",
+    {"database": {"root_username": "root", "root_password": "*-*-*root_password*-*-*"}},
+)
 
 VARS = vars()
 

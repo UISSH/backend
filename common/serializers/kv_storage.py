@@ -5,4 +5,4 @@ from common.models import KVStorage
 class KVStorageSerializer(ICBaseModelSerializer):
     class Meta:
         model = KVStorage
-        fields =  '__all__'
+        fields = "__all__"

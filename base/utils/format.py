@@ -3,9 +3,9 @@ from subprocess import CompletedProcess
 
 def format_bytes(size) -> (int, str):
     # 2**10 = 1024
-    power = 2 ** 10
+    power = 2**10
     n = 0
-    power_labels = {0: '', 1: 'KB', 2: 'MB', 3: 'GB', 4: 'T'}
+    power_labels = {0: "", 1: "KB", 2: "MB", 3: "GB", 4: "T"}
     while size > power:
         size /= power
         n += 1
@@ -13,7 +13,7 @@ def format_bytes(size) -> (int, str):
 
 
 def format_completed_process(p: CompletedProcess):
-    msg = f'result:{p.returncode}\n'
+    msg = f"result:{p.returncode}\n"
     if p.stdout:
         msg += f"\n{'-' * 10}stdout{'-' * 10}\n"
         msg += p.stdout.decode()

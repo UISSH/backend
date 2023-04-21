@@ -22,17 +22,17 @@ To                         Action      From
 8080/tcp (v6)              ALLOW       Anywhere (v6)"""
 
     lines = text.splitlines()
-    first = lines[3].find('To')
-    second = lines[3].find('Action')
-    third = lines[3].find('From')
+    first = lines[3].find("To")
+    second = lines[3].find("Action")
+    third = lines[3].find("From")
 
     area = []
-    for (index, line) in enumerate(lines[5:]):
+    for index, line in enumerate(lines[5:]):
         To = line[first:second]
         Action = line[second:third]
         From = line[third:]
         data = {
-            "ID": index+1,
+            "ID": index + 1,
             "to": To.strip(),
             "action": Action.strip(),
             "from": From.strip(),

@@ -12,13 +12,13 @@ class OSQueryResult:
 
 
 def os_query_json(sql) -> OSQueryResult:
-    res = subprocess.Popen(['osqueryi', '--json', sql],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
+    res = subprocess.Popen(
+        ["osqueryi", "--json", sql], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
 
     out, err = res.communicate()
 
-    err = ''
+    err = ""
     if out:
         out = json.loads(format_os_query_result(out.decode()))
     else:

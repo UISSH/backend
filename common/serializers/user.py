@@ -12,9 +12,9 @@ from common.models.User import User
 class BaseUserSerializer(ICBaseModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']
-        read_only_fields = ['id']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ["id", "username", "email", "password"]
+        read_only_fields = ["id"]
+        extra_kwargs = {"password": {"write_only": True}}
 
     # noinspection PyMethodMayBeStatic
     def validate_email(self, value):
@@ -23,11 +23,8 @@ class BaseUserSerializer(ICBaseModelSerializer):
         return value
 
     def create(self, validated_data):
-        user = User(
-            email=validated_data['email'],
-            username=validated_data['username']
-        )
-        user.set_password(validated_data['password'])
+        user = User(email=validated_data["email"], username=validated_data["username"])
+        user.set_password(validated_data["password"])
         user.save()
         return user
 
@@ -35,18 +32,18 @@ class BaseUserSerializer(ICBaseModelSerializer):
 class AdminUserSerializer(BaseUserSerializer):
     class Meta:
         model = User
-        fields = '__all__'
-        read_only_fields = ['id']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = "__all__"
+        read_only_fields = ["id"]
+        extra_kwargs = {"password": {"write_only": True}}
 
 
 class UserSerializer(ICBaseModelSerializer):
-    isAdmin = serializers.SerializerMethodField('_is_admin')
-    isActive = serializers.SerializerMethodField('_is_active')
+    isAdmin = serializers.SerializerMethodField("_is_admin")
+    isActive = serializers.SerializerMethodField("_is_active")
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'isAdmin', 'isActive']
+        fields = ["username", "email", "isAdmin", "isActive"]
 
     def _is_admin(self, obj: User) -> bool:
         return obj.is_anonymous
@@ -56,11 +53,9 @@ class UserSerializer(ICBaseModelSerializer):
 
 
 class CreateUserSerializer(ICBaseModelSerializer):
-
     def create(self, validated_data):
-        password = validated_data.get('password', None)
-        instance: User = super(CreateUserSerializer,
-                               self).create(validated_data)
+        password = validated_data.get("password", None)
+        instance: User = super(CreateUserSerializer, self).create(validated_data)
         instance.set_password(password)
         instance.save()
         return instance
@@ -73,14 +68,13 @@ class CreateUserSerializer(ICBaseModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']
-        read_only_fields = ['id']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ["id", "username", "email", "password"]
+        read_only_fields = ["id"]
+        extra_kwargs = {"password": {"write_only": True}}
 
         validators = [
             UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=['username', 'email']
+                queryset=User.objects.all(), fields=["username", "email"]
             )
         ]
 
@@ -103,7 +97,7 @@ class UpdatePasswordSerializer(ICBaseSerializer):
         user = self.get_user()
         user = authenticate(username=user.username, password=val)
         if user is None:
-            raise serializers.ValidationError('密码错误')
+            raise serializers.ValidationError("密码错误")
         return val
 
 
@@ -118,18 +112,18 @@ class UserRegisterSerializer(serializers.Serializer):
         # the same position.
         validators = [
             UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=['username', 'email']
+                queryset=User.objects.all(), fields=["username", "email"]
             )
         ]
 
     def create(self, attrs):
-        username = attrs.get('username')
-        email = attrs.get('email')
-        password = attrs.get('password')
+        username = attrs.get("username")
+        email = attrs.get("email")
+        password = attrs.get("password")
 
         print(attrs)
         return attrs
+
     # def validate(self, attrs):
     #     username = attrs.get('username')
     #     email = attrs.get('email')
@@ -146,25 +140,27 @@ class UserRegisterSerializer(serializers.Serializer):
 
 class UserLoginResSerializer(serializers.Serializer):
     token = serializers.CharField(min_length=1, label="token")
-    email = serializers.EmailField(
-        required=False, label="邮箱", help_text="邮箱与用户名必填一项")
+    email = serializers.EmailField(required=False, label="邮箱", help_text="邮箱与用户名必填一项")
     username = serializers.CharField(
-        min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
+        min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项"
+    )
 
 
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(
-        required=False, label="邮箱", help_text="邮箱与用户名必填一项")
+    email = serializers.EmailField(required=False, label="邮箱", help_text="邮箱与用户名必填一项")
     username = serializers.CharField(
-        min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项")
+        min_length=1, required=False, label="用户名", help_text="邮箱与用户名必填一项"
+    )
     password = serializers.CharField(min_length=1, label="密码")
 
     def create(self, validated_data):
         """
         save() 调用的方法，返回用户的Token
         """
-        m_user = User.objects.get(Q(username=validated_data.get(
-            'username')) | Q(email=validated_data.get('email')))
+        m_user = User.objects.get(
+            Q(username=validated_data.get("username"))
+            | Q(email=validated_data.get("email"))
+        )
         m_user.last_login = timezone.now()
         m_user.save()
         token, created = Token.objects.get_or_create(user=m_user)
@@ -181,33 +177,32 @@ class UserLoginSerializer(serializers.Serializer):
         登录验证，成功返回数据
         """
         data_dict = dict(data)
-        username = data_dict.get('username')
-        email = data_dict.get('email')
-        password = data_dict.get('password')
+        username = data_dict.get("username")
+        email = data_dict.get("email")
+        password = data_dict.get("password")
         if not username and not email:
             msg = "用户名和邮箱必填其中一个"
-            raise serializers.ValidationError({'username': msg, 'email': msg})
+            raise serializers.ValidationError({"username": msg, "email": msg})
 
         try:
             m_user = User.objects.get(Q(username=username) | Q(email=email))
         except User.DoesNotExist as e:
-
             if username:
-                raise serializers.ValidationError({'username': "用户名不存在"})
+                raise serializers.ValidationError({"username": "用户名不存在"})
             elif email:
-                raise serializers.ValidationError({'email': "邮箱不存在"})
+                raise serializers.ValidationError({"email": "邮箱不存在"})
             else:
                 raise serializers.ValidationError(
-                    {'username': "用户不存在", 'email': "用户不存在"})
+                    {"username": "用户不存在", "email": "用户不存在"}
+                )
 
         user = authenticate(username=m_user.username, password=password)
 
         if not m_user.is_active:
             msg = "该账号被限制登录，请联系管理员"
-            raise serializers.ValidationError({'username': msg, 'email': msg})
+            raise serializers.ValidationError({"username": msg, "email": msg})
 
         elif user is None:
-
             raise serializers.ValidationError({"password": "密码错误"})
 
         elif user is not None:

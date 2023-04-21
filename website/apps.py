@@ -5,8 +5,8 @@ from loguru import logger
 
 
 class WebsiteConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'website'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "website"
 
     def ready(self):
         # Implicitly connect a signal handlers decorated with @receiver.

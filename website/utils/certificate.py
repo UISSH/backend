@@ -8,13 +8,12 @@ from website.applications.core.dataclass import BaseSSLCertificate
 
 def issuing_certificate(instance) -> subprocess.CompletedProcess:
     valid = False
-    plog.info(f'Issue a certificate for {instance.domain}')
-    certificate_path = instance.ssl_config['path']['certificate']
+    plog.info(f"Issue a certificate for {instance.domain}")
+    certificate_path = instance.ssl_config["path"]["certificate"]
 
-    plog.debug(instance.ssl_config['path'])
+    plog.debug(instance.ssl_config["path"])
 
-    if certificate_path != '' and pathlib.Path(certificate_path).exists():
-
+    if certificate_path != "" and pathlib.Path(certificate_path).exists():
         try:
             cert = BaseSSLCertificate.get_certificate(certificate_path)
             plog.info(f"{instance.domain} cert info:\n{cert.__str__()}")
@@ -31,25 +30,40 @@ def issuing_certificate(instance) -> subprocess.CompletedProcess:
             valid = False
 
     if valid:
-        plog.info('Certificate is valid skip generating.')
-        return subprocess.run("echo 'Certificate is valid skip generating.'", capture_output=True, shell=True)
+        plog.info("Certificate is valid skip generating.")
+        return subprocess.run(
+            "echo 'Certificate is valid skip generating.'",
+            capture_output=True,
+            shell=True,
+        )
 
-    key_path = instance.ssl_config['path']['key']
-    certificate_path = instance.ssl_config['path']['certificate']
+    key_path = instance.ssl_config["path"]["key"]
+    certificate_path = instance.ssl_config["path"]["certificate"]
 
-    plog.info('Run certbot Issue certificate')
-    cmd = ['certbot', 'certonly', '-n', '--nginx', '--reuse-key',
-           '--agree-tos', '-m', instance.user.email,
-           '--fullchain-path', certificate_path,
-           '--key-path', key_path,
-           '-d', instance.domain]
+    plog.info("Run certbot Issue certificate")
+    cmd = [
+        "certbot",
+        "certonly",
+        "-n",
+        "--nginx",
+        "--reuse-key",
+        "--agree-tos",
+        "-m",
+        instance.user.email,
+        "--fullchain-path",
+        certificate_path,
+        "--key-path",
+        key_path,
+        "-d",
+        instance.domain,
+    ]
 
-    if instance.extra_domain is not None and instance.extra_domain != '':
+    if instance.extra_domain is not None and instance.extra_domain != "":
         extra_domain = instance.extra_domain.replace("\n", ",")
         for domain in extra_domain.split(","):
-            cmd.append('-d')
+            cmd.append("-d")
             cmd.append(domain)
-        cmd.append('--expand')
+        cmd.append("--expand")
 
     # debug = True
     # if debug:
@@ -57,10 +71,10 @@ def issuing_certificate(instance) -> subprocess.CompletedProcess:
     #         "Note that the debug mode is turned on and the issued certificate will not actually take effect.")
     #     cmd.append('--dry-run')
 
-    cmd.append('-v')
+    cmd.append("-v")
 
     p = subprocess.run(cmd, capture_output=True)
     msg = f"==============Issuing a certificate==================\n{' '.join(cmd)}\n"
     plog.info(msg)
-    plog.info(f'{format_completed_process(p)}')
+    plog.info(f"{format_completed_process(p)}")
     return p

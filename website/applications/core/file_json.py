@@ -10,6 +10,7 @@ class FileJson(dict):
     2023/04/12: 数据存储方式从文件变更为数据库，此类将被废弃
 
     """
+
     _CACHE = {}
     warnings.warn("FileJson is deprecated.")
 
@@ -40,15 +41,14 @@ class FileJson(dict):
             path = pathlib.Path(path)
             if path.exists():
                 data = cls.__get_file_json(path.__str__())
-                instance = cls(f'{path.absolute()}', data)
+                instance = cls(f"{path.absolute()}", data)
             else:
                 path.touch()
-                instance = cls(f'{path.absolute()}', {})
+                instance = cls(f"{path.absolute()}", {})
             cls._CACHE[path] = instance
         return instance
 
     def __sync__(self):
-
         with open(self.path, "w") as f:
             json.dump(self, f, indent=2)
 
@@ -88,7 +88,7 @@ class FileJson(dict):
         return data
 
     def clear(self):  # real signature unknown; restored from __doc__
-        """ D.clear() -> None.  Remove all items from D. """
+        """D.clear() -> None.  Remove all items from D."""
         super().clear()
         self.__sync__()
 
@@ -111,6 +111,7 @@ class FileJson(dict):
 
     def __del__(self):
         self.__sync__()
+
 
 # a = FileJson('str')
 #

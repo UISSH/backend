@@ -5,9 +5,10 @@ class IBaseCache(object):
     """
     缓存的封装
     """
-    cache = caches['default']
 
-    def __init__(self, name='default'):
+    cache = caches["default"]
+
+    def __init__(self, name="default"):
         if not self.cache is caches[name]:
             self.cache = caches[name]
 

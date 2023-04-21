@@ -30,14 +30,14 @@ class ABSDBConfig(object):
         有五秒缓存时间
         :return: 返回数据库记录的值
         """
-        raise NotImplementedError('未实现该接口')
+        raise NotImplementedError("未实现该接口")
 
     @abc.abstractmethod
     def init_data(self, module_name):
-        raise NotImplementedError('未实现该接口')
+        raise NotImplementedError("未实现该接口")
 
     def log_msg(self, msg):
         print(msg)
 
     def __str__(self):
-        return f'{self._name}::{self._key}::{self._value}'
+        return f"{self._name}::{self._key}::{self._value}"

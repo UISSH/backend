@@ -9,7 +9,7 @@ from common.models.User import User
 
 class DemoManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related('user')
+        return super().get_queryset().select_related("user")
 
 
 class Demo(BaseModel):
@@ -20,6 +20,7 @@ class Demo(BaseModel):
         CANCELED ："被取消"
         REFUND   ："已退款"
         """
+
         UNPAID = 0, "未支付"
         PAID = 1, "已支付"
         CANCELED = 2, "被取消"
@@ -29,10 +30,12 @@ class Demo(BaseModel):
     objects = DemoManager()
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="用户")
     name = models.CharField(verbose_name="名称", max_length=768)
-    status = models.IntegerField(choices=StatusType.choices, default=StatusType.UNPAID, verbose_name="支付状态")
+    status = models.IntegerField(
+        choices=StatusType.choices, default=StatusType.UNPAID, verbose_name="支付状态"
+    )
 
     class Meta:
-        unique_together = ['user', 'name']
+        unique_together = ["user", "name"]
         verbose_name = "演示"
         verbose_name_plural = "演示"
 

@@ -5,7 +5,11 @@ from rest_framework.response import Response
 
 from base.viewset import BaseModelViewSet
 from ftpserver.models.ftpserver import FtpServerModel
-from ftpserver.serializers.ftpserver import FtpServerModelSerializer, FtpServerPongSerializer, EmptySerializer
+from ftpserver.serializers.ftpserver import (
+    FtpServerModelSerializer,
+    FtpServerPongSerializer,
+    EmptySerializer,
+)
 from ftpserver.utils import ftpserver
 
 
@@ -15,12 +19,15 @@ class FtpServerView(BaseModelViewSet):
     serializer_class = FtpServerModelSerializer
 
     @extend_schema(responses=FtpServerPongSerializer)
-    @action(methods=['get'], detail=False, )
+    @action(
+        methods=["get"],
+        detail=False,
+    )
     def ping(self, request):
         return Response(FtpServerPongSerializer.get_data())
 
     @extend_schema(responses=FtpServerPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def install(self, request):
         ftpserver.install()
 
@@ -32,22 +39,20 @@ class FtpServerView(BaseModelViewSet):
         return Response(FtpServerPongSerializer.get_data())
 
     @extend_schema(responses=FtpServerPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def reload_service(self, request):
-
         ftpserver.stop_service()
         ftpserver.start_service()
         return Response(FtpServerPongSerializer.get_data())
 
     @extend_schema(responses=FtpServerPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def start_service(self, request):
-
         ftpserver.start_service()
         return Response(FtpServerPongSerializer.get_data())
 
     @extend_schema(responses=FtpServerPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def sync_account(self, request):
         FtpServerModel.sync_account()
         ftpserver.stop_service()
@@ -55,7 +60,7 @@ class FtpServerView(BaseModelViewSet):
         return Response(FtpServerPongSerializer.get_data())
 
     @extend_schema(responses=FtpServerPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def stop_service(self, request):
         ftpserver.stop_service()
         return Response(FtpServerPongSerializer.get_data())
@@ -73,7 +78,7 @@ class FtpServerView(BaseModelViewSet):
         return res
 
     def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
+        kwargs["partial"] = True
         res = self.update(request, *args, **kwargs)
         if res.status_code == 200:
             FtpServerModel.sync_account()

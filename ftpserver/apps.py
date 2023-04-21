@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class FtpserverConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'ftpserver'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "ftpserver"

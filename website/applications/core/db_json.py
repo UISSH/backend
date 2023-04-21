@@ -7,7 +7,6 @@ from website.models import ApplicationData
 
 
 class DirectInitError(Exception):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -45,7 +44,8 @@ class DBJson(dict):
 
         if calframe[1][3] != "get_instance":
             raise DirectInitError(
-                "Don't init DBJson directly! please use DBJson.get_instance()")
+                "Don't init DBJson directly! please use DBJson.get_instance()"
+            )
 
         self.hash_key = hash_key
 

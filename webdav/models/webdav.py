@@ -18,18 +18,17 @@ class WebDAVModel(BaseModel):
         if not config_file.exists():
             return
 
-        data = config_file.read_text(encoding='utf-8')
+        data = config_file.read_text(encoding="utf-8")
         data = yaml.safe_load(data)
 
         users = []
 
         for i in WebDAVModel.objects.all():
-            users.append({'username': i.username,
-                          "password": i.password,
-                          "scope": i.scope
-                          })
-        data['users'] = users
+            users.append(
+                {"username": i.username, "password": i.password, "scope": i.scope}
+            )
+        data["users"] = users
 
-        data =  yaml.safe_dump(data)
+        data = yaml.safe_dump(data)
 
         config_file.write_text(data)

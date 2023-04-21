@@ -34,13 +34,13 @@ def listener_pre_delete(sender, instance: Website, **kwargs):
         app.stop()
         app.delete()
 
-    if instance.index_root.startswith('/var/www/'):
-        os_system_info(f'rm -rf {instance.index_root}')
+    if instance.index_root.startswith("/var/www/"):
+        os_system_info(f"rm -rf {instance.index_root}")
 
     # clean nginx config
 
-    os_system_info(f'rm /etc/nginx/sites-available/{instance.domain}.conf')
-    os_system_info(f'rm /etc/nginx/sites-enabled/{instance.domain}.conf')
+    os_system_info(f"rm /etc/nginx/sites-available/{instance.domain}.conf")
+    os_system_info(f"rm /etc/nginx/sites-enabled/{instance.domain}.conf")
 
     # reload nginx config
-    os_system_info('systemctl reload nginx')
+    os_system_info("systemctl reload nginx")

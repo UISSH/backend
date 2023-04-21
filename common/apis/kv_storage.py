@@ -10,11 +10,11 @@ class KVStorageView(BaseModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = KVStorage.objects.all()
     serializer_class = KVStorageSerializer
-    lookup_field = 'key'
-    search_fields = ['key']
+    lookup_field = "key"
+    search_fields = ["key"]
 
     def retrieve(self, request, *args, **kwargs):
-        _key = self.kwargs['key']
+        _key = self.kwargs["key"]
         KVStorage.objects.get_or_create(key=_key)
         instance = self.get_object()
         serializer = self.get_serializer(instance)

@@ -14,7 +14,7 @@ from websocket.utils import format_ssh_auth_data
 class SFTPUploadSerializer(ICBaseModelSerializer):
     class Meta:
         model = SFTPUploadModel
-        fields = '__all__'
+        fields = "__all__"
 
 
 class SSHAuthorization(ICBaseSerializer):
@@ -42,7 +42,7 @@ def get_ssh_client(_format) -> paramiko.SSHClient:
         msg = f"connection failed: {e}"
         raise serializers.ValidationError(msg)
     except Exception as e:
-        raise serializers.ValidationError(f'{e}')
+        raise serializers.ValidationError(f"{e}")
 
     return client
 
@@ -53,15 +53,14 @@ class UploadFileSerializer(ICBaseSerializer):
     target_path = serializers.CharField(max_length=768)
 
     def create(self, validated_data):
-        file_obj: File = validated_data.get('file')
-        target_path = validated_data.get('target_path')
-        auth = validated_data.get('auth')
+        file_obj: File = validated_data.get("file")
+        target_path = validated_data.get("target_path")
+        auth = validated_data.get("auth")
         obj = SFTPUploadModel()
         obj.target_path = target_path
         obj.username = auth.get("username")
         obj.hostname = auth.get("hostname")
         obj.save()
-
 
         tmp_file = f"/tmp/{time.time()}"
         plog.debug("write file to local.")
@@ -76,7 +75,7 @@ class UploadFileSerializer(ICBaseSerializer):
 
         obj.status = obj.StatusType.SUCCESSFUL
         obj.save()
-        os.system(f'rm -rf {tmp_file}')
+        os.system(f"rm -rf {tmp_file}")
         sftp.close()
         client.close()
         return SFTPUploadSerializer(obj).data

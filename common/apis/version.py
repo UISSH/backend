@@ -6,8 +6,12 @@ import version
 
 
 class VersionInfoSerializer(serializers.Serializer):
-    backend_current_version = serializers.CharField(read_only=True, default=version.CURRENT_VERSION)
-    require_frontend_minimum_version = serializers.CharField(read_only=True, default=version.FRONTED_MINIMUM_VERSION)
+    backend_current_version = serializers.CharField(
+        read_only=True, default=version.CURRENT_VERSION
+    )
+    require_frontend_minimum_version = serializers.CharField(
+        read_only=True, default=version.FRONTED_MINIMUM_VERSION
+    )
 
 
 class ResultSerializer(serializers.Serializer):
@@ -19,12 +23,16 @@ class VersionView(generics.RetrieveAPIView):
 
     @extend_schema(responses=VersionInfoSerializer)
     def get(request, *args, **kwargs):
-        return Response({"backend_current_version": version.CURRENT_VERSION,
-                         "require_frontend_minimum_version": version.FRONTED_MINIMUM_VERSION})
+        return Response(
+            {
+                "backend_current_version": version.CURRENT_VERSION,
+                "require_frontend_minimum_version": version.FRONTED_MINIMUM_VERSION,
+            }
+        )
 
 
 @extend_schema(responses=ResultSerializer)
 class UpgradeFrontend(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         version.upgrade_front_project()
-        return Response({'detail': 'ok'})
+        return Response({"detail": "ok"})

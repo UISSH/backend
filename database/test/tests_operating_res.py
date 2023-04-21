@@ -2,13 +2,13 @@ from django.test import TestCase
 
 
 class GlobalOperatingTests(TestCase):
-
     def test_object_consistent(self):
         """
         测试从缓存读取的对象等于缓存之前的对象.
         Tests that the object read from the cache is equal to the object before the cache.
         """
         from base.dataclass import BaseOperatingRes
+
         op = BaseOperatingRes()
         _op = BaseOperatingRes.get_instance(op.event_id)
         _op.msg = "update new msg"
@@ -22,6 +22,7 @@ class GlobalOperatingTests(TestCase):
         test whether the original object data has also been modified.
         """
         from base.dataclass import BaseOperatingRes
+
         op = BaseOperatingRes()
 
         def _do(event_id: str):
@@ -38,6 +39,7 @@ class GlobalOperatingTests(TestCase):
         When the original object data is modified, test whether the cached object data is also changed.
         """
         from base.dataclass import BaseOperatingRes
+
         op = BaseOperatingRes(result=BaseOperatingRes.result_enum().PROCESSING)
         _op = BaseOperatingRes.get_instance(op.event_id)
 
@@ -48,6 +50,7 @@ class GlobalOperatingTests(TestCase):
 
     def test_data_consistency_3(self):
         from base.dataclass import BaseOperatingRes
+
         op = BaseOperatingRes()
         op.set_failure()
         _op = BaseOperatingRes.get_instance(op.event_id)

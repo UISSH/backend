@@ -8,8 +8,7 @@ from loguru import logger
 
 from base.utils.logger import plog
 from website.applications.core.application import Application, Storage
-from website.applications.core.dataclass import (NewWebSiteConfig,
-                                                 WebServerTypeEnum)
+from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
 
 filepath = "website/applications/app"
 
