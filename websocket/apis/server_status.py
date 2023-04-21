@@ -35,9 +35,17 @@ class ServerStatusConsumer(WebsocketConsumer):
         while not self.stop:
             total_sec = 0
             msg = os_query_json(sql)
-            self.send(text_data=json.dumps(
-                {'doc': 'https://osquery.io/schema/5.3.0/', 'action': 'query', 'sql': sql, 'message': msg.__dict__,
-                 'code': 200}))
+            self.send(
+                text_data=json.dumps(
+                    {
+                        "doc": "https://osquery.io/schema/5.3.0/",
+                        "action": "query",
+                        "sql": sql,
+                        "message": msg.__dict__,
+                        "code": 200,
+                    }
+                )
+            )
             while 1:
                 interval = self.cache.get(sql)
                 total_sec += 1
@@ -48,7 +56,9 @@ class ServerStatusConsumer(WebsocketConsumer):
 
             if self.stop or run_count > max_run_count:
                 break
-        plog.info(f'monitoring_information thread is stop, cost {time.time() - start_time} seconds.')
+        plog.info(
+            f"monitoring_information thread is stop, cost {time.time() - start_time} seconds."
+        )
 
     def connect(self):
         self.accept()
@@ -57,20 +67,22 @@ class ServerStatusConsumer(WebsocketConsumer):
             token = Token.objects.get(key=token)
             user = token.user
             if not user.is_superuser:
-                self.send(text_data=json.dumps(
-                    {'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
+                self.send(
+                    text_data=json.dumps({"message": "没有授权, 已终止本次会话.\r\n", "code": 403})
+                )
                 self.disconnect(403)
                 return
         except Exception:
             plog.error("Failed to authenticate user with token")
-            self.send(text_data=json.dumps(
-                {'message': "没有授权, 已终止本次会话.\r\n", "code": 403}))
+            self.send(
+                text_data=json.dumps({"message": "没有授权, 已终止本次会话.\r\n", "code": 403})
+            )
             self.disconnect(403)
             return
 
         msg = "connection succeeded\r\n"
         try:
-            self.send(text_data=json.dumps({'message': msg, 'code': 201}))
+            self.send(text_data=json.dumps({"message": msg, "code": 201}))
         except Exception:
             plog.error("Failed to send message to client")
             self.disconnect(403)
@@ -82,13 +94,12 @@ class ServerStatusConsumer(WebsocketConsumer):
 
     def receive(self, text_data: str, bytes_data=None) -> None:
         text_data_json = json.loads(text_data)
-        query_sql = text_data_json.get('query_sql')
-        interval = text_data_json.get('interval', 5)
+        query_sql = text_data_json.get("query_sql")
+        interval = text_data_json.get("interval", 5)
         interval = int(interval)
         if query_sql not in self.cache:
             self.cache[query_sql] = interval
-            loop = Thread(target=self.monitoring_information,
-                          args=(query_sql,))
+            loop = Thread(target=self.monitoring_information, args=(query_sql,))
             loop.start()
             plog.debug(f"start new threading {loop.native_id}")
         else:

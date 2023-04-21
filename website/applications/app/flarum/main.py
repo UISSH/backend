@@ -23,10 +23,11 @@ from website.applications.core.dataclass import *
 
 
 class FlarumApplication(Application, ApplicationToolMinx):
-
     def create(self):
         if self._config.web_server_type != WebServerTypeEnum.Nginx:
-            raise RuntimeError(f"This app does not support {self._config.web_server_type.name} web server.")
+            raise RuntimeError(
+                f"This app does not support {self._config.web_server_type.name} web server."
+            )
 
         if not self._config.database_config:
             raise RuntimeError(f"Need to configure database.")
@@ -41,15 +42,25 @@ class FlarumApplication(Application, ApplicationToolMinx):
         return app_parameter
 
     def start(self):
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT, msg="This operation is not supported.")
+        return OperatingRes(
+            uuid.uuid4().hex,
+            OperatingResEnum.NOT_SUPPORT,
+            msg="This operation is not supported.",
+        )
 
     def stop(self):
-        return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT, msg="This operation is not supported.")
+        return OperatingRes(
+            uuid.uuid4().hex,
+            OperatingResEnum.NOT_SUPPORT,
+            msg="This operation is not supported.",
+        )
 
     def read(self, *args, **kwargs) -> ApplicationWebServerConfig:
-        config = ApplicationWebServerConfig(flarum_nginx_config.replace('{root_dir}', self._config.root_dir))
-        config.enter_folder_name = 'public'
-        dot_nginx_config = pathlib.Path(f'{self._config.root_dir}/.nginx.conf')
+        config = ApplicationWebServerConfig(
+            flarum_nginx_config.replace("{root_dir}", self._config.root_dir)
+        )
+        config.enter_folder_name = "public"
+        dot_nginx_config = pathlib.Path(f"{self._config.root_dir}/.nginx.conf")
         if not dot_nginx_config.exists():
             dot_nginx_config.touch()
         return config
@@ -63,11 +74,15 @@ class FlarumApplication(Application, ApplicationToolMinx):
     def reload(self, *args, **kwargs):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
 
-    def backup(self, backup_path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All):
-        os.system(f'tar zcvf {backup_path} {self._config.root_dir}')
+    def backup(
+        self, backup_path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All
+    ):
+        os.system(f"tar zcvf {backup_path} {self._config.root_dir}")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
-    def recover(self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All) -> OperatingRes:
+    def recover(
+        self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All
+    ) -> OperatingRes:
         pass
 
     def migrate(self, old_code_version: int, new_code_version: int):
@@ -75,9 +90,14 @@ class FlarumApplication(Application, ApplicationToolMinx):
 
     @classmethod
     def version(cls) -> ApplicationVersion:
-        name = 'Flarum'
-        return ApplicationVersion(name=name, name_version="0.0.1 alpha", code_version=1, author="zmaplex@gmail.com",
-                                  description="Deploy Flarum program")
+        name = "Flarum"
+        return ApplicationVersion(
+            name=name,
+            name_version="0.0.1 alpha",
+            code_version=1,
+            author="zmaplex@gmail.com",
+            description="Deploy Flarum program",
+        )
 
     def get_data(self) -> dict:
         return self._storage.read()
@@ -86,13 +106,17 @@ class FlarumApplication(Application, ApplicationToolMinx):
         return self._storage.size() + self.get_folder_size(self._config.root_dir)
 
     def toggle_ssl(self, toggle: bool):
-        config_php = pathlib.Path(self._config.root_dir) / 'config.php'
+        config_php = pathlib.Path(self._config.root_dir) / "config.php"
         with open(config_php, "r") as f:
             data = f.read()
         if toggle:
-            data = data.replace(f"http://{self._config.domain}", f"https://{self._config.domain}")
+            data = data.replace(
+                f"http://{self._config.domain}", f"https://{self._config.domain}"
+            )
         else:
-            data = data.replace(f"https://{self._config.domain}", f"http://{self._config.domain}")
+            data = data.replace(
+                f"https://{self._config.domain}", f"http://{self._config.domain}"
+            )
         with open(config_php, "w") as f:
             f.write(data)
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
@@ -101,7 +125,7 @@ class FlarumApplication(Application, ApplicationToolMinx):
         if old_domain is None or new_domain is None:
             return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
-        config_php = pathlib.Path(self._config.root_dir) / 'config.php'
+        config_php = pathlib.Path(self._config.root_dir) / "config.php"
         with open(config_php, "r") as f:
             data = f.read()
 
@@ -111,5 +135,5 @@ class FlarumApplication(Application, ApplicationToolMinx):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

@@ -16,5 +16,4 @@ class FileView(BaseReadOnlyModelViewSet):
 
     @action(methods=["post"], detail=True, permission_classes=[permissions.AllowAny])
     def notify(self, request, *args, **kwargs):
-        """
-        """
+        """ """

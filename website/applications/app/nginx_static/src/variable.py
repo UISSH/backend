@@ -2,47 +2,33 @@ app_parameter = [
     {
         "attr": {},
         "name": "name",
-        "label": {
-            "default": "title",
-            "en-US": "title"
-        },
-        'value': 'New website!',
+        "label": {"default": "title", "en-US": "title"},
+        "value": "New website!",
         "required": True,
-        "description": {
-            "default": "your website title",
-            "en-US": "your website title"
-        }
+        "description": {"default": "your website title", "en-US": "your website title"},
     },
     {
         "attr": {},
         "name": "text",
-        "label": {
-            "default": "text",
-            "en-US": "text"
-        },
+        "label": {"default": "text", "en-US": "text"},
         "required": True,
-        "value": '与君初相识，犹如故人归。嗨，别来无恙！ <br> Hello World！',
+        "value": "与君初相识，犹如故人归。嗨，别来无恙！ <br> Hello World！",
         "description": {
             "default": "what about do u you say?",
-            "en-US": "what about do u you say?"
-        }
+            "en-US": "what about do u you say?",
+        },
     },
-
     {
         "attr": {},
         "name": "email",
-        "label": {
-            "default": "email",
-            "en-US": "email"
-        },
-        'value': None,
+        "label": {"default": "email", "en-US": "email"},
+        "value": None,
         "required": False,
         "description": {
             "default": "your contact information",
-            "en-US": "your contact information"
-        }
-    }
-
+            "en-US": "your contact information",
+        },
+    },
 ]
 
 nginx_config = """

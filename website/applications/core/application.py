@@ -11,7 +11,6 @@ from website.applications.core.file_json import FileJson
 
 
 class Storage(metaclass=ABCMeta):
-
     def __init__(hash_key: str, *args, **kwargs):
         pass
 
@@ -37,11 +36,9 @@ class Storage(metaclass=ABCMeta):
 
 
 class LocalStorage(Storage):
-    warnings.warn(
-        "LocalStorage is not recommended for production environments.")
+    warnings.warn("LocalStorage is not recommended for production environments.")
 
-    def __init__(self, unique, dir_path: pathlib.Path = pathlib.Path('local_storage')):
-
+    def __init__(self, unique, dir_path: pathlib.Path = pathlib.Path("local_storage")):
         if not dir_path.exists():
             dir_path.mkdir()
 
@@ -77,6 +74,7 @@ class DBStorage(Storage):
 
     def read(self, *args, **kwargs) -> dict:
         from website.applications.core.db_json import DBJson
+
         return DBJson.get_instance(self.obj.unique)
 
     def write(self, data):
@@ -91,8 +89,7 @@ class DBStorage(Storage):
 
 
 class ApplicationToolMinx:
-
-    def get_folder_size(self, path='.'):
+    def get_folder_size(self, path="."):
         total = 0
         with os.scandir(path) as it:
             for entry in it:
@@ -104,29 +101,31 @@ class ApplicationToolMinx:
 
 
 class ApplicationStorage:
-
-    def __init__(self, config: NewWebSiteConfig, app_config: dict = None, storage_cls=Storage):
+    def __init__(
+        self, config: NewWebSiteConfig, app_config: dict = None, storage_cls=Storage
+    ):
         app_path = pathlib.Path(sys.modules[self.__module__].__file__).parent
         hash_key = storage_cls.calc_text_hash(
-            f"{self.__class__.__name__.__str__()}{config.domain}{config.root_dir}")
+            f"{self.__class__.__name__.__str__()}{config.domain}{config.root_dir}"
+        )
 
-        if (storage_cls == LocalStorage):
-            self._storage = storage_cls(hash_key, dir_path=app_path / 'data')
+        if storage_cls == LocalStorage:
+            self._storage = storage_cls(hash_key, dir_path=app_path / "data")
         else:
             self._storage = storage_cls(hash_key)
 
         if app_config is not None:
             self._app_config = app_config
             data = self._storage.read()
-            if 'app_config' in data:
-                data['app_config'].update(app_config)
+            if "app_config" in data:
+                data["app_config"].update(app_config)
             else:
-                data['app_config'] = app_config
+                data["app_config"] = app_config
 
         else:
             data = self._storage.read()
-            if 'app_config' in data:
-                self._app_config = data['app_config']
+            if "app_config" in data:
+                self._app_config = data["app_config"]
             else:
                 self._app_config = {}
 
@@ -146,12 +145,18 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
             app = AppName(config=NewWebSiteConfig(...),app_config={...},storage_cls=you_storage_class)
     """
 
-    def __init__(self, config: NewWebSiteConfig, app_config: dict = None, storage_cls=LocalStorage):
+    def __init__(
+        self,
+        config: NewWebSiteConfig,
+        app_config: dict = None,
+        storage_cls=LocalStorage,
+    ):
         not_allow = [":", "/", " "]
         for i in not_allow:
             if i in config.domain:
                 raise RuntimeError(
-                    f"Invalid parameter: {config.domain} include '{i}' char")
+                    f"Invalid parameter: {config.domain} include '{i}' char"
+                )
 
         self._config: NewWebSiteConfig = config.instance
         super().__init__(config, app_config, storage_cls)
@@ -227,14 +232,18 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def backup(self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All) -> OperatingRes:
+    def backup(
+        self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All
+    ) -> OperatingRes:
         """
         Backup data to specified compressed file, the 'path' e.g: /www/backup/domain/data_format.tar.gz
         """
         pass
 
     @abstractmethod
-    def recover(self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All) -> OperatingRes:
+    def recover(
+        self, path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All
+    ) -> OperatingRes:
         """
         Restore from backup file.
         """

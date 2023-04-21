@@ -27,8 +27,11 @@ class ApplicationView(BaseReadOnlyModelViewSet):
 
     def _get_app_instance(self, website: Website, data: dict = None) -> Application:
         name = website.application
-        config = NewWebSiteConfig(domain=website.domain, root_dir=website.index_root,
-                                  web_server_type=WebServerTypeEnum.Nginx)
+        config = NewWebSiteConfig(
+            domain=website.domain,
+            root_dir=website.index_root,
+            web_server_type=WebServerTypeEnum.Nginx,
+        )
 
         app = self.app_factory.get_application_module(name, config, data)
         return app
@@ -39,15 +42,17 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         data = self.app_factory.get_application_list()
         return Response(data)
 
-    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
+    @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def app_create(self, request, *args, **kwargs):
         instance: Website = self.get_object()
         # 4.Create application instance
         app_factory = AppFactory
         app_factory.load()
-        app = app_factory.get_application_module(instance.application,
-                                                 instance.get_app_new_website_config(),
-                                                 instance.application_config)
+        app = app_factory.get_application_module(
+            instance.application,
+            instance.get_app_new_website_config(),
+            instance.application_config,
+        )
         res = app.create()
         if not res.is_success():
             err_msg = res.__str__()
@@ -57,21 +62,22 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         instance.save()
         return Response(res.json())
 
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
+    @action(methods=["get"], detail=True, serializer_class=OperatingResSerializer)
     def app_delete(self, request, *args, **kwargs):
         obj: Website = self.get_object()
         app = self._get_app_instance(obj)
         data = app.delete()
         return Response(data.json())
 
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
+    @action(methods=["get"], detail=True, serializer_class=OperatingResSerializer)
     def app_start(self, request, *args, **kwargs):
-
         obj: Website = self.get_object()
         app = self._get_app_instance(obj)
 
-        cmd = f"ln -s /etc/nginx/sites-available/{obj.domain}.conf /etc/nginx/sites-enabled/{obj.domain}.conf" \
-              f" && systemctl reload nginx "
+        cmd = (
+            f"ln -s /etc/nginx/sites-available/{obj.domain}.conf /etc/nginx/sites-enabled/{obj.domain}.conf"
+            f" && systemctl reload nginx "
+        )
 
         ret = LinuxShell(cmd)
         data = app.start()
@@ -79,9 +85,8 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         obj.save()
         return Response(data.json())
 
-    @action(methods=['get'], detail=True, serializer_class=OperatingResSerializer)
+    @action(methods=["get"], detail=True, serializer_class=OperatingResSerializer)
     def app_stop(self, request, *args, **kwargs):
-
         obj: Website = self.get_object()
         app = self._get_app_instance(obj)
         cmd = f"rm -rf  /etc/nginx/sites-enabled/{obj.domain}.conf && systemctl reload nginx"

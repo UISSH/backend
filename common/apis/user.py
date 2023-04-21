@@ -8,8 +8,14 @@ from rest_framework.request import Request
 
 from base.viewset import BaseModelViewSet, BaseReadOnlyModelViewSet
 from common.models.User import User
-from common.serializers.user import CreateUserSerializer, AdminUserSerializer, UserLoginSerializer, UserSerializer, \
-    UpdatePasswordSerializer, UserLoginResSerializer
+from common.serializers.user import (
+    CreateUserSerializer,
+    AdminUserSerializer,
+    UserLoginSerializer,
+    UserSerializer,
+    UpdatePasswordSerializer,
+    UserLoginResSerializer,
+)
 
 
 class AdminUserView(BaseModelViewSet):
@@ -17,8 +23,8 @@ class AdminUserView(BaseModelViewSet):
     queryset = User.objects.all()
     serializer_class = AdminUserSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['username']
-    filterset_fields = ['username', 'email']
+    search_fields = ["username"]
+    filterset_fields = ["username", "email"]
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object().user
@@ -32,8 +38,8 @@ class UserView(BaseReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = CreateUserSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['username']
-    filterset_fields = ['username', 'email']
+    search_fields = ["username"]
+    filterset_fields = ["username", "email"]
 
     def get_queryset(self):
         return self.queryset.filter(pk=self.request.user.id)
@@ -47,8 +53,12 @@ class UserView(BaseReadOnlyModelViewSet):
         return self.base_response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(responses={"200": UserLoginResSerializer})
-    @action(methods=['POST'], detail=False, permission_classes=[permissions.AllowAny],
-            serializer_class=UserLoginSerializer)
+    @action(
+        methods=["POST"],
+        detail=False,
+        permission_classes=[permissions.AllowAny],
+        serializer_class=UserLoginSerializer,
+    )
     def login(self, request, *args, **kwargs):
         """
         登录接口，email 与 username 至少传一项
@@ -57,30 +67,45 @@ class UserView(BaseReadOnlyModelViewSet):
         if serializer.is_valid():
             user: User = None
             token, user = serializer.save()
-            return self.base_response({'token': f"{token}", "username": user.username, "email": user.email},
-                                      status=status.HTTP_200_OK)
+            return self.base_response(
+                {"token": f"{token}", "username": user.username, "email": user.email},
+                status=status.HTTP_200_OK,
+            )
         else:
-            return self.base_response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return self.base_response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
     @action(methods=["POST"], detail=False, permission_classes=[permissions.AllowAny])
     def forget_password(self, request, *args, **kwargs):
-        return self.base_response({"msg": "该接口尚未实现"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return self.base_response(
+            {"msg": "该接口尚未实现"}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
     # @vary_on_headers('anonymous', 'authorization')
     # @method_decorator(cache_page(30))
-    @action(methods=['get'], detail=False, permission_classes=[permissions.IsAuthenticated])
+    @action(
+        methods=["get"], detail=False, permission_classes=[permissions.IsAuthenticated]
+    )
     def status(self, request: Request, *args, **kwargs):
         user: User = request.user
-        user = User.objects.select_related("quota", "quota__billing_plan", "quota_storage", "quota_network").get(
-            pk=user.id)
+        user = User.objects.select_related(
+            "quota", "quota__billing_plan", "quota_storage", "quota_network"
+        ).get(pk=user.id)
         serializer = UserSerializer(user)
         return self.base_response(serializer.data)
 
     @extend_schema(responses=UserSerializer)
-    @action(methods=["POST"], detail=False, permission_classes=[permissions.IsAuthenticated],
-            serializer_class=UpdatePasswordSerializer)
+    @action(
+        methods=["POST"],
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=UpdatePasswordSerializer,
+    )
     def update_password(self, request: Request, *args, **kwargs):
-        serializer = UpdatePasswordSerializer(data=request.data, context={'request': request})
+        serializer = UpdatePasswordSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid(raise_exception=True):
             data = serializer.save()
             return self.base_response(data)

@@ -5,7 +5,11 @@ from rest_framework.response import Response
 
 from base.viewset import BaseModelViewSet
 from webdav.models.webdav import WebDAVModel
-from webdav.serializers.webdav import WebDAVModelSerializer, WebDAVPongSerializer, EmptySerializer
+from webdav.serializers.webdav import (
+    WebDAVModelSerializer,
+    WebDAVPongSerializer,
+    EmptySerializer,
+)
 from webdav.utils import webdav
 
 
@@ -15,34 +19,34 @@ class WebDAVView(BaseModelViewSet):
     serializer_class = WebDAVModelSerializer
 
     @extend_schema(responses=WebDAVPongSerializer)
-    @action(methods=['get'], detail=False, )
+    @action(
+        methods=["get"],
+        detail=False,
+    )
     def ping(self, request):
         return Response(WebDAVPongSerializer.get_data())
 
     @extend_schema(responses=WebDAVPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def install(self, request):
         webdav.install()
         return Response(WebDAVPongSerializer.get_data())
 
     @extend_schema(responses=WebDAVPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def reload_service(self, request):
-
         webdav.stop_service()
         webdav.start_service()
         return Response(WebDAVPongSerializer.get_data())
 
     @extend_schema(responses=WebDAVPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def start_service(self, request):
-
         webdav.start_service()
         return Response(WebDAVPongSerializer.get_data())
 
-
     @extend_schema(responses=WebDAVPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def sync_account(self, request):
         WebDAVModel.sync_account()
         webdav.stop_service()
@@ -50,7 +54,7 @@ class WebDAVView(BaseModelViewSet):
         return Response(WebDAVPongSerializer.get_data())
 
     @extend_schema(responses=WebDAVPongSerializer)
-    @action(methods=['post'], detail=False, serializer_class=EmptySerializer)
+    @action(methods=["post"], detail=False, serializer_class=EmptySerializer)
     def stop_service(self, request):
         webdav.stop_service()
         return Response(WebDAVPongSerializer.get_data())
@@ -68,7 +72,7 @@ class WebDAVView(BaseModelViewSet):
         return res
 
     def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
+        kwargs["partial"] = True
 
         res = self.update(request, *args, **kwargs)
         if res.status_code == 200:

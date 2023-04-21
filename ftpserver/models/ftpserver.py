@@ -13,26 +13,30 @@ def _get_default_params():
 class FtpServerModel(BaseModel):
     username = models.CharField(max_length=32)
     password = models.CharField(max_length=64)
-    file_system = models.CharField(default='os', max_length=32)
+    file_system = models.CharField(default="os", max_length=32)
     params = models.JSONField(default=_get_default_params)
 
     @staticmethod
     def sync_account():
         accesses = []
         for item in FtpServerModel.objects.all():
-
-            data = {"user": item.username, "pass": item.password, "fs": item.file_system, "params": item.params}
+            data = {
+                "user": item.username,
+                "pass": item.password,
+                "fs": item.file_system,
+                "params": item.params,
+            }
             if isinstance(item.params, str):
-                data['params'] = json.loads(item.params)
+                data["params"] = json.loads(item.params)
 
             if isinstance(item.params, str):
-                data['params'] = json.loads(item.params)
+                data["params"] = json.loads(item.params)
 
             accesses.append(data)
 
         with open(f"{FTP_SERVER_CONFIG}", "r") as f:
             account_data = json.load(f)
 
-        account_data['accesses'] = accesses
+        account_data["accesses"] = accesses
         with open(f"{FTP_SERVER_CONFIG}", "w") as f:
             json.dump(account_data, f, indent=2)

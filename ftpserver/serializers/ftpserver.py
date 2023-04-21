@@ -7,8 +7,7 @@ from ftpserver.models.ftpserver import FtpServerModel
 class FtpServerModelSerializer(ICBaseModelSerializer):
     class Meta:
         model = FtpServerModel
-        fields = '__all__'
-
+        fields = "__all__"
 
 
 class EmptySerializer(ICBaseSerializer):
@@ -25,10 +24,13 @@ class FtpServerPongSerializer(ICBaseSerializer):
     @staticmethod
     def get_data():
         from ftpserver.utils import ftpserver
+
         installed, status = ftpserver.ping()
-        serializer = FtpServerPongSerializer(data={
-            'installed': installed,
-            'run_status': status,
-        })
+        serializer = FtpServerPongSerializer(
+            data={
+                "installed": installed,
+                "run_status": status,
+            }
+        )
         serializer.is_valid()
         return serializer.data

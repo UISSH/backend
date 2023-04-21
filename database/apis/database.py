@@ -45,9 +45,8 @@ class DataBaseView(BaseModelViewSet):
 
         return Response(op_res.json())
 
-    @action(methods=['get'], detail=False, serializer_class=OperatingResSerializer)
+    @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
     def query_database_run_status(self, request, *args, **kwargs):
-
         stats = os.system("systemctl is-active -q mariadb")
         if stats == 0:
             msg = "active"
@@ -96,35 +95,44 @@ class DataBaseView(BaseModelViewSet):
             op_res.set_failure()
         return Response(op_res.json())
 
-    @extend_schema(parameters=[OpenApiParameter(name='str', type=str)])
-    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
+    @extend_schema(parameters=[OpenApiParameter(name="str", type=str)])
+    @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def import_backup(self, request: Request, *args, **kwargs):
         op_res = DataBase.get_operating_res()
-        path = request.query_params.get('path', None)
+        path = request.query_params.get("path", None)
         if path is None:
-            op_res.msg = f'`path` parameter is required.'
+            op_res.msg = f"`path` parameter is required."
             op_res.set_failure()
             return Response(op_res.json())
         if not pathlib.Path(path).exists():
-            op_res.msg = f'{path} does not exist. '
+            op_res.msg = f"{path} does not exist. "
             op_res.set_failure()
             return Response(op_res.json())
 
-        root_username = DB_SETTINGS.database_value()['database']['root_username']
-        root_password = DB_SETTINGS.database_value()['database']['root_password']
-        import_backup_db(op_res.event_id, backup_db_path=path, root_username=root_username, root_password=root_password)
+        root_username = DB_SETTINGS.database_value()["database"]["root_username"]
+        root_password = DB_SETTINGS.database_value()["database"]["root_password"]
+        import_backup_db(
+            op_res.event_id,
+            backup_db_path=path,
+            root_username=root_username,
+            root_password=root_password,
+        )
         return Response(op_res.json())
 
-    @action(methods=['post'], detail=True, serializer_class=OperatingResSerializer)
+    @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def export_backup(self, request: Request, *args, **kwargs):
-
         op_res = DataBase.get_operating_res()
-        root_username = DB_SETTINGS.database_value()['database']['root_username']
-        root_password = DB_SETTINGS.database_value()['database']['root_password']
+        root_username = DB_SETTINGS.database_value()["database"]["root_username"]
+        root_password = DB_SETTINGS.database_value()["database"]["root_password"]
         obj: DataBase = self.get_object()
-        backup_db_path = f'{obj.get_backup_dir()}/{int(time.time())}.sql'
-        export_backup_db(op_res.event_id, obj.name, backup_db_path=backup_db_path,
-                         root_username=root_username, root_password=root_password)
+        backup_db_path = f"{obj.get_backup_dir()}/{int(time.time())}.sql"
+        export_backup_db(
+            op_res.event_id,
+            obj.name,
+            backup_db_path=backup_db_path,
+            root_username=root_username,
+            root_password=root_password,
+        )
         op_res.msg = backup_db_path
 
         return Response(op_res.json())

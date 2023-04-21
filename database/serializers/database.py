@@ -6,20 +6,26 @@ from database.models import DataBase
 
 
 class DataBaseModelSerializer(ICBaseModelSerializer):
-    own_username = serializers.SerializerMethodField('_own_username', help_text="own username", label="own username")
-    create_status_text = serializers.SerializerMethodField('_create_status_text')
-    database_type_text = serializers.SerializerMethodField('_database_type_text')
+    own_username = serializers.SerializerMethodField(
+        "_own_username", help_text="own username", label="own username"
+    )
+    create_status_text = serializers.SerializerMethodField("_create_status_text")
+    database_type_text = serializers.SerializerMethodField("_database_type_text")
 
     class Meta:
         model = DataBase
-        fields = '__all__'
+        fields = "__all__"
 
     def validate_name(self, val: str):
         if "." in val:
-            raise serializers.ValidationError("Database name cannot contain '.' characters.")
+            raise serializers.ValidationError(
+                "Database name cannot contain '.' characters."
+            )
         return val
 
-    @extend_schema_field(serializers.CharField(read_only=True, help_text="own username"))
+    @extend_schema_field(
+        serializers.CharField(read_only=True, help_text="own username")
+    )
     def _own_username(self, instance: DataBase):
         return instance.user.username
 

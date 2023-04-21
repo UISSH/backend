@@ -4,16 +4,17 @@ from django.apps import AppConfig
 
 from common.config import ABSDBConfig
 
-class BaseConfig(AppConfig):
 
+class BaseConfig(AppConfig):
     def ready(self):
         from common.config import get_db_configs
+
         items = get_db_configs()
         self.init_config(items)
 
     @staticmethod
     def read_file(filepath):
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             return f.read()
 
     def log_msg(self, msg):

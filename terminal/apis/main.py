@@ -16,12 +16,12 @@ class TerminalView(BaseReadOnlyModelViewSet):
     queryset = SFTPUploadModel.objects.all()
     serializer_class = SFTPUploadSerializer
 
-    @action(methods=['post'], detail=False, serializer_class=UploadFileSerializer)
+    @action(methods=["post"], detail=False, serializer_class=UploadFileSerializer)
     def upload_file(self, request: Request, *args, **kwargs):
         data = OrderedDict()
         data.update(request.data)
 
-        data['auth'] = json.loads(data.get('auth'))
+        data["auth"] = json.loads(data.get("auth"))
         serializer = UploadFileSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.save()

@@ -143,7 +143,9 @@ class WebsiteView(BaseModelViewSet):
         op.set_success()
         return Response(op.json())
 
-    @action(methods=["get"], detail=True, serializer_class=DefaultWebsuteConfigSerializer)
+    @action(
+        methods=["get"], detail=True, serializer_class=DefaultWebsuteConfigSerializer
+    )
     def get_default_nginx_config(self, request, *args, **kwargs):
         """
         获取提供给用户的默认 nginx 配置文件。

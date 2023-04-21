@@ -15,7 +15,6 @@ from websocket.utils import format_ssh_auth_data
 
 
 class SshWebConsumer(WebsocketConsumer):
-
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.user: Optional[User] = None
@@ -24,7 +23,7 @@ class SshWebConsumer(WebsocketConsumer):
         self.connect_status = False
         self.loop: Optional[Thread] = None
         self.suspended_interactive = False
-        self.current_work_dir = '/'
+        self.current_work_dir = "/"
 
     def connect(self):
         self.accept()
@@ -33,23 +32,35 @@ class SshWebConsumer(WebsocketConsumer):
             token = Token.objects.get(key=token)
             user = token.user
             if not user.is_superuser:
-                self.send(text_data=json.dumps(
-                    {'message': "No authorization, this session has been terminated.\r\n", "code": 403}))
+                self.send(
+                    text_data=json.dumps(
+                        {
+                            "message": "No authorization, this session has been terminated.\r\n",
+                            "code": 403,
+                        }
+                    )
+                )
                 self.disconnect(403)
                 return
         except Exception:
             print(traceback.format_exc())
-            self.send(text_data=json.dumps(
-                {'message': "No authorization, this session has been terminated.\r\n", "code": 403}))
+            self.send(
+                text_data=json.dumps(
+                    {
+                        "message": "No authorization, this session has been terminated.\r\n",
+                        "code": 403,
+                    }
+                )
+            )
             self.disconnect(403)
             return
         self.connect_status = True
 
     def disconnect(self, close_code):
-        room_name = self.scope['url_route']['kwargs']['room_name']
+        room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.ssh_session.close()
         self.client.close()
-        plog.debug(f'{room_name} websocket is closed.')
+        plog.debug(f"{room_name} websocket is closed.")
         self.connect_status = False
 
     def __init_ssh(self, _format):
@@ -68,20 +79,22 @@ class SshWebConsumer(WebsocketConsumer):
             plog.critical(e.__str__())
             msg = "connection failed\r\n"
 
-        self.send(text_data=json.dumps({'message': msg}))
+        self.send(text_data=json.dumps({"message": msg}))
 
-        if not hasattr(self.client, 'get_transport'):
+        if not hasattr(self.client, "get_transport"):
             return
 
         self.ssh_session = self.client.get_transport().open_session()  # 成功连接后获取ssh通道
         self.ssh_session.settimeout(120)
         self.ssh_session.get_pty()
         self.ssh_session.invoke_shell()
-        self.send(text_data=json.dumps({'message': '', 'code': 201}))
+        self.send(text_data=json.dumps({"message": "", "code": 201}))
 
         for i in range(2):
             msg = self.ssh_session.recv(2048)
-            self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
+            self.send(
+                text_data=json.dumps({"message": msg.decode("utf-8"), "code": 200})
+            )
 
     def ssh_recv(self):
         while 1:
@@ -93,24 +106,25 @@ class SshWebConsumer(WebsocketConsumer):
                 break
             if self.ssh_session.recv_ready() is True:
                 msg = self.ssh_session.recv(2048)
-                self.send(text_data=json.dumps({'message': msg.decode("utf-8"), 'code': 200}))
+                self.send(
+                    text_data=json.dumps({"message": msg.decode("utf-8"), "code": 200})
+                )
             time.sleep(0.1)
         print("terminal thread is ended.")
 
     def get_work_dir(self):
-        self.ssh_session.send('pwd \r')
-        msg = self.ssh_session.recv(2048).decode("utf-8").split('\n')[1]
-        msg = msg.split('\r')[1]
+        self.ssh_session.send("pwd \r")
+        msg = self.ssh_session.recv(2048).decode("utf-8").split("\n")[1]
+        msg = msg.split("\r")[1]
         self.current_work_dir = msg
-        self.send(text_data=json.dumps(
-            {'work_dir': msg, 'message': '', 'code': 200}))
+        self.send(text_data=json.dumps({"work_dir": msg, "message": "", "code": 200}))
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         if self.client:
             message = 'echo "invalid format request"\r'
             try:
-                message = text_data_json['message']
+                message = text_data_json["message"]
             except:
                 pass
             method = text_data_json.pop("method", "interactive")
@@ -128,7 +142,14 @@ class SshWebConsumer(WebsocketConsumer):
                     getattr(self, method)()
                     self.suspended_interactive = False
                 except Exception:
-                    self.send(text_data=json.dumps(
-                        {'work_dir': traceback.format_exc(), 'message': '', 'code': 500}))
+                    self.send(
+                        text_data=json.dumps(
+                            {
+                                "work_dir": traceback.format_exc(),
+                                "message": "",
+                                "code": 500,
+                            }
+                        )
+                    )
         else:
             self.__init_ssh(text_data_json)

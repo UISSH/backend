@@ -6,16 +6,17 @@ from base.config import ABSDBConfig
 
 
 class CommonConfig(AppConfig):
-    name = 'common'
+    name = "common"
 
     def ready(self):
         from .config import get_db_configs
+
         super(CommonConfig, self).ready()
         self.init_config(get_db_configs())
 
     @staticmethod
     def read_file(filepath):
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             return f.read()
 
     def log_msg(self, msg):

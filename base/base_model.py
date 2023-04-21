@@ -12,22 +12,25 @@ logger.add(sys.stderr, format=fmt)
 
 
 class BaseModel(models.Model):
-    create_at = models.DateTimeField(blank=True, auto_now_add=True, help_text="创建日期", verbose_name="创建日期")
-    update_at = models.DateTimeField(blank=True, auto_now=True, help_text="更新日期", verbose_name="最后修改")
+    create_at = models.DateTimeField(
+        blank=True, auto_now_add=True, help_text="创建日期", verbose_name="创建日期"
+    )
+    update_at = models.DateTimeField(
+        blank=True, auto_now=True, help_text="更新日期", verbose_name="最后修改"
+    )
 
     class Meta:
         abstract = True
 
     @classmethod
     def log(cls, level="info", *args, **kwargs):
-
         if level == "info":
             logger.info(*args, **kwargs)
         elif level == "warning":
             logger.warning(*args, **kwargs)
         elif level == "critical":
             logger.critical(*args, **kwargs)
-        elif level == 'error':
+        elif level == "error":
             logger.error(*args, **kwargs)
         else:
             logger.debug(*args, **kwargs)

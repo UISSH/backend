@@ -10,6 +10,7 @@ try:
     _DEFAULT_TIMEOUT = 60 * 60 * 24
     _CACHE: cache = caches["GlobalOperationResCache"]
 except:
+
     class Cache(dict):
         def set(self, k, v):
             self[k] = v
@@ -36,12 +37,11 @@ class BaseOperatingRes:
     event_id: str = uuid.uuid4().__str__()
 
     result: BaseOperatingResEnum = BaseOperatingResEnum.PENDING
-    name: str = 'default'
-    msg: str = ''
+    name: str = "default"
+    msg: str = ""
     create_at: str = datetime.now().__str__()
 
     def __setattr__(self, key, value):
-
         if "event_id" in self.__dict__:
             event_id = self.__dict__["event_id"]
             obj = BaseOperatingRes.get_instance(event_id, self)
@@ -54,7 +54,7 @@ class BaseOperatingRes:
 
     def __getattribute__(self, name: str):
         skip = ["result_enum", "is_success", "json", "get_instance"]
-        if name.startswith("_") or name in skip or name.startswith('set_'):
+        if name.startswith("_") or name in skip or name.startswith("set_"):
             return object.__getattribute__(self, name)
         event_id = object.__getattribute__(self, "event_id")
         data: BaseOperatingRes = _CACHE.get(event_id, self)
@@ -98,7 +98,7 @@ class BaseOperatingRes:
 class BaseOperatingResTest:
     event_id: str = uuid.uuid4().__str__()
 
-    msg: str = ''
+    msg: str = ""
     result: BaseOperatingResEnum = BaseOperatingResEnum.PENDING
     create_at: str = datetime.now().__str__()
 
@@ -109,6 +109,6 @@ class BaseOperatingResTest:
         return data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(BaseOperatingResTest().json())
     print(BaseOperatingRes().json())

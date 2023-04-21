@@ -6,7 +6,7 @@ def singleton(cls):
 
     @functools.wraps(cls.__new__)
     def singleton_new(cls, *args, **kwargs):
-        it = cls.__dict__.get('__it__')
+        it = cls.__dict__.get("__it__")
         if it is not None:
             return it
 

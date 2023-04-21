@@ -7,11 +7,12 @@ from webdav.models.webdav import WebDAVModel
 class WebDAVModelSerializer(ICBaseModelSerializer):
     class Meta:
         model = WebDAVModel
-        fields = '__all__'
+        fields = "__all__"
 
 
 class EmptySerializer(ICBaseSerializer):
     pass
+
 
 class WebDAVPongSerializer(ICBaseSerializer):
     installed = serializers.BooleanField(default=False, required=False)
@@ -23,10 +24,13 @@ class WebDAVPongSerializer(ICBaseSerializer):
     @staticmethod
     def get_data():
         from webdav.utils import webdav
+
         installed, status = webdav.ping()
-        serializer = WebDAVPongSerializer(data={
-            'installed': installed,
-            'run_status': status,
-        })
+        serializer = WebDAVPongSerializer(
+            data={
+                "installed": installed,
+                "run_status": status,
+            }
+        )
         serializer.is_valid()
         return serializer.data

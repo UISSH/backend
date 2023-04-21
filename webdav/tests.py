@@ -5,8 +5,8 @@ from webdav.utils.webdav import append_server_nginx_config
 
 # Create your tests here.
 
-class NginxModifyTestCase(TestCase):
 
+class NginxModifyTestCase(TestCase):
     def test_update_server_block(self):
         data = """server {
     listen 80 default_server;
@@ -32,5 +32,3 @@ class NginxModifyTestCase(TestCase):
 """
         test_data = append_server_nginx_config(data, new_data)
         self.assertEqual(test_data, expect_data)
-
-

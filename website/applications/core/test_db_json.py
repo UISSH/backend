@@ -8,7 +8,6 @@ from website.models import ApplicationData
 
 
 class TestDBJson(TestCase):
-
     def test_create(self):
         """_summary_
         test create

@@ -12,8 +12,8 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(SystemConfig)
 class SystemConfigAdmin(admin.ModelAdmin):
-    list_display = ['name', 'key', 'enable', 'module_name']
-    list_editable = ['enable']
+    list_display = ["name", "key", "enable", "module_name"]
+    list_editable = ["enable"]
     formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget},
+        models.JSONField: {"widget": JSONEditorWidget},
     }

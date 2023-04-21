@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 
 class User(AbstractUser):
     # 主要增加邮箱地址唯一约束
-    email = models.EmailField(_('email address'), blank=True, unique=True)
+    email = models.EmailField(_("email address"), blank=True, unique=True)
     avatar = models.URLField(default=None, blank=True, null=True)
 
     def save(self, *args, **kwargs):
