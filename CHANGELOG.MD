@@ -1,18 +1,21 @@
 # 2023/04/05
 ## Update
+
 ### New features
 
 - Add flarum application.
 - Add 'iptables' django app
 - Add execute command api
+- Add get website default config api
 
 ### Changes
 
-application:
+application interface:
   - change `localStorage` to `dbStorage` for application config, and mark `localStorage` as deprecated.
 
 wordpress application:
   - update version to 6.2 from 6.0.1
+
 ### Application interface
 
 - Add `toggle_ssl(self, toggle: bool) -> OperatingRes` method.
