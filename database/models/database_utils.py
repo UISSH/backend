@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 import pymysql
@@ -201,6 +202,11 @@ def export_backup_db(
     event_id, name, backup_db_path, root_username="root", root_password="a.123456"
 ):
     # mysqldump -uroot-p123456 mydb > /data/mysqlDump/mydb.sql
+
+    folder = os.path.dirname(backup_db_path)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     operator_res = BaseOperatingRes.get_instance(event_id)
     operator_res.set_processing()
     cmd = f"mysqldump -u{root_username} -p{root_password} {name} > {backup_db_path}"
@@ -213,8 +219,10 @@ def export_backup_db(
         encoding="utf-8",
     )
     if ret.returncode == 0:
+        operator_res.msg = ret.stdout
         operator_res.set_success()
     else:
+        operator_res.msg = ret.stderr
         operator_res.set_failure()
 
     return ret
