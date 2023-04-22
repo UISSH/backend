@@ -7,8 +7,6 @@ import warnings
 
 from website.applications.core.dataclass import *
 
-from website.applications.core.file_json import FileJson
-
 
 class Storage(metaclass=ABCMeta):
     def __init__(hash_key: str, *args, **kwargs):
@@ -44,7 +42,9 @@ class LocalStorage(Storage):
 
         self.file = dir_path / unique
 
-    def read(self, *args, **kwargs) -> FileJson:
+    def read(self, *args, **kwargs):
+        from website.applications.core.file_json import FileJson
+
         data = FileJson.get_instance(self.file.__str__())
         return data
 
@@ -271,20 +271,65 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
 
     def update_domain(self, old_domain: str, new_domain: str) -> OperatingRes:
-        """
-        This method will be called when the domain name is successfully updated.
+        """This method will be called when the domain name is successfully updated.
+
         Args:
-            old_domain: Update the previous domain name.
-            new_domain: The domain name after successful update.
+            old_domain (str): Update the previous domain name.
+            new_domain (str): The domain name after successful update.
+
+        Returns:
+            OperatingRes: OperatingRes object.
         """
+
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.NOT_SUPPORT)
 
-    def status(self, status_type: ApplicationStatusTypeEnum) -> Enum:
+    @abstractmethod
+    def get_boot_status(self) -> ApplicationBootStatusEnum:
+        """If application instance boot status is enable, it will be started automatically when the system is started.
+        otherwise, it will not be started automatically.
+
+        Returns:
+            ApplicationBootStatusEnum:  ApplicationBootStatusEnum enum value.
+            e.g: ApplicationBootStatusEnum.Enable, ApplicationBootStatusEnum.Disable
+
+        Added at: 2023-04-22
+        Updated at: 2023-04-22
         """
-        Return to this application status.
+        pass
+
+    @abstractmethod
+    def get_run_status(self) -> ApplicationRunStatusEnum:
+        """Get application instance run status.
+
+        Returns:
+            ApplicationRunStatusEnum: ApplicationRunStatusEnum enum value.
+            e.g: ApplicationRunStatusEnum.Running, ApplicationRunStatusEnum.Stopped
+
+        Added at: 2023-04-22
+        Updated at: 2023-04-22
         """
-        data = self._storage.read()
-        if status_type == ApplicationStatusTypeEnum.BootStatus:
-            return ApplicationStatusTypeEnum(data["status"]["boot_startup"])
-        else:
-            return ApplicationRunStatusEnum(data["status"]["run_status"])
+        pass
+
+    @abstractmethod
+    def get_requried_ports(self) -> list[int]:
+        """Get application instance required ports.
+
+        Returns:
+            list[int]: Required ports list.
+
+        Added at: 2023-04-22
+        Updated at: 2023-04-22
+        """
+        pass
+
+    @abstractmethod
+    def get_requried_databases(self) -> list[DataBaseListEnum]:
+        """Get application instance required databases.
+
+        Returns:
+            list[str]: Required databases list.
+
+        Added at: 2023-04-22
+        Updated at: 2023-04-22
+        """
+        pass
