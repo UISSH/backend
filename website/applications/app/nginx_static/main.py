@@ -108,6 +108,18 @@ class NginxApplication(Application, ApplicationToolMinx):
     def size(self) -> int:
         return self._storage.size() + self.get_folder_size(self._config.root_dir)
 
+    def get_boot_status(self) -> ApplicationBootStatusEnum:
+        return ApplicationBootStatusEnum.Enable
+
+    def get_requried_databases(self) -> list[DataBaseListEnum]:
+        return []
+
+    def get_requried_ports(self) -> list[int]:
+        return [80, 443]
+
+    def get_run_status():
+        pass
+
 
 if __name__ == "__main__":
     pass

@@ -87,8 +87,8 @@ class TestDBDatabase(TestCase):
         op = BaseOperatingRes()
         import_backup_db(
             op.event_id,
+            self.db_name,
             f"/tmp/{self.db_name}.sql",
-            name=self.db_name,
             root_username=root_username,
             root_password=root_password,
         )
