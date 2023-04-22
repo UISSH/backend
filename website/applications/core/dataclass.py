@@ -213,6 +213,22 @@ class NewWebSiteConfig(BaseData):
             )
 
 
+class DataBaseListEnum(Enum):
+    """DataBase List Enum
+
+    Args:
+        Enum (_type_):  Enum Type
+        e.g.:  MySQL = 1 , MariaDB = 2 , ...
+    """
+
+    MariaDB = 1
+    Redis = 2
+    # it is not supported yet.
+    # MongoDB = 3
+    # PostgreSQL = 4
+    # SQLite = 5
+
+
 if __name__ == "__main__":
     pprint(ApplicationRunStatusEnum(1))
     instance = BaseSSLCertificate.get_certificate(
