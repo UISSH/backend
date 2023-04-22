@@ -2,7 +2,7 @@ import os
 import subprocess
 
 import pymysql
-
+from base.utils.logger import plog
 from base.dataclass import BaseOperatingRes
 
 
@@ -178,11 +178,12 @@ def update_password_database(
 
 
 def import_backup_db(
-    event_id, backup_db_path, root_username="root", root_password="a.123456"
+    event_id, name, backup_db_path, root_username="root", root_password="a.123456"
 ):
     operator_res = BaseOperatingRes.get_instance(event_id)
     operator_res.set_processing()
-    cmd = f"mysql -u{root_username}  -p{root_password}  <  {backup_db_path}"
+    cmd = f"mysql -u{root_username}  -p{root_password} {name}  <  {backup_db_path}"
+
     ret = subprocess.run(
         cmd,
         shell=True,
@@ -191,8 +192,10 @@ def import_backup_db(
         encoding="utf-8",
     )
     if ret.returncode == 0:
+        operator_res.msg = ret.stdout
         operator_res.set_success()
     else:
+        operator_res.msg = ret.stderr
         operator_res.set_failure()
 
     return ret

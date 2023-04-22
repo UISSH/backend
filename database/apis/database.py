@@ -114,6 +114,7 @@ class DataBaseView(BaseModelViewSet):
         import_backup_db(
             op_res.event_id,
             backup_db_path=path,
+            name=self.get_object().name,
             root_username=root_username,
             root_password=root_password,
         )
