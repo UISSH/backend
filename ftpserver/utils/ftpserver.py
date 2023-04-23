@@ -15,16 +15,16 @@ FTP_SERVER_CONFIG = f"{FTP_SERVER_ROOT}/config.json"
 
 
 def start_service():
-    os.system("systemctl start ftp_server")
+    os.system("systemctl start ftp-server")
 
 
 def stop_service():
-    os.system("systemctl stop ftp_server")
+    os.system("systemctl stop ftp-server")
 
 
 def install():
     # remove folder that be old version created.
-    os.system("systemctl stop ftp_server")
+    os.system("systemctl stop ftp-server")
     os.system(f"rm -rf {PROJECT_ROOT}/ftpserver")
 
     # clean target folder
@@ -38,14 +38,28 @@ def install():
 
     tls_config = {"server_cert": {"cert": "cert.pem", "key": "key.pem"}}
 
-    if len(WEBSITE_ADDRESS) > 4 and "https:" in WEBSITE_ADDRESS:
-        domain = WEBSITE_ADDRESS.replace("https://", "").replace("/", "")
-        cert = pathlib.Path(f"/etc/letsencrypt/live/{domain}/fullchain.pem")
-        privkey = pathlib.Path(f"/etc/letsencrypt/live/{domain}/privkey.pem")
-        if cert.exists() and privkey.exists():
-            tls_config = {
-                "server_cert": {"cert": cert.__str__(), "key": privkey.__str__()}
-            }
+    nginx_config = pathlib.Path("/etc/nginx/sites-enabled/backend_ssl.conf")
+
+    if nginx_config.exists():
+        nginx_config_data = nginx_config.read_text()
+        try:
+            cert_path = (
+                nginx_config_data.split("ssl_certificate")[1].split(";")[0].strip()
+            )
+            privkey_path = (
+                nginx_config_data.split("ssl_certificate_key")[1].split(";")[0].strip()
+            )
+            cert = pathlib.Path(cert_path)
+            privkey = pathlib.Path(privkey_path)
+            if cert.exists() and privkey.exists():
+                tls_config = {
+                    "server_cert": {"cert": cert.__str__(), "key": privkey.__str__()}
+                }
+
+        except:
+            cert_path = ""
+            privkey_path = ""
+
     file_fd = pathlib.Path(f"{FTP_SERVER_ROOT}/config.json")
     conf = json.loads(file_fd.read_text())
     conf["tls"] = tls_config
@@ -60,7 +74,7 @@ def ping():
     return (bool,bool)
     """
     installed = pathlib.Path(FTP_SERVER_CONFIG).exists()
-    status = os.system("systemctl is-active --quiet ftp_server") == 0
+    status = os.system("systemctl is-active --quiet ftp-server") == 0
     return installed, status
 
 
