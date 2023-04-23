@@ -1,7 +1,7 @@
 import os
 
 CURRENT_VERSION = "0.0.7"
-FRONTED_MINIMUM_VERSION = "v0.0.16"
+FRONTED_MINIMUM_VERSION = "v0.1.1"
 MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
 FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
@@ -29,6 +29,7 @@ def upgrade_backend_project():
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py collectstatic --noinput")
+    cmd("systemctl stop ui-ssh")
     cmd("systemctl start ui-ssh")
 
 
