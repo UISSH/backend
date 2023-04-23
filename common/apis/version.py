@@ -2,15 +2,15 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, generics, permissions
 from rest_framework.response import Response
 
-import version
+import upgrade
 
 
 class VersionInfoSerializer(serializers.Serializer):
     backend_current_version = serializers.CharField(
-        read_only=True, default=version.CURRENT_VERSION
+        read_only=True, default=upgrade.CURRENT_VERSION
     )
     require_frontend_minimum_version = serializers.CharField(
-        read_only=True, default=version.FRONTED_MINIMUM_VERSION
+        read_only=True, default=upgrade.FRONTED_MINIMUM_VERSION
     )
 
 
@@ -25,8 +25,8 @@ class VersionView(generics.RetrieveAPIView):
     def get(request, *args, **kwargs):
         return Response(
             {
-                "backend_current_version": version.CURRENT_VERSION,
-                "require_frontend_minimum_version": version.FRONTED_MINIMUM_VERSION,
+                "backend_current_version": upgrade.CURRENT_VERSION,
+                "require_frontend_minimum_version": upgrade.FRONTED_MINIMUM_VERSION,
             }
         )
 
@@ -34,5 +34,5 @@ class VersionView(generics.RetrieveAPIView):
 @extend_schema(responses=ResultSerializer)
 class UpgradeFrontend(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
-        version.upgrade_front_project()
+        upgrade.upgrade_front_project()
         return Response({"detail": "ok"})
