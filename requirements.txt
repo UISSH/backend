@@ -8,7 +8,6 @@ django-filter==23.1
 django-json-widget==1.1.1
 drf-spectacular==0.26.2
 gunicorn==20.1.0
-loguru==0.7.0
 nginxfmt==1.2.2
 paramiko==3.1.0
 PyMySQL==1.0.3
