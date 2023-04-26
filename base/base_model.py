@@ -1,14 +1,10 @@
 import sys
 import uuid
-
+import logging
 from django.db import models
-from loguru import logger
+
 
 from base.dataclass import BaseOperatingRes
-
-fmt = "{level} >>> {time:YYYY-MM-DD HH:mm:ss.SSS} | {function}:{line} - {message}"
-logger.remove()
-logger.add(sys.stderr, format=fmt)
 
 
 class BaseModel(models.Model):
@@ -25,15 +21,15 @@ class BaseModel(models.Model):
     @classmethod
     def log(cls, level="info", *args, **kwargs):
         if level == "info":
-            logger.info(*args, **kwargs)
+            logging.info(*args, **kwargs)
         elif level == "warning":
-            logger.warning(*args, **kwargs)
+            logging.warning(*args, **kwargs)
         elif level == "critical":
-            logger.critical(*args, **kwargs)
+            logging.critical(*args, **kwargs)
         elif level == "error":
-            logger.error(*args, **kwargs)
+            logging.error(*args, **kwargs)
         else:
-            logger.debug(*args, **kwargs)
+            logging.debug(*args, **kwargs)
 
     @classmethod
     def get_class_name(cls):

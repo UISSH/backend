@@ -1,7 +1,6 @@
 import traceback
-
+import logging
 from django.apps import AppConfig
-from loguru import logger
 
 
 class WebsiteConfig(AppConfig):
@@ -13,4 +12,4 @@ class WebsiteConfig(AppConfig):
         try:
             from website.signals import website
         except:
-            logger.log("ERROR", traceback.format_exc())
+            logging.error(traceback.format_exc())
