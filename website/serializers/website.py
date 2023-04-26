@@ -1,11 +1,10 @@
 import os
 import pathlib
-
+import logging
 from rest_framework import serializers
 
 from base.serializer import ICBaseModelSerializer, ICBaseSerializer
 from base.utils.format import format_completed_process
-from base.utils.logger import plog
 from website.applications.app_factory import AppFactory
 from website.models import Website
 from website.models.utils import get_section, insert_section, update_nginx_server_name
@@ -160,19 +159,19 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
 
         # 1.Create folder and file
         if instance.index_root == "/var/www/html":
-            plog.info(f"mkdir -p  /var/www/{instance.domain}")
-            plog.info(f"chown www-data.www-data -R {instance.index_root}")
+            logging.info(f"mkdir -p  /var/www/{instance.domain}")
+            logging.info(f"chown www-data.www-data -R {instance.index_root}")
             instance.index_root = f"/var/www/{instance.domain}"
 
         else:
-            plog.info(f"mkdir -p  {instance.index_root}")
-            plog.info(f"chown www-data.www-data -R {instance.index_root}")
+            logging.info(f"mkdir -p  {instance.index_root}")
+            logging.info(f"chown www-data.www-data -R {instance.index_root}")
 
         try:
             os.system(f"mkdir -p  {instance.index_root}")
             os.system(f"chown www-data.www-data -R {instance.index_root}")
         except Exception as e:
-            plog.exception(f"create and chmod {instance.index_root} failed!")
+            logging.exception(f"create and chmod {instance.index_root} failed!")
         nginx_config_path = f"/etc/nginx/sites-available/{instance.domain}.conf"
         os.system(f"touch {nginx_config_path}")
 
@@ -216,10 +215,10 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
         instance.valid_web_server_config = web_server_config
 
         is_valid_configuration_001 = instance.is_valid_configuration_001()
-        print(is_valid_configuration_001)
+        logging.debug(is_valid_configuration_001)
 
         if is_valid_configuration_001.returncode == 0:
-            print("instance.is_valid_configuration_001()")
+            logging.debug("instance.is_valid_configuration_001()")
             if instance.is_valid_configuration_002(web_server_config):
                 os.system("systemctl reload nginx")
                 instance.status = instance.StatusType.VALID

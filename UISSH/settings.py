@@ -2,14 +2,14 @@
 Django settings for UISSH project.
 """
 
-from .components.common import *
+import logging
 import os
-
 
 from corsheaders.defaults import default_headers
 
 from . import BASE_DIR, config
 from .components import geo_ip
+from .components.common import *
 
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 
@@ -30,6 +30,33 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 # 不是开发环境，则把会话信息缓存到进程内存中
 if not DEBUG:
     SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+
+LOGGING = {
+    "version": 1,
+    "level": DEBUG,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": DEBUG if DEBUG else "WARNING",
+    },
+    "formatters": {
+        "verbose": {
+            "format": "{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+}
+
+logger = logging.getLogger(__name__)
 
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")]

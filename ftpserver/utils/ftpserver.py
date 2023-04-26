@@ -2,12 +2,6 @@ import json
 import os
 import pathlib
 
-try:
-    from django.conf import settings
-
-    WEBSITE_ADDRESS = settings.WEBSITE_ADDRESS
-except:
-    WEBSITE_ADDRESS = "https://demo.uissh.com"
 
 PROJECT_ROOT = "/usr/local/uissh"
 FTP_SERVER_ROOT = f"{PROJECT_ROOT}/ftp-server"

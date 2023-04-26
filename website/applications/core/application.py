@@ -333,3 +333,25 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
         Updated at: 2023-04-22
         """
         pass
+
+    @staticmethod
+    def list_installed_dataBase() -> list[DataBaseListEnum]:
+        """Get all installed databases.
+
+        Returns:
+            list[DataBaseListEnum]: Installed databases list.
+
+        Added at: 2023-04-25
+        Updated at: 2023-04-25
+        """
+        data = []
+
+        if os.system("which mariadb") == 0:
+            data.append(DataBaseListEnum.MariaDB)
+        elif os.system("which mysql") == 0:
+            data.append(DataBaseListEnum.MySQL)
+
+        if os.system("which redis-server") == 0:
+            data.append(DataBaseListEnum.Redis)
+
+        return data

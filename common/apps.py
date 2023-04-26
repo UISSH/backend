@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from django.apps import AppConfig
@@ -20,7 +21,7 @@ class CommonConfig(AppConfig):
             return f.read()
 
     def log_msg(self, msg):
-        print(f"{self.name}::{msg}")
+        logging.debug(f"{self.name}::{msg}")
 
     def init_config(self, items: List[ABSDBConfig]):
         try:

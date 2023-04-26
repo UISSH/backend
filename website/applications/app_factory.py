@@ -3,10 +3,9 @@ import inspect
 import os
 import pathlib
 import traceback
+import logging
 
-from loguru import logger
 
-from base.utils.logger import plog
 from website.applications.core.application import Application, Storage
 from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
 
@@ -52,7 +51,7 @@ class AppFactory:
                             == "website.applications.core.application"
                         ):
                             continue
-                        plog.debug(f"{_obj.__name__} Loaded.")
+                        logging.debug(f"{_obj.__name__} Loaded.")
                         AppFactory.MODULES[_obj.__name__] = {
                             "module": _obj,
                             "info": _obj.version().__dict__,

@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import string
@@ -37,8 +38,8 @@ def find_domain_in_nginx():
             domain = data.split("server_name")[1].split(";")[0].strip()
             return domain
         except Exception:
-            print(traceback.format_exc())
-            print("find domain in nginx error")
+            logging.debug(traceback.format_exc())
+            logging.debug("find domain in nginx error")
 
     return ""
 
@@ -89,6 +90,6 @@ def domain_is_resolved(domain, request):
 
 
 if __name__ == "__main__":
-    print(resolve_domain("example.com"))
-    print(find_domain_in_nginx())
-    print(requests.get("http://checkip.amazonaws.com").text)
+    logging.debug(resolve_domain("example.com"))
+    logging.debug(find_domain_in_nginx())
+    logging.debug(requests.get("http://checkip.amazonaws.com").text)

@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -5,8 +6,7 @@ import paramiko
 from django.core.files import File
 from rest_framework import serializers
 
-from base.serializer import ICBaseSerializer, ICBaseModelSerializer
-from base.utils.logger import plog
+from base.serializer import ICBaseModelSerializer, ICBaseSerializer
 from terminal.models import SFTPUploadModel
 from websocket.utils import format_ssh_auth_data
 
@@ -63,12 +63,12 @@ class UploadFileSerializer(ICBaseSerializer):
         obj.save()
 
         tmp_file = f"/tmp/{time.time()}"
-        plog.debug("write file to local.")
+        logging.debug("write file to local.")
         with open(tmp_file, "wb") as f:
             for chunk in file_obj.chunks():
                 f.write(chunk)
 
-        plog.debug("put file to remote.")
+        logging.debug("put file to remote.")
         client = get_ssh_client(auth)
         sftp = client.open_sftp()
         sftp.put(tmp_file, target_path)

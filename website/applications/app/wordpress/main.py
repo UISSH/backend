@@ -33,12 +33,16 @@ class WordPressApplication(Application, ApplicationToolMinx):
             "wordpress", "https://wordpress.org/wordpress-6.2.zip"
         )
 
+        database_config = (
+            self._config.databases.mariadb or self._config.databases.mysqldb
+        )
+
         install_wordpress(
             download_url,
             self._config.root_dir,
-            self._config.database_config.db_name,
-            self._config.database_config.username,
-            self._config.database_config.password,
+            database_config.db_name,
+            database_config.username,
+            database_config.password,
         )
 
         os.system(f"chown www-data.www-data -R {self._config.root_dir}")
@@ -110,6 +114,26 @@ class WordPressApplication(Application, ApplicationToolMinx):
 
     def size(self) -> int:
         return self._storage.size() + self.get_folder_size(self._config.root_dir)
+
+    def get_requried_databases(self) -> list[DataBaseListEnum]:
+        data = self.list_installed_dataBase()
+
+        if DataBaseListEnum.MariaDB in data:
+            return [DataBaseListEnum.MariaDB]
+
+        if DataBaseListEnum.MySQL in data:
+            return [DataBaseListEnum.MySQL]
+
+        raise RuntimeError("No database installed.")
+
+    def get_requried_ports(self) -> list[int]:
+        return [80, 443]
+
+    def get_boot_status(self) -> ApplicationBootStatusEnum:
+        return ApplicationBootStatusEnum.Enable
+
+    def get_run_status():
+        pass
 
 
 if __name__ == "__main__":

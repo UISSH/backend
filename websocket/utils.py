@@ -1,8 +1,7 @@
+import logging
 from io import StringIO
 
 import paramiko
-
-from base.utils.logger import plog
 
 
 def format_ssh_auth_data(_format):
@@ -34,7 +33,7 @@ def format_ssh_auth_data(_format):
     elif not _format.get("password", None):
         # If there is no password and certificate,
         # try to use the certificate file in the project root directory for testing.
-        plog.warning("Use project root certificate.")
+        logging.warning("Use project root certificate.")
         pkey = paramiko.RSAKey.from_private_key(open("./test.pem"))
         auth_info = _format
         auth_info["pkey"] = pkey
