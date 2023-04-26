@@ -1,4 +1,5 @@
 import abc
+import logging
 
 from django.db import models
 
@@ -37,7 +38,7 @@ class ABSDBConfig(object):
         raise NotImplementedError("未实现该接口")
 
     def log_msg(self, msg):
-        print(msg)
+        logging.debug(msg)
 
     def __str__(self):
         return f"{self._name}::{self._key}::{self._value}"

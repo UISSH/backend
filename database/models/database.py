@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import uuid
 
@@ -7,13 +8,13 @@ from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 
 from base.base_model import BaseModel
-from base.utils.logger import plog
+
 from common.config import DB_SETTINGS
 from common.models.User import User
 from database.models.database_utils import (
     delete_database,
-    update_username_database,
     update_password_database,
+    update_username_database,
 )
 from website.models import Website
 
@@ -22,7 +23,7 @@ class DataBase(BaseModel):
     DATABASE_BACKUPS_DIR = "/var/db_backups"
 
     class DBType(IntegerChoices):
-        MySql = 0, "MySql"
+        MySQL = 0, "MySQL"
         MariaDB = 1, "MariaDB"
 
     class CreateStatus(IntegerChoices):
@@ -89,6 +90,8 @@ class DataBase(BaseModel):
 
         root_username = DB_SETTINGS.database_value()["database"]["root_username"]
         root_password = DB_SETTINGS.database_value()["database"]["root_password"]
+
+        logging.debug("Create database instance.")
         create_new_database(
             event_id=event_id,
             name=self.name,
@@ -102,6 +105,7 @@ class DataBase(BaseModel):
         )
 
         op_res = self.get_operating_res(event_id)
+        logging.debug(f"Create database instance result: {op_res}")
         if op_res.is_success():
             backup_dir = self.get_backup_dir()
             if not backup_dir.exists():
@@ -128,7 +132,7 @@ def pre_save_database_event(
             instance.username != old_obj.username
             or instance.authorized_ip != old_obj.authorized_ip
         ):
-            plog.debug(
+            logging.debug(
                 "The database user name is modified and synchronized to the database."
             )
             op = instance.get_operating_res()
@@ -142,7 +146,7 @@ def pre_save_database_event(
             )
 
         if instance.password != old_obj.password:
-            plog.debug(
+            logging.debug(
                 "The database user password is modified and synchronized to the database."
             )
             op = instance.get_operating_res()

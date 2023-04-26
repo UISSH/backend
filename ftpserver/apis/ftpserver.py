@@ -1,3 +1,4 @@
+import logging
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -86,8 +87,8 @@ class FtpServerView(BaseModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         res = super(FtpServerView, self).destroy(request, *args, **kwargs)
-        print(res.status_code)
+        logging.debug(res.status_code)
         if res.status_code == 204:
-            print(" FtpServerModel.sync_account()")
+            logging.debug(" FtpServerModel.sync_account()")
             FtpServerModel.sync_account()
         return res

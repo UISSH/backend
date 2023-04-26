@@ -1,12 +1,10 @@
 import pathlib
-import shlex
 import subprocess
 
 from rest_framework import serializers
 
 from base.dataclass import BaseOperatingRes
 from base.serializer import ICBaseSerializer
-from base.utils.logger import plog
 from base.utils.os_query import os_query_json
 
 

@@ -39,6 +39,8 @@ def install_flarum(config: NewWebSiteConfig, app_config: dict):
     os.system(f"cd {directory.__str__()} && rm -rf * .*")
     cmd("composer create-project flarum/flarum . -n", directory)
 
+    database_config = config.databases.mariadb or config.databases.mysqldb
+
     install_yaml_config = {
         "debug": False,
         "baseUrl": f"http://{config.domain}",
@@ -46,9 +48,9 @@ def install_flarum(config: NewWebSiteConfig, app_config: dict):
             "driver": "mysql",
             "host": "localhost",
             "port": 3306,
-            "database": config.database_config.db_name,
-            "username": config.database_config.username,
-            "password": config.database_config.password,
+            "database": database_config.db_name,
+            "username": database_config.username,
+            "password": database_config.password,
             "prefix": False,
         },
         "adminUser": {

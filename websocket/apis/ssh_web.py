@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 import traceback
 from threading import Thread
@@ -9,7 +10,6 @@ from channels.generic.websocket import WebsocketConsumer
 from paramiko.channel import Channel
 from rest_framework.authtoken.models import Token
 
-from base.utils.logger import plog
 from common.models import User
 from websocket.utils import format_ssh_auth_data
 
@@ -43,7 +43,7 @@ class SshWebConsumer(WebsocketConsumer):
                 self.disconnect(403)
                 return
         except Exception:
-            print(traceback.format_exc())
+            logging.debug(traceback.format_exc())
             self.send(
                 text_data=json.dumps(
                     {
@@ -60,14 +60,14 @@ class SshWebConsumer(WebsocketConsumer):
         room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.ssh_session.close()
         self.client.close()
-        plog.debug(f"{room_name} websocket is closed.")
+        logging.debug(f"{room_name} websocket is closed.")
         self.connect_status = False
 
     def __init_ssh(self, _format):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
         auth_info = format_ssh_auth_data(_format)
-        plog.debug(auth_info)
+        logging.debug(auth_info)
         msg = "connection succeeded\r\n"
         try:
             self.client.connect(timeout=5, **auth_info)
@@ -76,7 +76,7 @@ class SshWebConsumer(WebsocketConsumer):
             msg = f"connection failed: {e}\r\n"
         except Exception as e:
             self.client = None
-            plog.critical(e.__str__())
+            logging.critical(e.__str__())
             msg = "connection failed\r\n"
 
         self.send(text_data=json.dumps({"message": msg}))
@@ -101,7 +101,7 @@ class SshWebConsumer(WebsocketConsumer):
             if self.suspended_interactive:
                 continue
             if self.connect_status is False:
-                plog.debug("ssh_recv and websocket is closed.")
+                logging.debug("ssh_recv and websocket is closed.")
                 self.loop = None
                 break
             if self.ssh_session.recv_ready() is True:
@@ -110,7 +110,7 @@ class SshWebConsumer(WebsocketConsumer):
                     text_data=json.dumps({"message": msg.decode("utf-8"), "code": 200})
                 )
             time.sleep(0.1)
-        print("terminal thread is ended.")
+        logging.debug("terminal thread is ended.")
 
     def get_work_dir(self):
         self.ssh_session.send("pwd \r")

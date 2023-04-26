@@ -1,3 +1,4 @@
+import logging
 import os
 import pathlib
 import subprocess
@@ -7,19 +8,20 @@ from django.db import models
 from django.db.models import IntegerChoices
 
 from base.base_model import BaseModel
-from base.utils.logger import plog
 from common.models.User import User
 from website.applications.app_factory import AppFactory
 from website.applications.core.application import Application
 from website.applications.core.dataclass import (
+    DataBaseDict,
+    MariaDBConfig,
+    MySQLDBConfig,
     NewWebSiteConfig,
     SSLConfig,
     WebServerTypeEnum,
-    DataBaseConfig,
 )
 from website.models.utils import (
-    enable_section,
     disable_section,
+    enable_section,
     get_section,
     insert_section,
     update_nginx_server_name,
@@ -82,9 +84,7 @@ class WebsiteMethod:
 
 
 class Website(BaseModel):
-    """
-    定义网站属性
-    """
+    """website model"""
 
     APP_FACTORY = AppFactory
 
@@ -114,7 +114,7 @@ class Website(BaseModel):
         verbose_name="用户",
     )
     name = models.CharField(verbose_name="名称", max_length=32)
-    domain = models.CharField(max_length=1024, verbose_name="域名")
+    domain = models.CharField(max_length=1024, verbose_name="域名", unique=True)
     extra_domain = models.CharField(
         max_length=1024,
         null=True,
@@ -226,19 +226,37 @@ class Website(BaseModel):
             web_server_type=WebServerTypeEnum.Nginx,
         )
 
+        # Get database config.
         if hasattr(self, "database") and self.database:
-            config.database_config = DataBaseConfig(
-                self.database.name, self.database.username, self.database.password
-            )
+            from database.models.database import DataBase
+
+            database: DataBase = self.database
+            if database.database_type == database.DBType.MariaDB:
+                config.databases = DataBaseDict(
+                    mariadb=MariaDBConfig(
+                        self.database.name,
+                        self.database.username,
+                        self.database.password,
+                    )
+                )
+            else:
+                config.databases = DataBaseDict(
+                    mariadb=MySQLDBConfig(
+                        self.database.name,
+                        self.database.username,
+                        self.database.password,
+                    )
+                )
+        # TODO:Get redis config.
 
         if self.ssl_enable:
-            plog.debug(f"enable {self.name} - {self.domain} ssl toggle.")
+            logging.debug(f"enable {self.name} - {self.domain} ssl toggle.")
             self.or_create_ssl_config()
             config.ssl_config = SSLConfig(
                 ssl_certificate_path=self.ssl_config["path"]["certificate"],
                 ssl_key_path=self.ssl_config["path"]["key"],
             )
-            plog.debug(config.ssl_config.__str__())
+            logging.debug(config.ssl_config.__str__())
 
         if self.valid_web_server_config is not None:
             config.web_server_config = self.valid_web_server_config
@@ -251,7 +269,7 @@ class Website(BaseModel):
         return app_factory.get_application_module(self.application, config)
 
     def is_valid_configuration_001(self) -> subprocess.CompletedProcess:
-        plog.info(
+        logging.info(
             f"001:verify {self.domain} configuration...\n\n{self.valid_web_server_config}"
         )
 
@@ -323,7 +341,7 @@ class Website(BaseModel):
         # set enter folder.
         app = self.get_application_module(self.get_app_new_website_config())
         app_config = app.read()
-        plog.debug(app_config)
+        logging.debug(app_config)
         if hasattr(app_config, "enter_folder_name") and app_config.enter_folder_name:
             old_field = f"root {self.index_root};"
             new_field = f"root {self.index_root}/{app_config.enter_folder_name};"

@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import sys
 import time
@@ -8,19 +9,19 @@ GEOIP_PATH = pathlib.Path("./data/GEO_IP")
 GEOIP_CITY = GEOIP_PATH.joinpath("GeoLite2-City.mmdb")
 GEOIP_COUNTRY = GEOIP_PATH.joinpath("GeoLite2-Country.mmdb")
 
-print(GEOIP_PATH.absolute())
+logging.debug(GEOIP_PATH.absolute())
 
 
 def init():
     url = "https://ghproxy.com/https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb"
 
     if not GEOIP_CITY.exists():
-        print("init GEOIP_CITY data..")
+        logging.debug("init GEOIP_CITY data..")
         download(url, GEOIP_CITY)
 
     url = "https://ghproxy.com/https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb"
     if not GEOIP_COUNTRY.exists():
-        print("init GEOIP_COUNTRY data..")
+        logging.debug("init GEOIP_COUNTRY data..")
         download(url, GEOIP_COUNTRY)
 
 
@@ -55,7 +56,7 @@ def download(url, save_path):
                 chunk_report(bytes_so_far, content_size)
 
     except Exception as e:
-        print(e)
+        logging.debug(e)
         time.sleep(5)
 
     finally:

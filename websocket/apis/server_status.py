@@ -8,7 +8,6 @@ from typing import Optional
 from channels.generic.websocket import WebsocketConsumer
 from rest_framework.authtoken.models import Token
 
-from base.utils.logger import plog
 from base.utils.os_query import os_query_json
 from common.models import User
 
@@ -56,7 +55,7 @@ class ServerStatusConsumer(WebsocketConsumer):
 
             if self.stop or run_count > max_run_count:
                 break
-        plog.info(
+        logging.info(
             f"monitoring_information thread is stop, cost {time.time() - start_time} seconds."
         )
 
@@ -73,7 +72,7 @@ class ServerStatusConsumer(WebsocketConsumer):
                 self.disconnect(403)
                 return
         except Exception:
-            plog.error("Failed to authenticate user with token")
+            logging.error("Failed to authenticate user with token")
             self.send(
                 text_data=json.dumps({"message": "没有授权, 已终止本次会话.\r\n", "code": 403})
             )
@@ -84,7 +83,7 @@ class ServerStatusConsumer(WebsocketConsumer):
         try:
             self.send(text_data=json.dumps({"message": msg, "code": 201}))
         except Exception:
-            plog.error("Failed to send message to client")
+            logging.error("Failed to send message to client")
             self.disconnect(403)
             return
 
@@ -101,6 +100,6 @@ class ServerStatusConsumer(WebsocketConsumer):
             self.cache[query_sql] = interval
             loop = Thread(target=self.monitoring_information, args=(query_sql,))
             loop.start()
-            plog.debug(f"start new threading {loop.native_id}")
+            logging.debug(f"start new threading {loop.native_id}")
         else:
             self.cache[query_sql] = interval

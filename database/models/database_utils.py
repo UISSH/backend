@@ -1,8 +1,8 @@
+import logging
 import os
 import subprocess
 
 import pymysql
-from base.utils.logger import plog
 from base.dataclass import BaseOperatingRes
 
 
@@ -27,15 +27,14 @@ def execute_sql(
         ret = subprocess.CompletedProcess(
             sql, e.args[0], stderr=f"{e.args[0]}:{e.args[1]}"
         )
+        logging.error(f"Failed to execute sql:{sql},error:{e.args[0]}:{e.args[1]}")
+    except pymysql.err.ProgrammingError as e:
+        ret = subprocess.CompletedProcess(
+            sql, e.args[0], stderr=f"{e.args[0]}:{e.args[1]}"
+        )
+        logging.error(f"Failed to execute sql:{sql},error:{e.args[0]}:{e.args[1]}")
     finally:
         db.close()
-
-    # ret = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
-    # if ret.returncode == 0:
-    #     pass
-    # else:
-    #     print(f"{ret.returncode}::{ret.stderr}")
-
     return ret
 
 
@@ -73,6 +72,7 @@ def create_new_database(
     )
 
     if ret.returncode != 0:
+        logging.error(f"Failed to create database:{ret.stderr}")
         operator_res.msg = f"Failed to create database:{ret.stderr}"
         operator_res.set_failure()
         return
@@ -81,6 +81,7 @@ def create_new_database(
         create_user_sql, root_username=root_username, root_password=root_password
     )
     if ret.returncode != 0:
+        logging.error(f"Failed to create user:{ret.stderr}")
         operator_res.msg = (
             f"Failed to create user:{ret.stderr}\n,sql::{create_user_sql}"
         )
@@ -91,6 +92,7 @@ def create_new_database(
         authorize_sql, root_username=root_username, root_password=root_password
     )
     if ret.returncode != 0:
+        logging.error(f"Failed to authorize user:{ret.stderr}")
         operator_res.msg = f"Authorization failed:{ret.stderr}"
         operator_res.set_failure()
         return
@@ -110,6 +112,7 @@ def delete_database(
     operator_res.set_processing()
 
     sql = f"DROP database {name};"
+
     ret = execute_sql(sql, root_username, root_password)
     if ret.returncode != 0:
         operator_res.msg = f"drop database:{ret.stderr}"

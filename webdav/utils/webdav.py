@@ -1,3 +1,4 @@
+import logging
 import os
 import pathlib
 from functools import wraps
@@ -19,7 +20,7 @@ def sync(config):
 
                 kwargs["data"] = data
             else:
-                print(f'"{config}" file does not exist.')
+                logging.debug(f'"{config}" file does not exist.')
                 return
 
             r = func(*args, **kwargs)

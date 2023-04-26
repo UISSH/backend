@@ -29,7 +29,16 @@ class FlarumApplication(Application, ApplicationToolMinx):
                 f"This app does not support {self._config.web_server_type.name} web server."
             )
 
-        if not self._config.database_config:
+        # if not self._config.database_config:
+        #     raise RuntimeError(f"Need to configure database.")
+
+        if self._config.databases is None:
+            raise RuntimeError(f"Need to configure database.")
+
+        if (
+            self._config.databases.mariadb is None
+            and self._config.databases.mysqldb is None
+        ):
             raise RuntimeError(f"Need to configure database.")
 
         install_composer()
@@ -133,6 +142,29 @@ class FlarumApplication(Application, ApplicationToolMinx):
         with open(config_php, "w") as f:
             f.write(data)
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
+
+    def get_boot_status(self) -> ApplicationBootStatusEnum:
+        return ApplicationBootStatusEnum.Enable
+
+    def get_requried_databases(self) -> list[DataBaseListEnum]:
+        data = self.list_installed_dataBase()
+
+        if DataBaseListEnum.MariaDB in data:
+            return [DataBaseListEnum.MariaDB]
+
+        if DataBaseListEnum.MySQL in data:
+            return [DataBaseListEnum.MySQL]
+
+        raise RuntimeError("No database installed.")
+
+    def get_requried_ports(self) -> list[int]:
+        return [80, 443]
+
+    def get_boot_status(self) -> ApplicationBootStatusEnum:
+        return ApplicationBootStatusEnum.Enable
+
+    def get_run_status():
+        pass
 
 
 if __name__ == "__main__":

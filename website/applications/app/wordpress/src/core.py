@@ -18,7 +18,7 @@ def install_wordpress(url, root_dir, db_name, db_username, db_password):
     with open(f"{root_dir}/wordpress.zip", "wb") as f:
         f.write(res.content)
     os.system(
-        f"cd {root_dir} && unzip wordpress.zip && mv wordpress/* ./ && rm wordpress.zip "
+        f"cd {root_dir} && unzip wordpress.zip > /dev/null && mv wordpress/* ./ && rm wordpress.zip "
     )
     res.raise_for_status()
 

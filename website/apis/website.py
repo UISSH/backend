@@ -1,7 +1,10 @@
+import logging
+import os
 import pathlib
 import traceback
 
 from django.db import transaction
+from database.models import DataBase
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -14,7 +17,8 @@ from base.utils.format import format_completed_process
 from base.viewset import BaseModelViewSet
 from common.models import User
 from common.serializers.operating import OperatingResSerializer
-from website.applications.core.dataclass import BaseSSLCertificate
+from website.applications.core.application import Application
+from website.applications.core.dataclass import BaseSSLCertificate, DataBaseListEnum
 from website.models import Website
 from website.serializers.website import (
     DefaultWebsuteConfigSerializer,
@@ -24,6 +28,10 @@ from website.serializers.website import (
 )
 from website.utils.certificate import issuing_certificate
 from website.utils.domain import domain_is_resolved, find_domain_in_nginx
+
+
+def generate_password():
+    return os.urandom(16).hex()
 
 
 class WebsiteView(BaseModelViewSet):
@@ -44,6 +52,50 @@ class WebsiteView(BaseModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
+    def allocating_resources(self, request, *args, **kwargs):
+        op = BaseOperatingRes(name="Website:Allocating Resources")
+        instance: Website = self.get_object()
+        app: Application = instance.get_application()
+        # allow port
+
+        if os.system("which ufw") == 0:
+            for i in app.get_requried_ports():
+                # if ufw port is not open, open it
+                os.system(f"ufw allow {i}")
+
+        # create database
+        for i in app.get_requried_databases():
+            if i == DataBaseListEnum.MariaDB or i == DataBaseListEnum.MySQL:
+                # set database type
+                database_type = (
+                    DataBase.DBType.MariaDB
+                    if i == DataBaseListEnum.MariaDB
+                    else DataBase.DBType.MySQL
+                )
+
+                # create database record
+                obj: DataBase = DataBase.objects.create(
+                    user=self.request.user,
+                    website=instance,
+                    name="DB_" + instance.domain.replace(".", "_"),
+                    username="DB_" + instance.domain.replace(".", "_"),
+                    password=generate_password(),
+                    database_type=database_type,
+                )
+
+                # create database instance
+                logging.debug(database_type)
+                op_res = obj.get_operating_res()
+                obj.create_database_instance(op_res.event_id)
+                logging.debug(op_res.json())
+                
+            elif i == DataBaseListEnum.Redis:
+                # TODO create redis database
+                pass
+
+        return Response(op.json())
 
     # @extend_schema(responses= todo add schema)
     @action(methods=["get"], detail=True)

@@ -40,11 +40,6 @@ class SSLProvideEnum(Enum):
     LetsEncrypt = 1
 
 
-class DataTypeEnum(Enum):
-    MariaDB = 1
-    MySQL = 2
-
-
 class WebServerTypeEnum(Enum):
     Nginx = 1
     Apache = 2
@@ -70,12 +65,17 @@ class ApplicationBootStatusEnum(Enum):
 
 
 class BaseData(metaclass=ABCMeta):
+    """Metaclass for defining Abstract Base Classes (ABCs).
+    If you want validate the data, you can inherit this class.
+    """
+
     @abstractmethod
-    def check_validity(self):
+    def check_validity(self: "BaseData") -> None:
+        """Check the validity of the data, if the verification fails, raise an exception."""
         pass
 
     @property
-    def data(self) -> dict:
+    def data(self: "BaseData") -> dict:
         """
         Verify the data, and return itself.__dict__ after the verification is passed.
         """
@@ -83,7 +83,7 @@ class BaseData(metaclass=ABCMeta):
         return self.__dict__
 
     @property
-    def instance(self):
+    def instance(self: "BaseData") -> "BaseData":
         """
         Verify the data, and return itself after the verification is passed.
         """
@@ -180,12 +180,38 @@ class ApplicationVersion:
     agreement_url: str = None
 
 
+class DataTypeEnum(Enum):
+    MariaDB = 1
+    MySQL = 2
+    Redis = 3
+
+
 @dataclass
-class DataBaseConfig:
+class MariaDBConfig:
     db_name: str
     username: str
     password: str
     db_type: DataTypeEnum = DataTypeEnum.MariaDB
+
+
+@dataclass
+class MySQLDBConfig(MariaDBConfig):
+    db_type: DataTypeEnum = DataTypeEnum.MySQL
+
+
+@dataclass
+class RedisConfig:
+    db_name: str
+    username: str
+    password: str
+    db_type: DataTypeEnum = DataTypeEnum.Redis
+
+
+@dataclass
+class DataBaseDict:
+    mysqldb: Optional[MySQLDBConfig] = None
+    mariadb: Optional[MariaDBConfig] = None
+    redis: Optional[RedisConfig] = None
 
 
 @dataclass
@@ -195,7 +221,9 @@ class NewWebSiteConfig(BaseData):
     web_server_type: WebServerTypeEnum = WebServerTypeEnum.Nginx
     extra_domain: Optional[List[str]] = None
     ssl_config: Optional[SSLConfig] = None
-    database_config: Optional[DataBaseConfig] = None
+    # deprecated
+    database_config: Optional[MariaDBConfig] = None
+    databases: Optional[DataBaseDict] = None
     web_server_config: str = None
 
     def check_validity(self):
@@ -220,7 +248,7 @@ class DataBaseListEnum(Enum):
         Enum (_type_):  Enum Type
         e.g.:  MySQL = 1 , MariaDB = 2 , ...
     """
-
+    MySQL = 0
     MariaDB = 1
     Redis = 2
     # it is not supported yet.
