@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "webdav.apps.WebdavConfig",
     "ftpserver.apps.FtpserverConfig",
     "terminal.apps.TerminalConfig",
+    "crontab.apps.CrontabConfig",
 ]
 
 SPECTACULAR_SETTINGS = spectacular.SPECTACULAR_DEFAULTS
