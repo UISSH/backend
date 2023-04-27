@@ -7,13 +7,12 @@ from database.models.database_utils import (
     create_new_database,
     delete_database,
     export_backup_db,
+    get_database_password,
+    get_database_username,
     import_backup_db,
     update_password_database,
     update_username_database,
-    get_database_username,
-    get_database_password,
 )
-
 
 root_username = get_database_username()
 root_password = get_database_password()
