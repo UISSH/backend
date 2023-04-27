@@ -1,23 +1,21 @@
 # 介绍
 
+本项目旨在摆脱繁琐的编译安装、命令行配置的运维工作，并尽最大的努力遵循 Linux 通用规范的一个可视化面板，提供一键安装、配置、管理、监控、备份、迁移等功能。
+
+并追求面板与系统环境隔离，面板仅仅是一个管理工具，部署的环境以及服务运行也不依赖面板功能。做到面板停止后，您配置的环境与服务依然可以正常运行，使您的系统环境更加稳定、更加安全。
+
 ## 环境
 
  ![debian](https://img.shields.io/badge/OS-Debian%2011%20LTS-brightgreen.svg?style=flat-square&logo=debian)
  ![ubuntu](https://img.shields.io/badge/OS-Ubuntu%2022%20LTS-brightgreen.svg?style=flat-square&logo=ubuntu)
  ![UISSH](https://img.shields.io/badge/Python-3.9--3.11-brightgreen.svg?style=flat-square&logo=python)
-
+ ![UISSH](https://img.shields.io/badge/Django-4.2-brightgreen.svg?style=flat-square&logo=django)
 ## CI
 ![django ci](https://github.com/UISSH/backend/actions/workflows/django.yml/badge.svg)
 [![Debian 11 CI](https://github.com/UISSH/install-script/actions/workflows/debian_11.yml/badge.svg)](https://github.com/UISSH/install-script/actions/workflows/debian_11.yml)
 [![Ubuntu 22.04 CI](https://github.com/UISSH/install-script/actions/workflows/ubuntu_22.04.yml/badge.svg)](https://github.com/UISSH/install-script/actions/workflows/ubuntu_22.04.yml)
 
 
-
-
-
-
-
-本项目旨在摆脱繁琐的编译安装、命令行配置的运维工作，并尽最大的努力遵循 Linux 通用规范的一个可视化界面。
 
 ## 安装
 
