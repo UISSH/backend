@@ -1,2 +1,2 @@
-from .website import Website
-from .application import ApplicationData
+from .website import WebsiteModel
+from .application import ApplicationDataModel

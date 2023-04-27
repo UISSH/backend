@@ -13,13 +13,15 @@ from common.config import DB_SETTINGS
 from common.models.User import User
 from database.models.database_utils import (
     delete_database,
+    get_database_password,
+    get_database_username,
     update_password_database,
     update_username_database,
 )
-from website.models import Website
+from website.models import WebsiteModel
 
 
-class DataBase(BaseModel):
+class DataBaseModel(BaseModel):
     DATABASE_BACKUPS_DIR = "/var/db_backups"
 
     class DBType(IntegerChoices):
@@ -36,7 +38,7 @@ class DataBase(BaseModel):
         User, verbose_name="user", blank=True, on_delete=models.CASCADE
     )
     website = models.OneToOneField(
-        Website,
+        WebsiteModel,
         default=None,
         null=True,
         blank=True,
@@ -78,7 +80,7 @@ class DataBase(BaseModel):
     )
 
     class Meta:
-        verbose_name = "DataBase"
+        verbose_name = "DataBaseModel"
         verbose_name_plural = "DataBases"
 
     def get_backup_dir(self) -> pathlib.Path:
@@ -88,8 +90,8 @@ class DataBase(BaseModel):
     def create_database_instance(self, event_id: str = uuid.uuid4().__str__()) -> str:
         from database.models.database_utils import create_new_database
 
-        root_username = DB_SETTINGS.database_value()["database"]["root_username"]
-        root_password = DB_SETTINGS.database_value()["database"]["root_password"]
+        root_username = get_database_username()
+        root_password = get_database_password()
 
         logging.debug("Create database instance.")
         create_new_database(
@@ -116,18 +118,18 @@ class DataBase(BaseModel):
         return event_id
 
 
-@receiver(pre_save, sender=DataBase)
+@receiver(pre_save, sender=DataBaseModel)
 def pre_save_database_event(
-    sender, instance: DataBase, raw, using, update_fields, **kwargs
+    sender, instance: DataBaseModel, raw, using, update_fields, **kwargs
 ):
-    root_username = DB_SETTINGS.database_value()["database"]["root_username"]
-    root_password = DB_SETTINGS.database_value()["database"]["root_password"]
+    root_username = get_database_username()
+    root_password = get_database_password()
     if not instance.id:
         # new create
         pass
     else:
         # update
-        old_obj = DataBase.objects.get(id=instance.id)
+        old_obj = DataBaseModel.objects.get(id=instance.id)
         if (
             instance.username != old_obj.username
             or instance.authorized_ip != old_obj.authorized_ip
@@ -160,10 +162,10 @@ def pre_save_database_event(
             )
 
 
-@receiver(pre_delete, sender=DataBase)
-def delete_database_event(sender, instance: DataBase, using, **kwargs):
-    root_username = DB_SETTINGS.database_value()["database"]["root_username"]
-    root_password = DB_SETTINGS.database_value()["database"]["root_password"]
+@receiver(pre_delete, sender=DataBaseModel)
+def delete_database_event(sender, instance: DataBaseModel, using, **kwargs):
+    root_username = get_database_username()
+    root_password = get_database_password()
     op = instance.get_operating_res()
     delete_database(
         op.event_id,

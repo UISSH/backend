@@ -12,7 +12,7 @@ class DemoManager(models.Manager):
         return super().get_queryset().select_related("user")
 
 
-class Demo(BaseModel):
+class DemoModel(BaseModel):
     class StatusType(IntegerChoices):
         """
         UNPAID   ："未支付"

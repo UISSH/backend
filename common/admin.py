@@ -4,13 +4,13 @@ from django.contrib.auth.admin import UserAdmin
 from django.db import models
 from django_json_widget.widgets import JSONEditorWidget
 
-from common.models import SystemConfig, User
+from common.models import SystemConfigModel, User
 
 # Register your models here.
 admin.site.register(User, UserAdmin)
 
 
-@admin.register(SystemConfig)
+@admin.register(SystemConfigModel)
 class SystemConfigAdmin(admin.ModelAdmin):
     list_display = ["name", "key", "enable", "module_name"]
     list_editable = ["enable"]

@@ -10,11 +10,13 @@ from database.models.database_utils import (
     import_backup_db,
     update_password_database,
     update_username_database,
+    get_database_username,
+    get_database_password,
 )
 
 
-root_username = os.environ.get("DB_USERNAME", "root")
-root_password = os.environ.get("DB_PASSWORD", "a.123456")
+root_username = get_database_username()
+root_password = get_database_password()
 
 
 class TestDBDatabase(TestCase):

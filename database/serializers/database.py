@@ -2,7 +2,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from base.serializer import ICBaseModelSerializer
-from database.models import DataBase
+from database.models import DataBaseModel
 
 
 class DataBaseModelSerializer(ICBaseModelSerializer):
@@ -13,7 +13,7 @@ class DataBaseModelSerializer(ICBaseModelSerializer):
     database_type_text = serializers.SerializerMethodField("_database_type_text")
 
     class Meta:
-        model = DataBase
+        model = DataBaseModel
         fields = "__all__"
 
     def validate_name(self, val: str):
@@ -26,13 +26,13 @@ class DataBaseModelSerializer(ICBaseModelSerializer):
     @extend_schema_field(
         serializers.CharField(read_only=True, help_text="own username")
     )
-    def _own_username(self, instance: DataBase):
+    def _own_username(self, instance: DataBaseModel):
         return instance.user.username
 
     @extend_schema_field(serializers.CharField(read_only=True))
-    def _database_type_text(self, instance: DataBase):
+    def _database_type_text(self, instance: DataBaseModel):
         return instance.get_database_type_display()
 
     @extend_schema_field(serializers.CharField(read_only=True))
-    def _create_status_text(self, instance: DataBase):
+    def _create_status_text(self, instance: DataBaseModel):
         return instance.get_create_status_display()

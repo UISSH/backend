@@ -87,7 +87,12 @@ class WordPressApplication(Application, ApplicationToolMinx):
     def backup(
         self, backup_path: str = None, backup_type: BackupTypeEnum = BackupTypeEnum.All
     ):
-        os.system(f"tar zcvf {backup_path} {self._config.root_dir}")
+        if backup_type == BackupTypeEnum.PROGRAM:
+            os.system(f"tar zcvf {backup_path} {self._config.root_dir}")
+        elif backup_type == BackupTypeEnum.DATABASE:
+            os.system("")
+        else:
+            os.system("")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def recover(

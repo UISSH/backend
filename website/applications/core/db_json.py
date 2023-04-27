@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from django.core.cache import cache
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
-from website.models import ApplicationData
+from website.models import ApplicationDataModel
 
 
 class DirectInitError(Exception):
@@ -58,7 +58,7 @@ class DBJson(dict):
         instance = cache.get(cache_key)
 
         if not instance:
-            obj, _ = ApplicationData.objects.get_or_create(name=hash_key)
+            obj, _ = ApplicationDataModel.objects.get_or_create(name=hash_key)
             instance = cls(hash_key, data=obj.data)
 
             # 将实例缓存到 Django Cache 中
@@ -109,13 +109,13 @@ class DBJson(dict):
         删除数据库中与此实例对应的记录，并从缓存中移除实例。
         """
         if self.hash_key:
-            ApplicationData.objects.filter(name=self.hash_key).delete()
+            ApplicationDataModel.objects.filter(name=self.hash_key).delete()
             cache.delete(f"{self.CACHE_PREFIX}{self.hash_key}")
             del self
 
     def __sync__(self):
         if hasattr(self, "hash_key") and self.hash_key:
-            data, _ = ApplicationData.objects.get_or_create(name=self.hash_key)
+            data, _ = ApplicationDataModel.objects.get_or_create(name=self.hash_key)
             data.data = self
             data.save()
 

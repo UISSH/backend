@@ -2,9 +2,9 @@ from base.config import ABSDBConfig
 
 
 class DBConfig(ABSDBConfig):
-    from common.models.Config import SystemConfig
+    from common.models.Config import SystemConfigModel
 
-    model = SystemConfig
+    model = SystemConfigModel
 
     def init_data(self, module_name):
         obj, created = self.model.objects.get_or_create(key=self._key)

@@ -69,7 +69,7 @@ def domain_is_resolved(domain, request):
     host = find_domain_in_nginx()
 
     try:
-        url = f"https://{remote_ip}/api/Website/domain_records"
+        url = f"https://{remote_ip}/api/WebsiteModel/domain_records"
 
         headers = {"Authorization": f"token {token.key}", "host": f"{host}"}
 

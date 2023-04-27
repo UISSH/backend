@@ -24,26 +24,30 @@ class CronTab:
                 data = []
             return data
 
-    def add(self, cron: str) -> None:
+    def add(
+        self,
+        schedule_expressions: str,
+        cmd: str,
+    ) -> None:
+        cron = f"{schedule_expressions.strip()}    {cmd.strip()}"
         if cron in self.crontab_context:
             return
         else:
             self.crontab_context += "{}\n".format(cron)
 
-    def remove(self, cron: str, strict=True) -> None:
-        if strict:
-            if cron in self.crontab_context:
-                self.crontab_context = self.crontab_context.replace(cron, "")
-        else:
-            _cron_list = self.crontab_context.split("\n")
-            new_crontab = []
-            for item in _cron_list:
-                if cron in item:
-                    continue
-                new_crontab.append(item)
-            self.crontab_context = "\n".join(new_crontab) + "\n"
+    def remove(
+        self,
+        schedule_expressions: str,
+        cmd: str,
+    ) -> None:
+        cron = f"{schedule_expressions.strip()}    {cmd.strip()}"
+        if cron in self.crontab_context:
+            self.crontab_context = self.crontab_context.replace(cron, "")
 
     def save(self) -> None:
+        """
+        It will save the crontab to the system.
+        """
         self.crontab_context = self.crontab_context.replace("\n\n", "\n")
 
         with open(self.crontab_file, "w") as f:
@@ -61,9 +65,11 @@ class CronTab:
 
 if __name__ == "__main__":
     cron = CronTab()
-    cron.add("*/5 * * * * /path/to/command")
+    cron.add("* * * * *", "echo 1")
     cron.save()
     print(cron.list())
-    cron.remove("*/5 * * * * /path/to/command")
+    cron.remove("* * * * *", "echo 1")
+    cron.add("* * * * *", "echo `date` >> /root/crontab.log")
+    cron.remove("*/10 * * * *", "echo `date` >> /root/crontab.log")
     cron.save()
     print(cron.list())

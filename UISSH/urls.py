@@ -14,6 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+import logging
+
 import debug_toolbar
 from django.conf import settings
 from django.conf.urls.static import static
@@ -26,7 +28,7 @@ from drf_spectacular.views import (
 )
 from rest_framework.routers import DefaultRouter
 
-import common
+
 from common import views
 from common.apis import opreating, user
 from common.apis.kv_storage import KVStorageView
@@ -34,22 +36,22 @@ from common.apis.version import VersionView
 from database.apis import database
 from filebrowser.apis.filebrowser import FileBrowserView
 from ftpserver.apis.ftpserver import FtpServerView
+from iptables.apis.main import IPTablesView
 from terminal.apis.main import TerminalView
 from webdav.apis.webdav import WebDAVView
 from website.apis import application, website
-from iptables.apis.main import IPTablesView
 
 router = DefaultRouter()
 router.register(r"User", user.UserView)
 router.register(r"Operating", opreating.OperatingView, basename="Operating")
-router.register(r"Website", website.WebsiteView)
+router.register(r"WebsiteModel", website.WebsiteView)
 router.register(r"Application", application.ApplicationView, basename="Application")
-router.register(r"DataBase", database.DataBaseView)
+router.register(r"DataBaseModel", database.DataBaseView)
 router.register(r"Admin/User", user.AdminUserView)
 router.register(r"FileBrowser", FileBrowserView)
 router.register(r"WebDAV", WebDAVView)
 router.register(r"FtpServer", FtpServerView)
-router.register(r"KVStorage", KVStorageView)
+router.register(r"KVStorageModel", KVStorageView)
 router.register(r"Terminal", TerminalView)
 router.register(r"IPTables", IPTablesView, basename="IPTables")
 
@@ -64,7 +66,8 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    print("Additional debug routing configuration")
+    logging.debug("Additional debug routing configuration")
+
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += [
         path("docs/schema/", SpectacularAPIView.as_view(), name="schema"),

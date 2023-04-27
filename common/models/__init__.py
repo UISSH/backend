@@ -1,3 +1,3 @@
 from .Config import *
 from .User import *
-from .KVStorage import KVStorage
+from .KVStorage import KVStorageModel

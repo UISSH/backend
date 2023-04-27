@@ -4,11 +4,11 @@ from django.db import models
 from base.model import BaseModel
 
 """
-from common.models.Config import SystemConfig;SystemConfig.objects.get(key="SETTINGS");obj.value['database']['root_password'] = "root";obj.save()
+from common.models.Config import SystemConfigModel;SystemConfigModel.objects.get(key="SETTINGS");obj.value['database']['root_password'] = "root";obj.save()
 """
 
 
-class SystemConfig(BaseModel):
+class SystemConfigModel(BaseModel):
     name = models.CharField(max_length=64, verbose_name="配置项")
     key = models.CharField(unique=True, max_length=32, verbose_name="配置键")
     value = models.JSONField(max_length=40280, null=True, verbose_name="配置值")
@@ -25,7 +25,7 @@ class SystemConfig(BaseModel):
         data = cache.get(key_value)
         default_value = {"error": f"没有找到相关配置，已自动生成一条记录，如果检查无误请填写字段 {key_value} 的内容"}
         if data is None:
-            obj, created = SystemConfig.objects.get_or_create(key=key_value)
+            obj, created = SystemConfigModel.objects.get_or_create(key=key_value)
             data = obj.value
             if created:
                 obj.value = default_value
@@ -38,7 +38,7 @@ class SystemConfig(BaseModel):
             if not obj.enable:
                 raise AttributeError(f"{key_value} 配置项没有被启用！")
 
-            cache.set(key_value, data, SystemConfig.Config.CACHE_TIME)
+            cache.set(key_value, data, SystemConfigModel.Config.CACHE_TIME)
         else:
             pass
 

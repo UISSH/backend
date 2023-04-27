@@ -31,33 +31,37 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 if not DEBUG:
     SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
-
 LOGGING = {
     "version": 1,
-    "level": DEBUG,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname:5s} {asctime} {module} {process:d} {thread:d} -> {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname:5s} {asctime} -> {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
     },
     "root": {
         "handlers": ["console"],
-        "level": DEBUG if DEBUG else "WARNING",
+        "level": "DEBUG" if DEBUG else "INFO",
     },
-    "formatters": {
-        "verbose": {
-            "format": "{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
         },
     },
 }
-
-logger = logging.getLogger(__name__)
-
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")]
 )
