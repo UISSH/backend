@@ -1,6 +1,6 @@
 ## 测试数据
 
-使用mysql数据库或mariaDB进行测试，默认用户名是root，密码是'a.123456'。
+使用mysql数据库或mariaDB进行测试，默认用户名是root，密码是'2d46274325564ced'。
 
 ```
 python manage.py test

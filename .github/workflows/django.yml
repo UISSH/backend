@@ -19,7 +19,7 @@ jobs:
         uses: getong/mariadb-action@v1.1
         with:
           mariadb version: "10.5.15"
-          mysql root password: "a.123456"
+          mysql root password: "2d46274325564ced"
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3

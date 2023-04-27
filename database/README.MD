@@ -1,7 +1,7 @@
 ## TEST DATABASE
 
 it default use mysql database or mariaDB for testing.
-default username is root and password is 'a.123456'.
+default username is root and password is '2d46274325564ced'.
 
 ```
 python manage.py test
