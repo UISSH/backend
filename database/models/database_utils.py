@@ -8,12 +8,9 @@ from base.dataclass import BaseOperatingRes
 
 
 def get_database_username():
-    from django.core.cache import cache
-
     _key = "DB_USERNAME"
     username = "root"
-    if cache.get(_key):
-        return cache.get(_key)
+
     try:
         from common.config import DB_SETTINGS
 
@@ -22,18 +19,13 @@ def get_database_username():
         logging.error(e)
 
     username = os.getenv(_key, username)
-    cache.set(_key, username)
 
     return username
 
 
 def get_database_password():
-    from django.core.cache import cache
-
     _key = "DB_PASSWORD"
     password = "2d46274325564ced"
-    if cache.get(_key):
-        return cache.get(_key)
     try:
         from common.config import DB_SETTINGS
 
@@ -42,7 +34,7 @@ def get_database_password():
         logging.error(e)
 
     password = os.getenv(_key, password)
-    cache.set(_key, password)
+
     return password
 
 
