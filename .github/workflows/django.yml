@@ -25,17 +25,19 @@ jobs:
           mysql root password: ${{ vars.DB_PASSWORD }}
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "pip"
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Set up Django
+        run: |
           cp .env.template .env
           python manage.py makemigrations
           python manage.py migrate
-
       - name: Run Tests
         run: |
           python manage.py test
