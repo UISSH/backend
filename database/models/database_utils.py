@@ -10,18 +10,19 @@ from base.dataclass import BaseOperatingRes
 def get_database_username():
     from django.core.cache import cache
 
+    _key = "DB_USERNAME"
     username = "root"
-    if cache.get("DB_ROOT_USERNAME"):
-        return cache.get("DB_ROOT_USERNAME")
+    if cache.get(_key):
+        return cache.get(_key)
     try:
         from common.config import DB_SETTINGS
 
         username = DB_SETTINGS.database_value()["database"]["root_username"]
     except Exception as e:
         logging.error(e)
-    username = os.getenv("DB_USERNAME", username)
 
-    cache.set("DB_ROOT_USERNAME", username)
+    username = os.getenv(_key, username)
+    cache.set(_key, username)
 
     return username
 
@@ -29,9 +30,10 @@ def get_database_username():
 def get_database_password():
     from django.core.cache import cache
 
-    password = "a.123456"
-    if cache.get("DB_ROOT_PASSWORD"):
-        return cache.get("DB_ROOT_PASSWORD")
+    _key = "DB_PASSWORD"
+    password = "2d46274325564ced"
+    if cache.get(_key):
+        return cache.get(_key)
     try:
         from common.config import DB_SETTINGS
 
@@ -39,13 +41,13 @@ def get_database_password():
     except Exception as e:
         logging.error(e)
 
-    password = os.getenv("DB_PASSWORD", password)
-    cache.set("DB_ROOT_PASSWORD", password)
+    password = os.getenv(_key, password)
+    cache.set(_key, password)
     return password
 
 
 def execute_sql(
-    sql, root_username="root", root_password="a.123456"
+    sql, root_username="root", root_password="2d46274325564ced"
 ) -> subprocess.CompletedProcess:
     # cmd = f'mysql -u{root_username} -p{root_password} -e "{sql}"'
     db = pymysql.connect(host="localhost", user=root_username, password=root_password)
@@ -85,7 +87,7 @@ def create_new_database(
     collation="utf8mb4_general_ci",
     authorized_ip="localhost",
     root_username="root",
-    root_password="a.123456",
+    root_password="2d46274325564ced",
 ):
     operator_res = BaseOperatingRes.get_instance(event_id)
     operator_res.set_processing()
@@ -144,7 +146,7 @@ def delete_database(
     username,
     authorized_ip="localhost",
     root_username="root",
-    root_password="a.123456",
+    root_password="2d46274325564ced",
 ):
     operator_res = BaseOperatingRes.get_instance(event_id)
     operator_res.set_processing()
@@ -172,7 +174,7 @@ def update_username_database(
     new_username,
     authorized_ip="localhost",
     root_username="root",
-    root_password="a.123456",
+    root_password="2d46274325564ced",
 ):
     # https://mariadb.com/kb/en/rename-user/
     operator_res = BaseOperatingRes.get_instance(event_id)
@@ -198,7 +200,7 @@ def update_password_database(
     new_password,
     root_username="root",
     authorized_ip="localhost",
-    root_password="a.123456",
+    root_password="2d46274325564ced",
 ):
     # https://mariadb.com/kb/en/set-password/#example
     operator_res = BaseOperatingRes.get_instance(event_id)
@@ -219,7 +221,11 @@ def update_password_database(
 
 
 def import_backup_db(
-    event_id, name, backup_db_path, root_username="root", root_password="a.123456"
+    event_id,
+    name,
+    backup_db_path,
+    root_username="root",
+    root_password="2d46274325564ced",
 ):
     operator_res = BaseOperatingRes.get_instance(event_id)
     operator_res.set_processing()
@@ -243,7 +249,11 @@ def import_backup_db(
 
 
 def export_backup_db(
-    event_id, name, backup_db_path, root_username="root", root_password="a.123456"
+    event_id,
+    name,
+    backup_db_path,
+    root_username="root",
+    root_password="2d46274325564ced",
 ):
     # mysqldump -uroot-p123456 mydb > /data/mysqlDump/mydb.sql
 
