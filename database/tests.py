@@ -17,6 +17,9 @@ from database.models.database_utils import (
 root_username = get_database_username()
 root_password = get_database_password()
 
+print(f"root_username: {root_username}")
+print(f"root_password: {root_password}")
+
 
 class TestDBDatabase(TestCase):
     def _pre_setup(self):
