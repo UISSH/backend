@@ -4,7 +4,7 @@ import pathlib
 import traceback
 
 from django.db import transaction
-from database.models import DataBase
+from database.models import DataBaseModel
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -19,7 +19,7 @@ from common.models import User
 from common.serializers.operating import OperatingResSerializer
 from website.applications.core.application import Application
 from website.applications.core.dataclass import BaseSSLCertificate, DataBaseListEnum
-from website.models import Website
+from website.models import WebsiteModel
 from website.serializers.website import (
     DefaultWebsuteConfigSerializer,
     WebsiteConfigSerializer,
@@ -36,7 +36,7 @@ def generate_password():
 
 class WebsiteView(BaseModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = Website.objects.select_related("user").all()
+    queryset = WebsiteModel.objects.select_related("user").all()
     serializer_class = WebsiteModelSerializer
 
     def get_queryset(self):
@@ -55,8 +55,8 @@ class WebsiteView(BaseModelViewSet):
 
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def allocating_resources(self, request, *args, **kwargs):
-        op = BaseOperatingRes(name="Website:Allocating Resources")
-        instance: Website = self.get_object()
+        op = BaseOperatingRes(name="WebsiteModel:Allocating Resources")
+        instance: WebsiteModel = self.get_object()
         app: Application = instance.get_application()
         # allow port
 
@@ -70,13 +70,13 @@ class WebsiteView(BaseModelViewSet):
             if i == DataBaseListEnum.MariaDB or i == DataBaseListEnum.MySQL:
                 # set database type
                 database_type = (
-                    DataBase.DBType.MariaDB
+                    DataBaseModel.DBType.MariaDB
                     if i == DataBaseListEnum.MariaDB
-                    else DataBase.DBType.MySQL
+                    else DataBaseModel.DBType.MySQL
                 )
 
                 # create database record
-                obj: DataBase = DataBase.objects.create(
+                obj: DataBaseModel = DataBaseModel.objects.create(
                     user=self.request.user,
                     website=instance,
                     name="DB_" + instance.domain.replace(".", "_"),
@@ -90,7 +90,7 @@ class WebsiteView(BaseModelViewSet):
                 op_res = obj.get_operating_res()
                 obj.create_database_instance(op_res.event_id)
                 logging.debug(op_res.json())
-                
+
             elif i == DataBaseListEnum.Redis:
                 # TODO create redis database
                 pass
@@ -117,7 +117,7 @@ class WebsiteView(BaseModelViewSet):
         methods=["post"], detail=True, serializer_class=WebsiteDomainConfigSerializer
     )
     def update_domain(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
+        obj: WebsiteModel = self.get_object()
         serializer = WebsiteDomainConfigSerializer(data=request.data, instance=obj)
         if serializer.is_valid(raise_exception=True):
             data = serializer.save()
@@ -133,7 +133,7 @@ class WebsiteView(BaseModelViewSet):
 
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def enable_ssl(self, request, *args, **kwargs):
-        obj: Website = self.get_object()
+        obj: WebsiteModel = self.get_object()
         op = BaseOperatingRes()
 
         p = issuing_certificate(obj)
@@ -151,7 +151,7 @@ class WebsiteView(BaseModelViewSet):
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def disable_ssl(self, request, *args, **kwargs):
         op = BaseOperatingRes()
-        obj: Website = self.get_object()
+        obj: WebsiteModel = self.get_object()
         obj.ssl_enable = False
         obj.sync_web_config(save=True)
         op.set_success()
@@ -203,7 +203,7 @@ class WebsiteView(BaseModelViewSet):
         获取提供给用户的默认 nginx 配置文件。
         Get the default nginx configuration file provided to the user.
         """
-        obj: Website = self.get_object()
+        obj: WebsiteModel = self.get_object()
         serializer = DefaultWebsuteConfigSerializer(
             instance=obj, data={"web_server_config": obj.valid_web_server_config}
         )

@@ -1,19 +1,31 @@
 # 介绍
 
+## 环境
+
+ ![debian](https://img.shields.io/badge/OS-Debian%2011%20LTS-brightgreen.svg?style=flat-square&logo=debian)
+ ![ubuntu](https://img.shields.io/badge/OS-Ubuntu%2022%20LTS-brightgreen.svg?style=flat-square&logo=ubuntu)
+ ![UISSH](https://img.shields.io/badge/Python-3.9--3.11-brightgreen.svg?style=flat-square&logo=python)
+
+## CI
 ![django ci](https://github.com/UISSH/backend/actions/workflows/django.yml/badge.svg)
 [![Debian 11 CI](https://github.com/UISSH/install-script/actions/workflows/debian_11.yml/badge.svg)](https://github.com/UISSH/install-script/actions/workflows/debian_11.yml)
 [![Ubuntu 22.04 CI](https://github.com/UISSH/install-script/actions/workflows/ubuntu_22.04.yml/badge.svg)](https://github.com/UISSH/install-script/actions/workflows/ubuntu_22.04.yml)
 
 
+
+
+
+
+
 本项目旨在摆脱繁琐的编译安装、命令行配置的运维工作，并尽最大的努力遵循 Linux 通用规范的一个可视化界面。
 
-# 安装
+## 安装
 
 可使用一键安装脚本快速部署，仅支持 Debian 11 与 Ubuntu 22.04。
 
 - [安装脚本](https://github.com/UISSH/install-script)
 
-# 运行
+## 运行
 
 使用 systemd 管理
 
@@ -28,7 +40,7 @@ systemctl stop ui-ssh
 gunicorn UISSH.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 
 ```
 
-# 目录结构
+## 目录结构
 
 安装后本项目的目录
 
@@ -42,7 +54,7 @@ gunicorn UISSH.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
 其余程序目录以及配置文件（MariaDB、PHP、Nginx）结构都保持默认位置。
 
 
-# 规范标准
+## 规范标准
 
 底层接口尽量调用开源工具提供的接口，目录结构以主流开源工具默认行为为准，不额外造轮子。
 

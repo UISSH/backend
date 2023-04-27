@@ -6,7 +6,7 @@ from rest_framework import serializers
 from base.serializer import ICBaseModelSerializer, ICBaseSerializer
 from base.utils.format import format_completed_process
 from website.applications.app_factory import AppFactory
-from website.models import Website
+from website.models import WebsiteModel
 from website.models.utils import get_section, insert_section, update_nginx_server_name
 
 
@@ -44,7 +44,7 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
     domain = serializers.CharField(max_length=512)
     extra_domain = serializers.CharField(max_length=10240, allow_null=True)
 
-    def update(self, instance: Website, validated_data):
+    def update(self, instance: WebsiteModel, validated_data):
         domain = validated_data.get("domain")
         extra_domain = validated_data.get("extra_domain")
         old_domain = instance.domain
@@ -94,7 +94,7 @@ class WebsiteDomainConfigSerializer(ICBaseSerializer):
 class DefaultWebsuteConfigSerializer(ICBaseSerializer):
     web_server_config = serializers.CharField(max_length=204800)
 
-    def update(self, instance: Website, validated_data):
+    def update(self, instance: WebsiteModel, validated_data):
         app = instance.get_application_module(instance.get_app_new_website_config())
         web_server_config = instance.get_nginx_config()
 
@@ -110,7 +110,7 @@ class DefaultWebsuteConfigSerializer(ICBaseSerializer):
 class WebsiteConfigSerializer(ICBaseSerializer):
     web_server_config = serializers.CharField(max_length=204800)
 
-    def update(self, instance: Website, validated_data):
+    def update(self, instance: WebsiteModel, validated_data):
         web_server_config = validated_data.get("web_server_config")
 
         app = instance.get_application_module(instance.get_app_new_website_config())
@@ -151,11 +151,13 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
     status_text = serializers.SerializerMethodField("_status_text")
 
     class Meta:
-        model = Website
+        model = WebsiteModel
         fields = "__all__"
 
     def create(self, validated_data):
-        instance: Website = super(WebsiteModelSerializer, self).create(validated_data)
+        instance: WebsiteModel = super(WebsiteModelSerializer, self).create(
+            validated_data
+        )
 
         # 1.Create folder and file
         if instance.index_root == "/var/www/html":
@@ -257,20 +259,20 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
     def update(self, instance, validated_data):
         return super(WebsiteModelSerializer, self).update(instance, validated_data)
 
-    def _ssl_config(self, obj: Website) -> SSLConfigSerializer:
+    def _ssl_config(self, obj: WebsiteModel) -> SSLConfigSerializer:
         return SSLConfigSerializer(obj.ssl_config)
 
-    def get_database_id(self, obj: Website):
+    def get_database_id(self, obj: WebsiteModel):
         if hasattr(obj, "database"):
             return obj.database.id
 
-    def _web_server_type_text(self, obj: Website):
+    def _web_server_type_text(self, obj: WebsiteModel):
         return obj.get_web_server_type_display()
 
-    def _status_text(self, obj: Website):
+    def _status_text(self, obj: WebsiteModel):
         return obj.get_status_display()
 
-    def get_database_name(self, obj: Website):
+    def get_database_name(self, obj: WebsiteModel):
         if hasattr(obj, "database"):
             return obj.database.name
 

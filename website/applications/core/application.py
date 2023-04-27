@@ -64,13 +64,13 @@ class LocalStorage(Storage):
 
 
 class DBStorage(Storage):
-    from website.models.application import ApplicationData
+    from website.models.application import ApplicationDataModel
 
     def __init__(self, unique):
-        if not self.ApplicationData.objects.filter(name=unique).exists():
-            self.obj = self.ApplicationData.objects.create(name=unique)
+        if not self.ApplicationDataModel.objects.filter(name=unique).exists():
+            self.obj = self.ApplicationDataModel.objects.create(name=unique)
         else:
-            self.obj = self.ApplicationData.objects.get(name=unique)
+            self.obj = self.ApplicationDataModel.objects.get(name=unique)
 
     def read(self, *args, **kwargs) -> dict:
         from website.applications.core.db_json import DBJson

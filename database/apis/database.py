@@ -12,14 +12,14 @@ from base.viewset import BaseModelViewSet
 from common.config import DB_SETTINGS
 from common.models import User
 from common.serializers.operating import OperatingResSerializer
-from database.models import DataBase
+from database.models import DataBaseModel
 from database.models.database_utils import export_backup_db, import_backup_db
 from database.serializers.database import DataBaseModelSerializer
 
 
 class DataBaseView(BaseModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = DataBase.objects.select_related("user").all()
+    queryset = DataBaseModel.objects.select_related("user").all()
     serializer_class = DataBaseModelSerializer
 
     # lookup_field = "username"
@@ -33,7 +33,7 @@ class DataBaseView(BaseModelViewSet):
 
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def create_instance(self, request, *args, **kwargs):
-        obj: DataBase = self.get_object()
+        obj: DataBaseModel = self.get_object()
         op_res = obj.get_operating_res()
 
         if obj.create_status == obj.CreateStatus.FAILED:
@@ -52,7 +52,7 @@ class DataBaseView(BaseModelViewSet):
             msg = "active"
         else:
             msg = "inactive"
-        op_res = DataBase.get_operating_res()
+        op_res = DataBaseModel.get_operating_res()
         op_res.set_processing()
         op_res.msg = msg
         op_res.set_success()
@@ -60,7 +60,7 @@ class DataBaseView(BaseModelViewSet):
 
     @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
     def start_database_instance(self, request, *args, **kwargs):
-        op_res = DataBase.get_operating_res()
+        op_res = DataBaseModel.get_operating_res()
         op_res.set_processing()
         stats = os.system("systemctl start mariadb")
         if stats == 0:
@@ -72,7 +72,7 @@ class DataBaseView(BaseModelViewSet):
 
     @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
     def stop_database_instance(self, request, *args, **kwargs):
-        op_res = DataBase.get_operating_res()
+        op_res = DataBaseModel.get_operating_res()
         op_res.set_processing()
         stats = os.system("systemctl stop mariadb")
         if stats == 0:
@@ -85,7 +85,7 @@ class DataBaseView(BaseModelViewSet):
 
     @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
     def restart_database_instance(self, request, *args, **kwargs):
-        op_res = DataBase.get_operating_res()
+        op_res = DataBaseModel.get_operating_res()
         op_res.set_processing()
         stats = os.system("systemctl restart mariadb")
         if stats == 0:
@@ -98,7 +98,7 @@ class DataBaseView(BaseModelViewSet):
     @extend_schema(parameters=[OpenApiParameter(name="str", type=str)])
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def import_backup(self, request: Request, *args, **kwargs):
-        op_res = DataBase.get_operating_res()
+        op_res = DataBaseModel.get_operating_res()
         path = request.query_params.get("path", None)
         if path is None:
             op_res.msg = f"`path` parameter is required."
@@ -122,10 +122,10 @@ class DataBaseView(BaseModelViewSet):
 
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def export_backup(self, request: Request, *args, **kwargs):
-        op_res = DataBase.get_operating_res()
+        op_res = DataBaseModel.get_operating_res()
         root_username = DB_SETTINGS.database_value()["database"]["root_username"]
         root_password = DB_SETTINGS.database_value()["database"]["root_password"]
-        obj: DataBase = self.get_object()
+        obj: DataBaseModel = self.get_object()
         backup_db_path = f"{obj.get_backup_dir()}/{int(time.time())}.sql"
         export_backup_db(
             op_res.event_id,

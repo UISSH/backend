@@ -3,7 +3,7 @@ from django.db import models
 from base.base_model import BaseModel
 
 
-class ApplicationData(BaseModel):
+class ApplicationDataModel(BaseModel):
     name = models.CharField(max_length=64, unique=True, verbose_name="名称")
     data = models.JSONField(verbose_name="数据", null=True, blank=True)
 

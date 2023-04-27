@@ -83,7 +83,7 @@ class WebsiteMethod:
         }
 
 
-class Website(BaseModel):
+class WebsiteModel(BaseModel):
     """website model"""
 
     APP_FACTORY = AppFactory
@@ -228,9 +228,9 @@ class Website(BaseModel):
 
         # Get database config.
         if hasattr(self, "database") and self.database:
-            from database.models.database import DataBase
+            from database.models.database import DataBaseModel
 
-            database: DataBase = self.database
+            database: DataBaseModel = self.database
             if database.database_type == database.DBType.MariaDB:
                 config.databases = DataBaseDict(
                     mariadb=MariaDBConfig(

@@ -4,7 +4,7 @@ import os
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from website.models import Website
+from website.models import WebsiteModel
 
 """
 from django.apps import AppConfig
@@ -20,8 +20,8 @@ class WebsiteConfig(AppConfig):
 """
 
 
-@receiver(pre_delete, sender=Website)
-def listener_pre_delete(sender, instance: Website, **kwargs):
+@receiver(pre_delete, sender=WebsiteModel)
+def listener_pre_delete(sender, instance: WebsiteModel, **kwargs):
     logging.info(f"clear up {instance.domain} related resources.")
 
     def os_system_info(cmd):

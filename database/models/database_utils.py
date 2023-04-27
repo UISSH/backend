@@ -2,8 +2,46 @@ import logging
 import os
 import subprocess
 
+
 import pymysql
 from base.dataclass import BaseOperatingRes
+
+
+def get_database_username():
+    from django.core.cache import cache
+
+    username = "root"
+    if cache.get("DB_ROOT_USERNAME"):
+        return cache.get("DB_ROOT_USERNAME")
+    try:
+        from common.config import DB_SETTINGS
+
+        username = DB_SETTINGS.database_value()["database"]["root_username"]
+    except Exception as e:
+        logging.error(e)
+    username = os.getenv("DB_USERNAME", username)
+
+    cache.set("DB_ROOT_USERNAME", username)
+
+    return username
+
+
+def get_database_password():
+    from django.core.cache import cache
+
+    password = "a.123456"
+    if cache.get("DB_ROOT_PASSWORD"):
+        return cache.get("DB_ROOT_PASSWORD")
+    try:
+        from common.config import DB_SETTINGS
+
+        password = DB_SETTINGS.database_value()["database"]["root_password"]
+    except Exception as e:
+        logging.error(e)
+
+    password = os.getenv("DB_PASSWORD", password)
+    cache.set("DB_ROOT_PASSWORD", password)
+    return password
 
 
 def execute_sql(

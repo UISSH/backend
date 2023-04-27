@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.test import TestCase
 
 from website.applications.core.db_json import DBJson, DirectInitError
-from website.models import ApplicationData
+from website.models import ApplicationDataModel
 
 
 class TestDBJson(TestCase):
@@ -14,7 +14,7 @@ class TestDBJson(TestCase):
         """
         db_json = DBJson.get_instance("create")
         db_json["1"] = 1
-        m = ApplicationData.objects.get(name="create")
+        m = ApplicationDataModel.objects.get(name="create")
         self.assertEqual(m.data, db_json)
 
     def test_update(self):
@@ -23,7 +23,7 @@ class TestDBJson(TestCase):
         """
         db_json = DBJson.get_instance("update")
         db_json["1"] = 1
-        m = ApplicationData.objects.get(name="update")
+        m = ApplicationDataModel.objects.get(name="update")
         self.assertEqual(m.data, db_json)
         db_json["1"] = 2
         db_json["2"] = "2"
@@ -37,7 +37,7 @@ class TestDBJson(TestCase):
         db_json = DBJson.get_instance("delete_part")
         db_json["1"] = 1
         db_json["2"] = "2"
-        m = ApplicationData.objects.get(name="delete_part")
+        m = ApplicationDataModel.objects.get(name="delete_part")
         self.assertEqual(m.data, db_json)
         item = db_json.pop("1")
         self.assertEqual(item, 1)
@@ -51,7 +51,7 @@ class TestDBJson(TestCase):
         db_json = DBJson.get_instance("delete_all")
         db_json["1"] = 1
         db_json["2"] = "2"
-        m = ApplicationData.objects.get(name="delete_all")
+        m = ApplicationDataModel.objects.get(name="delete_all")
         self.assertEqual(m.data, db_json)
         db_json.clear()
         m.refresh_from_db()
@@ -64,7 +64,7 @@ class TestDBJson(TestCase):
         db_json = DBJson.get_instance("del_funcation")
         db_json["1"] = 1
         db_json["2"] = "2"
-        m = ApplicationData.objects.get(name="del_funcation")
+        m = ApplicationDataModel.objects.get(name="del_funcation")
         self.assertEqual(m.data, db_json)
         del db_json["1"]
         self.assertNotIn("1", db_json)
@@ -97,7 +97,7 @@ class TestDBJson(TestCase):
             hash_key_list.append(f"gc_{i}")
 
         for i in range(num):
-            res = ApplicationData.objects.filter(name=f"gc_{i}").exists()
+            res = ApplicationDataModel.objects.filter(name=f"gc_{i}").exists()
             self.assertTrue(res)
 
         for item in db_json_list:
@@ -105,7 +105,7 @@ class TestDBJson(TestCase):
 
         for i in range(num):
             key = f"gc_{i}"
-            res = ApplicationData.objects.filter(name=key)
+            res = ApplicationDataModel.objects.filter(name=key)
             self.assertFalse(res.exists())
 
             cache_key = f"{DBJson.CACHE_PREFIX}{key}"

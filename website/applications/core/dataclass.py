@@ -23,9 +23,9 @@ class BackupTypeEnum(Enum):
       4. website database
       ...
     - DATABASE
-      MySQL, MariaDB or other DataBase data.
+      MySQL, MariaDB or other DataBaseModel data.
     - PROGRAM
-      Website Program code etc.
+      WebsiteModel Program code etc.
     """
 
     All = 1
@@ -242,12 +242,13 @@ class NewWebSiteConfig(BaseData):
 
 
 class DataBaseListEnum(Enum):
-    """DataBase List Enum
+    """DataBaseModel List Enum
 
     Args:
         Enum (_type_):  Enum Type
         e.g.:  MySQL = 1 , MariaDB = 2 , ...
     """
+
     MySQL = 0
     MariaDB = 1
     Redis = 2

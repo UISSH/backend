@@ -1,9 +1,16 @@
 from django.contrib import admin
 
 # # Register your models here.
-# from database.models import DataBase
+# from database.models import DataBaseModel
 
 
-# @admin.register(DataBase)
+# @admin.register(DataBaseModel)
 # class DataBaseAdmin(admin.ModelAdmin):
 #     pass
+
+from .models import CrontabModel
+
+
+@admin.register(CrontabModel)
+class CronTabModelAdmin(admin.ModelAdmin):
+    list_display = ("uuid", "schedule", "command")

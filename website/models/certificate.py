@@ -4,11 +4,11 @@ from base.base_model import BaseModel
 from common.models.User import User
 
 
-class AcmeDNS(BaseModel):
+class AcmeDNSModel(BaseModel):
     pass
 
 
-class AcmeAccount(BaseModel):
+class AcmeAccountModel(BaseModel):
     """
     用于注册 certbot 帐号的信息记录，每添加一个新的账户需要调用脚本注册并更新注册状态。
     """

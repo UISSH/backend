@@ -26,8 +26,8 @@ def upgrade_backend_project():
     cmd(
         f"cd {BACKEND_DIR} && python3 -m venv venv && venv/bin/pip install -r requirements.txt"
     )
-    cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations")
-    cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate")
+    cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations --noinput")
+    cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py collectstatic --noinput")
     cmd("systemctl stop ui-ssh")
     cmd("systemctl start ui-ssh")

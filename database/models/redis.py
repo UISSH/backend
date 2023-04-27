@@ -12,7 +12,7 @@ from base.utils.logger import plog
 from common.config import DB_SETTINGS
 from common.models.User import User
 
-from website.models import Website
+from website.models import WebsiteModel
 
 
 def install_redis():
@@ -67,7 +67,7 @@ def create_redis_instance(name):
     # enable redis-server service and start it
 
 
-class RedisDB(BaseModel):
+class RedisDBModel(BaseModel):
     name = models.CharField(max_length=255, unique=True)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=255, unique=True)
