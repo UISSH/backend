@@ -40,6 +40,7 @@ from iptables.apis.main import IPTablesView
 from terminal.apis.main import TerminalView
 from webdav.apis.webdav import WebDAVView
 from website.apis import application, website
+from crontab.apis.main import CrontabViewSet
 
 router = DefaultRouter()
 router.register(r"User", user.UserView)
@@ -54,6 +55,7 @@ router.register(r"FtpServer", FtpServerView)
 router.register(r"KVStorageModel", KVStorageView)
 router.register(r"Terminal", TerminalView)
 router.register(r"IPTables", IPTablesView, basename="IPTables")
+router.register(r"Crontab", CrontabViewSet)
 
 
 admin.site.site_title = "UI-SSH"

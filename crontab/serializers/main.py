@@ -1,11 +1,8 @@
-from base.serializer import ICBaseModelSerializer, ICBaseSerializer
+from base.serializer import ICBaseModelSerializer
+from crontab.models.main import CrontabModel
 
 
-class MainModelSerializer(ICBaseModelSerializer):
+class CrontabModelSerializer(ICBaseModelSerializer):
     class Meta:
-        model = object
+        model = CrontabModel
         fields = "__all__"
-
-
-class MainSerializer(ICBaseSerializer):
-    pass
