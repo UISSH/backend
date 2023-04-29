@@ -1,4 +1,5 @@
 import logging
+import sys
 from django.apps import AppConfig
 
 
@@ -8,6 +9,9 @@ class CrontabConfig(AppConfig):
 
     def ready(self) -> None:
         from .models import CrontabModel
+
+        if "manage.py" in sys.argv and "runserver" not in sys.argv:
+            return
 
         try:
             logging.debug("sync crontab job from system to database")

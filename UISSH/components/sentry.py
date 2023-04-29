@@ -1,3 +1,6 @@
+import logging
+
+
 def __init__():
     from .. import config
 
@@ -18,4 +21,4 @@ def __init__():
             )
 
     except Exception as e:
-        print(f"load sentry sdk error: {e}")
+        logging.debug(f"load sentry sdk error: {e}")

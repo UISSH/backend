@@ -1,4 +1,5 @@
 import logging
+import sys
 from typing import List
 
 from django.apps import AppConfig
@@ -10,6 +11,8 @@ class CommonConfig(AppConfig):
     name = "common"
 
     def ready(self):
+        if "manage.py" in sys.argv and "runserver" not in sys.argv:
+            return
         from .config import get_db_configs
 
         super(CommonConfig, self).ready()

@@ -5,7 +5,7 @@ from uuid import uuid4
 from django.db import models
 from base.base_model import BaseModel
 from crontab.utils import CronTab
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 
@@ -72,8 +72,15 @@ class CrontabModel(BaseModel):
         lastest_crontab.save()
 
 
+@receiver(post_save, sender=CrontabModel)
+def signal_receiver_post_save(sender, instance: CrontabModel, created, **kwargs):
+    lastest_crontab = CronTab()
+    lastest_crontab.add(instance.schedule, instance.command)
+    lastest_crontab.save()
+
+
 @receiver(post_delete, sender=CrontabModel)
-def __delete(sender, instance: CrontabModel, using, **kwargs):
+def signal_receiver_post_delete(sender, instance: CrontabModel, using, **kwargs):
     lastest_crontab = CronTab()
     lastest_crontab.remove(instance.schedule, instance.command)
     lastest_crontab.save()
