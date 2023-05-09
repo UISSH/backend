@@ -1,5 +1,38 @@
+import json
+import logging
 import os
 import tempfile
+
+
+def list_by_osquery():
+    """
+    List all crontab tasks by osquery.
+    """
+    pass
+    # check if osquery is installed
+    if os.system("which osquery") == 0:
+        return []
+
+    # use popen to get crontab tasks
+    osquery_cmd = "osqueryi --json \"select * from crontab where path like '%root';\""
+    osquery_result = os.popen(osquery_cmd).read()
+    logging.debug(f"osquery result: {osquery_result}")
+    task_list = []
+    try:
+        osquery_result = json.loads(osquery_result)
+        for i in osquery_result:
+            if i["event"]:
+                task = f'{i["event"]}    {i["command"]}'
+            else:
+                task = f'{i["minute"]} {i["hour"]} {i["day_of_month"]} {i["month"]} {i["day_of_week"]}    {i["command"]}'
+
+            print(task)
+            task_list.append(task)
+
+    except Exception as e:
+        logging.error(f"failed to parse osquery result: {e}")
+        return []
+    return task_list
 
 
 class CronTab:
@@ -14,6 +47,11 @@ class CronTab:
             self._crontab_context = self.crontab_context
 
     def list(self):
+        data = list_by_osquery()
+        print(data)
+        if data:
+            return data
+
         crontab_file = tempfile.NamedTemporaryFile().name
         os.system("crontab -l > {}".format(crontab_file))
         with open(crontab_file) as f:

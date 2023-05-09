@@ -1,5 +1,6 @@
 import logging
 import sys
+import traceback
 from django.apps import AppConfig
 
 
@@ -17,5 +18,6 @@ class CrontabConfig(AppConfig):
             logging.debug("sync crontab job from system to database")
             CrontabModel.sync()
         except Exception as e:
-            logging.error(e)
+            logging.error(traceback.format_exc())
+
         return super().ready()

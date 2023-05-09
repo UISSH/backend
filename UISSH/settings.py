@@ -36,7 +36,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname:5s} {asctime} {module} {process:d} {thread:d} -> {message}",
+            "format": "{levelname:5s} {asctime} {pathname}:{lineno} -> {message}",
             "style": "{",
         },
         "simple": {
@@ -47,7 +47,7 @@ LOGGING = {
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "verbose" if DEBUG else "simple",
         },
     },
     "root": {
