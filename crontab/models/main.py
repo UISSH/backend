@@ -3,10 +3,11 @@ import pathlib
 from uuid import uuid4
 
 from django.db import models
+from django.db.models.signals import post_delete, pre_save
+from django.dispatch import receiver
+
 from base.base_model import BaseModel
 from crontab.utils import CronTab
-from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 
 
 class CrontabModel(BaseModel):
@@ -37,6 +38,21 @@ class CrontabModel(BaseModel):
     def __str__(self):
         return f"{self.uuid}"
 
+    def update_shell_script(self):
+        if self.shellscript:
+            shellscript_folder = pathlib.Path("/usr/local/uissh/crontab")
+            shellscript_sh = shellscript_folder / pathlib.Path(f"{self.uuid.hex}.sh")
+            if not shellscript_folder.exists():
+                shellscript_folder.mkdir(parents=True, exist_ok=True)
+
+            shellscript_sh.write_text(
+                f"#!/usr/bin/bash\n#{self.schedule}\n#{self.command}\n\n"
+                + self.shellscript
+                + "\n"
+            )
+            shellscript_sh.chmod(0o755)
+            self.command = f"{shellscript_sh}"
+
     @classmethod
     def sync(cls):
         # diff system crontab and database crontab
@@ -44,6 +60,7 @@ class CrontabModel(BaseModel):
         logging.debug(f"system crontab: {system_crontab}")
         database_crontab = cls.objects.all()
         for i in system_crontab:
+            logging.debug(f"system crontab: {i}")
             schedule, command = i.split("    ")
             schedule = schedule.strip()
             command = command.strip()
@@ -55,32 +72,28 @@ class CrontabModel(BaseModel):
         lastest_crontab = CronTab()
         database_crontab = cls.objects.all()
         for i in database_crontab:
-            if i.shellscript:
-                shellscript_folder = pathlib.Path("/usr/local/uissh/crontab")
-                shellscript_sh = shellscript_folder / pathlib.Path(f"{i.uuid.hex}.sh")
-                if not shellscript_folder.exists():
-                    shellscript_folder.mkdir(parents=True, exist_ok=True)
-
-                shellscript_sh.write_text(
-                    f"#!/usr/bin/bash\n#{i.schedule}\n#{i.command}" + i.shellscript
-                )
-                shellscript_sh.chmod(0o755)
-                i.command = f"{shellscript_sh}"
-                i.save()
+            i.update_shell_script()
+            i.save()
             lastest_crontab.add(i.schedule, i.command)
 
         lastest_crontab.save()
 
 
-@receiver(post_save, sender=CrontabModel)
-def signal_receiver_post_save(sender, instance: CrontabModel, created, **kwargs):
+@receiver(pre_save, sender=CrontabModel)
+def signal_receiver_post_save(sender, instance: CrontabModel, **kwargs):
     lastest_crontab = CronTab()
     lastest_crontab.add(instance.schedule, instance.command)
-    lastest_crontab.save()
+    instance.update_shell_script()
 
 
 @receiver(post_delete, sender=CrontabModel)
 def signal_receiver_post_delete(sender, instance: CrontabModel, using, **kwargs):
     lastest_crontab = CronTab()
     lastest_crontab.remove(instance.schedule, instance.command)
+    shellscript_folder = pathlib.Path("/usr/local/uissh/crontab")
+    shellscript_sh = shellscript_folder / pathlib.Path(f"{instance.uuid.hex}.sh")
+    try:
+        shellscript_sh.unlink()
+    except Exception as e:
+        logging.error(f"failed to remove {shellscript_sh}: {e}")
     lastest_crontab.save()
