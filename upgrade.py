@@ -10,7 +10,9 @@ BACKEND_DIR = f"{PROJECT_DIR}/backend"
 PYTHON_INTERPRETER = f"{BACKEND_DIR}/venv/bin/python"
 
 
-def cmd(command):
+def cmd(command, msg=None):
+    if msg:
+        print(msg)
     os.system(command)
 
 
