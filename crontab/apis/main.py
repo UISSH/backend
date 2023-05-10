@@ -16,7 +16,7 @@ class CrontabViewSet(BaseModelViewSet):
     def get_queryset(self):
         return self.queryset.all()
 
-    @action(detail=False, methods=["sync"])
+    @action(detail=False, methods=["get"])
     def sync(self, request, *args, **kwargs):
         op = BaseOperatingRes(name="sync iptables")
         try:

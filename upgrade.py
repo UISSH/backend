@@ -1,7 +1,7 @@
 import os
 
-CURRENT_VERSION = "0.1.0"
-FRONTED_MINIMUM_VERSION = "v0.2.0"
+CURRENT_VERSION = "0.2.0"
+FRONTED_MINIMUM_VERSION = "v0.2.2"
 MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
 FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
