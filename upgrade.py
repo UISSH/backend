@@ -1,16 +1,18 @@
 import os
 
-CURRENT_VERSION = "0.2.0"
+CURRENT_VERSION = "v0.2.0"
 FRONTED_MINIMUM_VERSION = "v0.2.2"
 MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
-FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
+FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
 PROJECT_DIR = "/usr/local/uissh"
 BACKEND_DIR = f"{PROJECT_DIR}/backend"
 PYTHON_INTERPRETER = f"{BACKEND_DIR}/venv/bin/python"
 
 
-def cmd(command):
+def cmd(command, msg=None):
+    if msg:
+        print(msg)
     os.system(command)
 
 
@@ -18,9 +20,9 @@ def upgrade_backend_project():
     cmd("systemctl stop ui-ssh")
     cmd(f"cd {BACKEND_DIR} && rm -rf venv")
     cmd(
-        f"cd {BACKEND_DIR} && wget https://github.com/UISSH/backend/archive/refs/tags/v{CURRENT_VERSION}.zip"
+        f"cd {BACKEND_DIR} && wget https://github.com/UISSH/backend/archive/refs/tags/{CURRENT_VERSION}.zip"
     )
-    cmd(f"cd {BACKEND_DIR} && unzip v{CURRENT_VERSION}.zip")
+    cmd(f"cd {BACKEND_DIR} && unzip {CURRENT_VERSION}.zip")
     cmd(f"cd {BACKEND_DIR} && cp backend-{CURRENT_VERSION}/* ./ -r")
     cmd(f"cd {BACKEND_DIR} && rm  backend-{CURRENT_VERSION}  *.zip -rf")
     cmd(
