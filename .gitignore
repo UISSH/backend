@@ -8,6 +8,7 @@ db.sqlite3
 /venv/
 /static/
 **/migrations/**
+!**/migrations/__init__.py
 website/applications/app/**/data/**
 
 __pycache__/

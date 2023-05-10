@@ -1,9 +1,10 @@
 import os
 
-CURRENT_VERSION = "v0.2.0"
-FRONTED_MINIMUM_VERSION = "v0.2.2"
+# Don't add v prefix
+CURRENT_VERSION = "0.2.0"
+FRONTED_MINIMUM_VERSION = "0.2.2"
 MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
-FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/{FRONTED_MINIMUM_VERSION}/django_spa.zip"
+FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
 PROJECT_DIR = "/usr/local/uissh"
 BACKEND_DIR = f"{PROJECT_DIR}/backend"
@@ -20,11 +21,11 @@ def upgrade_backend_project():
     cmd("systemctl stop ui-ssh")
     cmd(f"cd {BACKEND_DIR} && rm -rf venv")
     cmd(
-        f"cd {BACKEND_DIR} && wget https://github.com/UISSH/backend/archive/refs/tags/{CURRENT_VERSION}.zip"
+        f"cd {BACKEND_DIR} && wget https://github.com/UISSH/backend/archive/refs/tags/v{CURRENT_VERSION}.zip"
     )
-    cmd(f"cd {BACKEND_DIR} && unzip {CURRENT_VERSION}.zip")
+    cmd(f"cd {BACKEND_DIR} && unzip v{CURRENT_VERSION}.zip")
     cmd(f"cd {BACKEND_DIR} && cp backend-{CURRENT_VERSION}/* ./ -r")
-    cmd(f"cd {BACKEND_DIR} && rm  backend-{CURRENT_VERSION}  *.zip -rf")
+    cmd(f"cd {BACKEND_DIR} && rm backend-{CURRENT_VERSION} *.zip -rf")
     cmd(
         f"cd {BACKEND_DIR} && python3 -m venv venv && venv/bin/pip install -r requirements.txt"
     )
@@ -40,7 +41,7 @@ def upgrade_front_project():
     Download frontend from github and replace the old one
     """
     cmd(
-        f'cd {BACKEND_DIR}/static && wget -q {FRONTEND_URL} -O "django_spa.zip" && rm -rf common spa',
+        f'cd {BACKEND_DIR}/static && wget -q {FRONTEND_URL} -O "django_spa.zip" && rm -rf common spa dist',
         "Download frontend",
     )
     cmd(
