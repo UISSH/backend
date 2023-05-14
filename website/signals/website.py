@@ -37,7 +37,7 @@ def listener_pre_delete(sender, instance: WebsiteModel, **kwargs):
 
     if instance.index_root.startswith("/var/www/"):
         os.system(
-            f"mv {instance.index_root} /tmp/{instance.index_root}{time.time()}.deleted"
+            f"mv {instance.index_root} /tmp/{instance.domain}.{time.time()}.deleted"
         )
 
     # clean nginx config
