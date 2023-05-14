@@ -221,7 +221,12 @@ def import_backup_db(
 ):
     operator_res = BaseOperatingRes.get_instance(event_id)
     operator_res.set_processing()
-    cmd = f"mysql -u{root_username}  -p{root_password} {name}  <  {backup_db_path}"
+    if backup_db_path.endswith(".sql"):
+        cmd = f"mysql -u{root_username}  -p{root_password} {name}  <  {backup_db_path}"
+    elif backup_db_path.endswith("sql.gz"):
+        cmd = f"gunzip < {backup_db_path} | mysql -u{root_username}  -p{root_password} {name}"
+    else:
+        raise Exception(f"Unsupported file type:{backup_db_path}")
 
     ret = subprocess.run(
         cmd,
@@ -255,7 +260,7 @@ def export_backup_db(
 
     operator_res = BaseOperatingRes.get_instance(event_id)
     operator_res.set_processing()
-    cmd = f"mysqldump -u{root_username} -p{root_password} {name} > {backup_db_path}"
+    cmd = f"mysqldump -u{root_username} -p{root_password} {name} | gzip -6 > {backup_db_path}.gz"
 
     ret = subprocess.run(
         cmd,

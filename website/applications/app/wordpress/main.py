@@ -33,9 +33,17 @@ class WordPressApplication(Application, ApplicationToolMinx):
             "wordpress", "https://wordpress.org/wordpress-6.2.zip"
         )
 
-        database_config = (
-            self._config.databases.mariadb or self._config.databases.mysqldb
-        )
+        # database_config = (
+        #     self._config.databases.mariadb or self._config.databases.mysqldb
+        # )
+        
+        if hasattr(self._config.databases, "mariadb"):
+            database_config = self._config.databases.mariadb
+        elif hasattr(self._config.databases, "mysqldb"):
+            database_config = self._config.databases.mysqldb
+        else:
+            raise RuntimeError("No database config found.")
+        
 
         install_wordpress(
             download_url,

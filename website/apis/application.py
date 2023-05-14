@@ -9,7 +9,7 @@ from base.viewset import BaseReadOnlyModelViewSet
 from common.serializers.operating import OperatingResSerializer
 from website.applications.app_factory import AppFactory
 from website.applications.core.application import Application
-from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
+from website.applications.core.dataclass import WebSiteConfig, WebServerTypeEnum
 from website.models import WebsiteModel
 from website.serializers.website import WebsiteModelSerializer
 
@@ -29,7 +29,7 @@ class ApplicationView(BaseReadOnlyModelViewSet):
         self, website: WebsiteModel, data: dict = None
     ) -> Application:
         name = website.application
-        config = NewWebSiteConfig(
+        config = WebSiteConfig(
             domain=website.domain,
             root_dir=website.index_root,
             web_server_type=WebServerTypeEnum.Nginx,
@@ -47,12 +47,16 @@ class ApplicationView(BaseReadOnlyModelViewSet):
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def app_create(self, request, *args, **kwargs):
         instance: WebsiteModel = self.get_object()
+
+        # https://docs.djangoproject.com/en/4.2/ref/models/instances/#django.db.models.Model.refresh_from_db
+        instance.refresh_from_db()
+
         # 4.Create application instance
         app_factory = AppFactory
         app_factory.load()
         app = app_factory.get_application_module(
             instance.application,
-            instance.get_app_new_website_config(),
+            instance.get_app_website_config(),
             instance.application_config,
         )
         res = app.create()

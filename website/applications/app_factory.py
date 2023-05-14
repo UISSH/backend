@@ -7,7 +7,7 @@ import logging
 
 
 from website.applications.core.application import Application, Storage
-from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
+from website.applications.core.dataclass import WebSiteConfig, WebServerTypeEnum
 
 filepath = "website/applications/app"
 
@@ -70,7 +70,7 @@ class AppFactory:
     @staticmethod
     def get_application_module(
         name,
-        config: NewWebSiteConfig,
+        config: WebSiteConfig,
         app_config: dict = None,
         storage_cls: Storage = None,
     ) -> Application:

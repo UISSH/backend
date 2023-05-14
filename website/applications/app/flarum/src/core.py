@@ -5,7 +5,7 @@ import string
 
 import yaml
 
-from website.applications.core.dataclass import NewWebSiteConfig
+from website.applications.core.dataclass import WebSiteConfig
 
 letters = string.ascii_letters + string.digits + string.punctuation.replace("'", "")
 
@@ -34,7 +34,7 @@ def install_composer():
     return os.system(install_script)
 
 
-def install_flarum(config: NewWebSiteConfig, app_config: dict):
+def install_flarum(config: WebSiteConfig, app_config: dict):
     directory = pathlib.Path(config.root_dir)
     os.system(f"cd {directory.__str__()} && rm -rf * .*")
     cmd("composer create-project flarum/flarum . -n", directory)

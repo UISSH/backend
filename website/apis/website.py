@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+import time
 import traceback
 
 from django.db import transaction
@@ -58,8 +59,8 @@ class WebsiteView(BaseModelViewSet):
         op = BaseOperatingRes(name="WebsiteModel:Allocating Resources")
         instance: WebsiteModel = self.get_object()
         app: Application = instance.get_application()
-        # allow port
 
+        # allow port
         if os.system("which ufw") == 0:
             for i in app.get_requried_ports():
                 # if ufw port is not open, open it
@@ -94,7 +95,7 @@ class WebsiteView(BaseModelViewSet):
             elif i == DataBaseListEnum.Redis:
                 # TODO create redis database
                 pass
-
+        op.set_success()
         return Response(op.json())
 
     # @extend_schema(responses= todo add schema)
