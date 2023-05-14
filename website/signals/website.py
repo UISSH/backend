@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -30,12 +31,14 @@ def listener_pre_delete(sender, instance: WebsiteModel, **kwargs):
 
     # TODO backup all data on before delete.
     if instance.application:
-        app = instance.get_application_module(instance.get_app_new_website_config())
+        app = instance.get_application_module(instance.get_app_website_config())
         app.stop()
         app.delete()
 
     if instance.index_root.startswith("/var/www/"):
-        os_system_info(f"rm -rf {instance.index_root}")
+        os.system(
+            f"mv {instance.index_root} /tmp/{instance.domain}.{time.time()}.deleted"
+        )
 
     # clean nginx config
 

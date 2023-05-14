@@ -14,9 +14,13 @@ def resolve_domain(domain):
     headers = {"Content-Type": "application/dns-json"}
     data = requests.post(url, params=params, headers=headers)
     # get type is "1" record
-    for i in data.json()["Answer"]:
-        if i["type"] == 1:
-            return i["data"]
+    logging.debug(data.text)
+    try:
+        for i in data.json()["Answer"]:
+            if i["type"] == 1:
+                return i["data"]
+    except:
+        return 
 
 
 def find_local_public_ip():
@@ -66,16 +70,23 @@ def domain_is_resolved(domain, request):
     token = Token.objects.get(user=request.user)
 
     remote_ip = resolve_domain(domain)
+    
+    if remote_ip is None:
+        op.msg = "The domain name has not been resolved to this host."
+        op.set_failure()
+        return op
+        
     host = find_domain_in_nginx()
-
+    url = f"https://{remote_ip}/api/Website/domain_records"
+      
+    headers = {"Authorization": f"token {token.key}", "host": f"{host}"}
     try:
-        url = f"https://{remote_ip}/api/WebsiteModel/domain_records"
-
-        headers = {"Authorization": f"token {token.key}", "host": f"{host}"}
-
         data = requests.get(
             url, params=params, headers=headers, timeout=5, verify=False
         )
+        
+        logging.info(data.text)
+        
 
         if data.json()["msg"] == random_str:
             op.set_success()
@@ -83,6 +94,8 @@ def domain_is_resolved(domain, request):
             op.msg = "The domain name has not been resolved to this host."
             op.set_failure()
     except:
+        logging.warn(f"Get {url}")
+        logging.warn(f"Headers:\n {headers}")
         op.msg = f"{traceback.print_exc()}"
         op.set_failure()
 

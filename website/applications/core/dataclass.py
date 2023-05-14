@@ -215,7 +215,7 @@ class DataBaseDict:
 
 
 @dataclass
-class NewWebSiteConfig(BaseData):
+class WebSiteConfig(BaseData):
     domain: str  # domain.com
     root_dir: str  # absolute path
     web_server_type: WebServerTypeEnum = WebServerTypeEnum.Nginx

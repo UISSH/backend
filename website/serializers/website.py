@@ -95,7 +95,7 @@ class DefaultWebsuteConfigSerializer(ICBaseSerializer):
     web_server_config = serializers.CharField(max_length=204800)
 
     def update(self, instance: WebsiteModel, validated_data):
-        app = instance.get_application_module(instance.get_app_new_website_config())
+        app = instance.get_application_module(instance.get_app_website_config())
         web_server_config = instance.get_nginx_config()
 
         if isinstance(app.read(), str):
@@ -113,7 +113,7 @@ class WebsiteConfigSerializer(ICBaseSerializer):
     def update(self, instance: WebsiteModel, validated_data):
         web_server_config = validated_data.get("web_server_config")
 
-        app = instance.get_application_module(instance.get_app_new_website_config())
+        app = instance.get_application_module(instance.get_app_website_config())
 
         data = instance.get_nginx_config()
         user_config = get_section(web_server_config, "user")
@@ -194,14 +194,14 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
             text = "与君初相识，犹如故人归。嗨，别来无恙！ <br> Hello World！"
             app = app_factory.get_application_module(
                 "NginxApplication",
-                instance.get_app_new_website_config(),
+                instance.get_app_website_config(),
                 {"name": "New website", "text": text},
             )
             instance.application = "NginxApplication"
         else:
             app = app_factory.get_application_module(
                 instance.application,
-                instance.get_app_new_website_config(),
+                instance.get_app_website_config(),
                 instance.application_config,
             )
 

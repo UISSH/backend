@@ -75,7 +75,10 @@ class DBStorage(Storage):
     def read(self, *args, **kwargs) -> dict:
         from website.applications.core.db_json import DBJson
 
-        return DBJson.get_instance(self.obj.unique)
+        if hasattr(self.obj, "unique"):
+            return DBJson.get_instance(self.obj.unique)
+        else:
+            return {}
 
     def write(self, data):
         self.obj.data = data
@@ -102,7 +105,7 @@ class ApplicationToolMinx:
 
 class ApplicationStorage:
     def __init__(
-        self, config: NewWebSiteConfig, app_config: dict = None, storage_cls=Storage
+        self, config: WebSiteConfig, app_config: dict = None, storage_cls=Storage
     ):
         app_path = pathlib.Path(sys.modules[self.__module__].__file__).parent
         hash_key = storage_cls.calc_text_hash(
@@ -142,14 +145,14 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
     Note 2: You can implement one yourself based on the Storage(in 'website/applications/core/application.py')
      abstract class.
             Example:
-            app = AppName(config=NewWebSiteConfig(...),app_config={...},storage_cls=you_storage_class)
+            app = AppName(config=WebSiteConfig(...),app_config={...},storage_cls=you_storage_class)
     """
 
     def __init__(
         self,
-        config: NewWebSiteConfig,
+        config: WebSiteConfig,
         app_config: dict = None,
-        storage_cls=LocalStorage,
+        storage_cls=DBStorage,
     ):
         not_allow = [":", "/", " "]
         for i in not_allow:
@@ -158,7 +161,7 @@ class Application(ApplicationStorage, metaclass=ABCMeta):
                     f"Invalid parameter: {config.domain} include '{i}' char"
                 )
 
-        self._config: NewWebSiteConfig = config.instance
+        self._config: WebSiteConfig = config.instance
         super().__init__(config, app_config, storage_cls)
 
     @classmethod

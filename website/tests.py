@@ -5,7 +5,7 @@ import time
 from django.test import TestCase
 
 from website.applications.app_factory import AppFactory
-from website.applications.core.dataclass import NewWebSiteConfig, WebServerTypeEnum
+from website.applications.core.dataclass import WebSiteConfig, WebServerTypeEnum
 
 # Create your tests here.
 from website.models.utils import (
@@ -146,7 +146,7 @@ class TestApplication(TestCase):
         if not path.exists():
             pathlib.Path(target_dir).mkdir()
 
-        config = NewWebSiteConfig(
+        config = WebSiteConfig(
             domain="hello11.com",
             root_dir=target_dir,
             web_server_type=WebServerTypeEnum.Nginx,

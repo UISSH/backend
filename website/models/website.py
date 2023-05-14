@@ -2,10 +2,13 @@ import logging
 import os
 import pathlib
 import subprocess
+import time
 import uuid
 
 from django.db import models
 from django.db.models import IntegerChoices
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from base.base_model import BaseModel
 from common.models.User import User
@@ -15,9 +18,9 @@ from website.applications.core.dataclass import (
     DataBaseDict,
     MariaDBConfig,
     MySQLDBConfig,
-    NewWebSiteConfig,
     SSLConfig,
     WebServerTypeEnum,
+    WebSiteConfig,
 )
 from website.models.utils import (
     disable_section,
@@ -190,11 +193,11 @@ class WebsiteModel(BaseModel):
     def __str__(self):
         return self.name
 
-    def get_application(self, data: dict = None) -> Application:
+    def get_application(self, app_config: dict = None) -> Application:
         if self.APP_FACTORY.MODULES == {}:
             self.APP_FACTORY.load()
         app = self.APP_FACTORY.get_application_module(
-            self.application, self.get_app_new_website_config(), data
+            self.application, self.get_app_website_config(), app_config
         )
         return app
 
@@ -219,32 +222,34 @@ class WebsiteModel(BaseModel):
 
             self.ssl_config = ssl_config
 
-    def get_app_new_website_config(self) -> NewWebSiteConfig:
-        config = NewWebSiteConfig(
+    def get_app_website_config(self) -> WebSiteConfig:
+        config = WebSiteConfig(
             domain=self.domain,
             root_dir=self.index_root,
             web_server_type=WebServerTypeEnum.Nginx,
         )
 
         # Get database config.
-        if hasattr(self, "database") and self.database:
+        logging.debug(f"get {self.name} - {self.domain} database config.")
+
+        if hasattr(self, "databasemodel") and self.databasemodel:
             from database.models.database import DataBaseModel
 
-            database: DataBaseModel = self.database
+            database: DataBaseModel = self.databasemodel
             if database.database_type == database.DBType.MariaDB:
                 config.databases = DataBaseDict(
                     mariadb=MariaDBConfig(
-                        self.database.name,
-                        self.database.username,
-                        self.database.password,
+                        self.databasemodel.name,
+                        self.databasemodel.username,
+                        self.databasemodel.password,
                     )
                 )
             else:
                 config.databases = DataBaseDict(
                     mariadb=MySQLDBConfig(
-                        self.database.name,
-                        self.database.username,
-                        self.database.password,
+                        self.databasemodel.name,
+                        self.databasemodel.username,
+                        self.databasemodel.password,
                     )
                 )
         # TODO:Get redis config.
@@ -263,7 +268,7 @@ class WebsiteModel(BaseModel):
 
         return config
 
-    def get_application_module(self, config: NewWebSiteConfig) -> Application:
+    def get_application_module(self, config: WebSiteConfig) -> Application:
         app_factory = AppFactory
         app_factory.load()
         return app_factory.get_application_module(self.application, config)
@@ -339,7 +344,7 @@ class WebsiteModel(BaseModel):
         # set nginx root field.
         data = data.replace("{dir_path}", self.index_root)
         # set enter folder.
-        app = self.get_application_module(self.get_app_new_website_config())
+        app = self.get_application_module(self.get_app_website_config())
         app_config = app.read()
         logging.debug(app_config)
         if hasattr(app_config, "enter_folder_name") and app_config.enter_folder_name:
@@ -355,7 +360,7 @@ class WebsiteModel(BaseModel):
         return data
 
     def get_default_config(self):
-        app = self.get_application_module(self.get_app_new_website_config())
+        app = self.get_application_module(self.get_app_website_config())
         nginx_data = self.get_nginx_config()
         app_config = app.read()
 
@@ -373,3 +378,5 @@ class WebsiteModel(BaseModel):
         self.is_valid_configuration_002(self.valid_web_server_config)
         if save:
             self.save()
+
+
