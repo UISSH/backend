@@ -1,17 +1,34 @@
+import pkg_resources
 from drf_spectacular.utils import extend_schema
-from rest_framework import serializers, generics, permissions
+from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
 import upgrade
 
 
+def get_github_last_version():
+    import requests
+
+    url = "https://api.github.com/repos/UISSH/backend/tags"
+    res = requests.get(url)
+    return res.json()[0]["name"]
+
+
+LATEST_VERSION = get_github_last_version()
+
+
+def can_updated():
+    current_ver = pkg_resources.parse_version(upgrade.CURRENT_VERSION)
+    latest_ver = pkg_resources.parse_version(LATEST_VERSION)
+    return current_ver < latest_ver
+
+
 class VersionInfoSerializer(serializers.Serializer):
-    backend_current_version = serializers.CharField(
+    current_version = serializers.CharField(
         read_only=True, default=upgrade.CURRENT_VERSION
     )
-    require_frontend_minimum_version = serializers.CharField(
-        read_only=True, default=upgrade.FRONTED_MINIMUM_VERSION
-    )
+    latest_version = serializers.CharField(read_only=True, default=LATEST_VERSION)
+    can_updated = serializers.BooleanField(read_only=True, default=can_updated())
 
 
 class ResultSerializer(serializers.Serializer):
@@ -25,8 +42,9 @@ class VersionView(generics.RetrieveAPIView):
     def get(request, *args, **kwargs):
         return Response(
             {
-                "backend_current_version": upgrade.CURRENT_VERSION,
-                "require_frontend_minimum_version": upgrade.FRONTED_MINIMUM_VERSION,
+                "current_version": "v" + upgrade.CURRENT_VERSION,
+                "latest_version": LATEST_VERSION,
+                "can_updated": can_updated(),
             }
         )
 
@@ -34,5 +52,11 @@ class VersionView(generics.RetrieveAPIView):
 @extend_schema(responses=ResultSerializer)
 class UpgradeFrontend(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
-        upgrade.upgrade_front_project()
-        return Response({"detail": "ok"})
+        if not can_updated():
+            return Response({"detail": "already latest version"})
+        try:
+            upgrade.upgrade_backend_project(LATEST_VERSION)
+            upgrade.upgrade_front_project()
+            return Response({"detail": "ok"})
+        except Exception as e:
+            return Response({"detail": str(e)}, status=500)
