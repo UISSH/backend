@@ -35,11 +35,11 @@ class ResultSerializer(serializers.Serializer):
     detail = serializers.CharField(read_only=True, default="ok")
 
 
-class VersionView(generics.RetrieveAPIView):
+class VersionView(generics.RetrieveAPIView, generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(responses=VersionInfoSerializer)
-    def get(request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         return Response(
             {
                 "current_version": "v" + upgrade.CURRENT_VERSION,
@@ -48,9 +48,6 @@ class VersionView(generics.RetrieveAPIView):
             }
         )
 
-
-@extend_schema(responses=ResultSerializer)
-class UpgradeFrontend(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         if not can_updated():
             return Response({"detail": "already latest version"})
