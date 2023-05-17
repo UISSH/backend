@@ -1,8 +1,8 @@
 import os
 
 # Don't add v prefix
-CURRENT_VERSION = "0.2.1"
-FRONTED_MINIMUM_VERSION = "0.2.2"
+CURRENT_VERSION = "0.2.2"
+FRONTED_MINIMUM_VERSION = "0.2.3"
 MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
 FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
@@ -17,18 +17,9 @@ def cmd(command, msg=None):
     os.system(command)
 
 
-def upgrade_backend_project():
-    cmd("systemctl stop ui-ssh")
-    cmd(f"cd {BACKEND_DIR} && rm -rf venv")
-    cmd(
-        f"cd {BACKEND_DIR} && wget https://github.com/UISSH/backend/archive/refs/tags/v{CURRENT_VERSION}.zip"
-    )
-    cmd(f"cd {BACKEND_DIR} && unzip v{CURRENT_VERSION}.zip")
-    cmd(f"cd {BACKEND_DIR} && cp backend-{CURRENT_VERSION}/* ./ -r")
-    cmd(f"cd {BACKEND_DIR} && rm backend-{CURRENT_VERSION} *.zip -rf")
-    cmd(
-        f"cd {BACKEND_DIR} && python3 -m venv venv && venv/bin/pip install -r requirements.txt"
-    )
+def upgrade_backend_project(version=CURRENT_VERSION):
+    cmd(f"cd {BACKEND_DIR} && git fetch && git checkout v{version}")
+    cmd(f"cd {BACKEND_DIR} && venv/bin/pip install -r requirements.txt")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations --noinput")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py collectstatic --noinput")
