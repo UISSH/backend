@@ -26,8 +26,7 @@ def upgrade_backend_project(version=CURRENT_VERSION):
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations --noinput")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py collectstatic --noinput")
-    cmd("systemctl stop ui-ssh")
-    cmd("systemctl start ui-ssh")
+    cmd("systemctl restart ui-ssh")
 
 
 def upgrade_front_project():
@@ -46,5 +45,5 @@ def upgrade_front_project():
 
 
 if __name__ == "__main__":
-    upgrade_backend_project()
     upgrade_front_project()
+    upgrade_backend_project()

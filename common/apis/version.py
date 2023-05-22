@@ -52,8 +52,9 @@ class VersionView(generics.RetrieveAPIView, generics.CreateAPIView):
         if not can_updated():
             return Response({"detail": "already latest version"})
         try:
-            upgrade.upgrade_backend_project(LATEST_VERSION)
             upgrade.upgrade_front_project()
+            upgrade.upgrade_backend_project(LATEST_VERSION)
+
             return Response({"detail": "ok"})
         except Exception as e:
             return Response({"detail": str(e)}, status=500)
