@@ -1,18 +1,19 @@
 import os
 import pathlib
-from django.views.decorators.csrf import csrf_exempt
+
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
-from rest_framework.response import Response
-from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 
 @csrf_exempt
 def index(request):
     request_host = request.headers.get("host")
     cors_allowed_origins = settings.CORS_ALLOWED_ORIGINS
-    host = f"{request.scheme}://{request_host}"
-    if host not in cors_allowed_origins:
+    host = f"{request_host}"
+
+    if host not in ",".join(cors_allowed_origins):
         return HttpResponse(pathlib.Path("./common/html/404.html").open(), status=404)
 
     static_index = pathlib.Path("./static/common/index.html")

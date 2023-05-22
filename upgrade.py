@@ -1,8 +1,8 @@
 import os
 
 # Don't add v prefix
-CURRENT_VERSION = "0.2.4"
-FRONTED_MINIMUM_VERSION = "0.2.4"
+CURRENT_VERSION = "0.2.5"
+FRONTED_MINIMUM_VERSION = "0.2.5"
 MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
 FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
@@ -18,10 +18,9 @@ def cmd(command, msg=None):
 
 
 def upgrade_backend_project(version=CURRENT_VERSION):
-    
-    if  version.startswith("v"):
+    if version.startswith("v"):
         version = version.lstrip("v")
-        
+
     cmd(f"cd {BACKEND_DIR} && git fetch && git checkout v{version}")
     cmd(f"cd {BACKEND_DIR} && venv/bin/pip install -r requirements.txt")
     cmd(f"{PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations --noinput")

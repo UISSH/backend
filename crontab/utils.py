@@ -48,7 +48,7 @@ class CronTab:
 
     def list(self):
         data = list_by_osquery()
-    
+
         if data:
             return data
 
@@ -68,11 +68,13 @@ class CronTab:
         cmd: str,
     ) -> None:
         cron = f"{schedule_expressions.strip()}    {cmd.strip()}"
-        
-        for i in self.crontab_context.split("\n"):
+
+        # Format existing crontab
+        item_list = self.crontab_context.split("\n")
+        for i in item_list:
             if schedule_expressions.strip() in i and cmd.strip() in i:
-                return
-    
+                self.crontab_context = self.crontab_context.replace(i, cron)
+
         if cron in self.crontab_context:
             return
         else:
