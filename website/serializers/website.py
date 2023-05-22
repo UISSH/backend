@@ -145,7 +145,7 @@ class WebsiteConfigSerializer(ICBaseSerializer):
 class WebsiteModelSerializer(ICBaseModelSerializer):
     ssl_config = SSLConfigSerializer(required=False)
     # ssl_config = serializers.SerializerMethodField('_ssl_config')
-    database_id = serializers.SerializerMethodField()
+    database_id = serializers.SerializerMethodField("_get_database_id")
     database_name = serializers.SerializerMethodField()
     web_server_type_text = serializers.SerializerMethodField("_web_server_type_text")
     status_text = serializers.SerializerMethodField("_status_text")
@@ -262,9 +262,9 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
     def _ssl_config(self, obj: WebsiteModel) -> SSLConfigSerializer:
         return SSLConfigSerializer(obj.ssl_config)
 
-    def get_database_id(self, obj: WebsiteModel):
-        if hasattr(obj, "database"):
-            return obj.database.id
+    def _get_database_id(self, obj: WebsiteModel):
+        if hasattr(obj, "databasemodel"):
+            return obj.databasemodel.id
 
     def _web_server_type_text(self, obj: WebsiteModel):
         return obj.get_web_server_type_display()
@@ -273,8 +273,8 @@ class WebsiteModelSerializer(ICBaseModelSerializer):
         return obj.get_status_display()
 
     def get_database_name(self, obj: WebsiteModel):
-        if hasattr(obj, "database"):
-            return obj.database.name
+        if hasattr(obj, "databasemodel"):
+            return obj.databasemodel.name
 
     def validate(self, data):
         return data
