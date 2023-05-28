@@ -55,7 +55,7 @@ router.register(r"KVStorage", KVStorageView)
 router.register(r"Terminal", TerminalView)
 router.register(r"IPTables", IPTablesView, basename="IPTables")
 router.register(r"Crontab", CrontabViewSet)
-router.register(r"DockerContainer", DockerContainerView)
+router.register(r"DockerContainer", DockerContainerView, basename="DockerContainer")
 
 
 admin.site.site_title = "UI-SSH"
