@@ -2,19 +2,19 @@
 https://docker-py.readthedocs.io/en/stable/api.html
 """
 import logging
+from pprint import pprint
 from typing import Any, List
-from rest_framework import status
 
 import docker
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from common.serializers.operating import OperatingResSerializer
-from dockers.models.main import DockerContainerMode
-from dockers.serializers.main import (
-    DockerContainerSerializer,
+from dockers.serializers.image import (
+    DockerImageInspectSerializer,
+    DockerImageSerializer,
 )
 
 
@@ -38,7 +38,7 @@ def keys_lower(dict_data: dict):
     return res
 
 
-# 重新格式化数据
+
 def format_data(data: List[dict]) -> List[dict]:
     res = []
     for item in data:
@@ -48,11 +48,11 @@ def format_data(data: List[dict]) -> List[dict]:
     return res
 
 
-class DockerContainerView(GenericViewSet):
+class DockerImageView(GenericViewSet):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = DockerContainerSerializer
+    serializer_class = DockerImageSerializer
     client = None
-    lookup_field = "docker_id"
+    lookup_field = "image_id"
 
     def get_queryset(self):
         return []
@@ -67,18 +67,28 @@ class DockerContainerView(GenericViewSet):
         super().__init__(**kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        lookup_field = request.parser_context["kwargs"]["image_id"]
 
-        self.client.remove_container(container=lookup_field, force=True)
+        self.client.remove_image(image=lookup_field, force=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, **kwargs):
-        lookup_field = request.parser_context["kwargs"]["docker_id"]
-        data = self.client.containers(all=True, filters={"id": lookup_field})
-        data = format_data(data)
-        if len(data) > 0:
-            return Response(data[0])
-        return Response(data)
+        lookup_field = request.parser_context["kwargs"]["image_id"]
+        data = self.client.images(all=True)
+
+        for i in data:
+            if lookup_field in i["Id"]:
+                return Response(keys_lower(i))
+
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=["get"], detail=True, serializer_class=DockerImageInspectSerializer)
+    def inspect(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["image_id"]
+
+        data = self.client.inspect_image(lookup_field)
+
+        return Response(keys_lower(data))
 
     def list(self, request, *args, **kwargs):
         """
@@ -87,7 +97,7 @@ class DockerContainerView(GenericViewSet):
         if self.client is None:
             msg = "docker daemon is not running."
             return Response(msg, status=500)
-        data = self.client.containers(all=True)
+        data = self.client.images()
 
         return Response(
             {
