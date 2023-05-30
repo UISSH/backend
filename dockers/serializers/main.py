@@ -9,6 +9,14 @@ class DockerContainerModelSerializer(ICBaseModelSerializer):
         fields = "__all__"
 
 
+class CreateDockerContainerSerializer(ICBaseSerializer):
+
+    name = serializers.CharField(max_length=255, label="name")
+    image = serializers.CharField(max_length=255, label="image")
+    port_bindings = serializers.JSONField(label="port_bindings")
+    binds = serializers.JSONField(label="binds")
+
+
 class DockerContainerSerializer(ICBaseSerializer):
     command = serializers.CharField(max_length=255, label="command")
     created = serializers.IntegerField(label="created")

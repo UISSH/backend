@@ -2,10 +2,10 @@
 https://docker-py.readthedocs.io/en/stable/api.html
 """
 import logging
-from pprint import pprint
 from typing import Any, List
 
 import docker
+from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,6 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 from common.serializers.operating import OperatingResSerializer
 from dockers.serializers.image import (
     DockerImageInspectSerializer,
+    DockerImageNameSerializer,
     DockerImageSerializer,
 )
 
@@ -36,7 +37,6 @@ def keys_lower(dict_data: dict):
         else:
             res[first_lower(key)] = dict_data[key]
     return res
-
 
 
 def format_data(data: List[dict]) -> List[dict]:
@@ -65,6 +65,22 @@ class DockerImageView(GenericViewSet):
         except Exception as e:
             logging.error("Docker is not running or not installed. detail: %s", e)
         super().__init__(**kwargs)
+
+    @extend_schema(responses=OperatingResSerializer)
+    @action(methods=["POST"], detail=False, serializer_class=DockerImageNameSerializer)
+    def pull(self, request, *args, **kwargs):
+        """
+        pull docker image with docker api.
+        #TODO async pull image
+        """
+        op = OperatingResSerializer.get_operating_res("pull image")
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        op.set_processing()
+        self.client.pull(data["name"])
+        op.set_success()
+        return Response(op.json(), status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         lookup_field = request.parser_context["kwargs"]["image_id"]

@@ -3,17 +3,17 @@ https://docker-py.readthedocs.io/en/stable/api.html
 """
 import logging
 from typing import Any, List
-from rest_framework import status
 
 import docker
-from rest_framework import permissions
+from drf_spectacular.utils import extend_schema
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from common.serializers.operating import OperatingResSerializer
-from dockers.models.main import DockerContainerMode
 from dockers.serializers.main import (
+    CreateDockerContainerSerializer,
     DockerContainerSerializer,
 )
 
@@ -66,6 +66,26 @@ class DockerContainerView(GenericViewSet):
             logging.error("Docker is not running or not installed. detail: %s", e)
         super().__init__(**kwargs)
 
+    @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
+    def ping(self, request, *args, **kwargs):
+        """
+        ping docker daemon with docker api.
+        """
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "ping docker daemon"
+        try:
+            if self.client.ping():
+                op.msg = self.client.ping()
+                op.set_success()
+            else:
+                op.set_failure("docker daemon is not running.")
+            return Response(op.json())
+
+        except Exception as e:
+            op.set_failure("docker daemon is not running.")
+            logging.error("Docker is not running or not installed. detail: %s", e)
+        return Response(op.json())
+
     def destroy(self, request, *args, **kwargs):
         lookup_field = request.parser_context["kwargs"]["docker_id"]
 
@@ -79,6 +99,28 @@ class DockerContainerView(GenericViewSet):
         if len(data) > 0:
             return Response(data[0])
         return Response(data)
+
+    @extend_schema(
+        request=CreateDockerContainerSerializer, responses=OperatingResSerializer
+    )
+    @action(methods=["POST"], detail=False)
+    def create_container(self, request, *args, **kwargs):
+        """create docker container with docker api."""
+        # container = self.client.create_container(
+        #     image="ubuntu:latest",
+        #     command="/bin/sleep 30",
+        #     name="test123",
+        #     host_config=self.client.create_host_config(
+        #         binds=["/home/username:/home/username"],
+        #         port_bindings={22: 2222},
+        #         network_mode="bridge",
+        #         restart_policy={"Name": "always"},
+        #     ),
+        #     volumes=["/home/username"],
+        #     environment={"FOO": "BAR"},
+        #     detach=True,
+        # )
+        pass
 
     def list(self, request, *args, **kwargs):
         """
@@ -101,23 +143,3 @@ class DockerContainerView(GenericViewSet):
                 "results": format_data(data),
             }
         )
-
-    @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
-    def ping(self, request, *args, **kwargs):
-        """
-        ping docker daemon with docker api.
-        """
-        op = OperatingResSerializer.get_operating_res()
-        op.name = "ping docker daemon"
-        try:
-            if self.client.ping():
-                op.msg = self.client.ping()
-                op.set_success()
-            else:
-                op.set_failure("docker daemon is not running.")
-            return Response(op.json())
-
-        except Exception as e:
-            op.set_failure("docker daemon is not running.")
-            logging.error("Docker is not running or not installed. detail: %s", e)
-        return Response(op.json())

@@ -2,6 +2,10 @@ from base.serializer import ICBaseSerializer
 from rest_framework import serializers
 
 
+class DockerImageNameSerializer(ICBaseSerializer):
+    name = serializers.CharField(label="name")
+
+
 class DockerImageSerializer(ICBaseSerializer):
     containers = serializers.IntegerField(label="containers")
     created = serializers.IntegerField(label="created")
