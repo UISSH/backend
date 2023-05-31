@@ -1,3 +1,6 @@
+from upgrade import CURRENT_VERSION
+
+
 SPECTACULAR_DEFAULTS = {
     # path prefix is used for tagging the discovered operations.
     # use '/api/v[0-9]' for tagging apis like '/api/v1/albums' with ['albums']
@@ -62,7 +65,7 @@ SPECTACULAR_DEFAULTS = {
     "CONTACT": {"name": "zmaplex", "email": "zmaplex@gmail.com"},
     # Optional: MUST contain "name", MAY contain URL
     "LICENSE": {"name": "Apache 2.0"},
-    "VERSION": "0.0.1",
+    "VERSION": CURRENT_VERSION,
     # Optional list of servers.
     # Each entry MUST contain "url", MAY contain "description", "variables"
     "SERVERS": [],

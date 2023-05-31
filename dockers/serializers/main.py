@@ -1,3 +1,4 @@
+import logging
 from base.serializer import ICBaseModelSerializer, ICBaseSerializer
 from dockers.models.main import DockerContainerMode
 from rest_framework import serializers
@@ -10,11 +11,23 @@ class DockerContainerModelSerializer(ICBaseModelSerializer):
 
 
 class CreateDockerContainerSerializer(ICBaseSerializer):
-
     name = serializers.CharField(max_length=255, label="name")
-    image = serializers.CharField(max_length=255, label="image")
-    port_bindings = serializers.JSONField(label="port_bindings")
-    binds = serializers.JSONField(label="binds")
+    image = serializers.CharField(
+        max_length=255, label="image", help_text="nginx:latest"
+    )
+    port_bindings = serializers.JSONField(
+        label="port_bindings", required=False, help_text="{80: 80, 443: 443}"
+    )
+    binds = serializers.JSONField(
+        label="binds", required=False, help_text='{"/home/user1/": "/mnt/vol2"}'
+    )
+    environment = serializers.JSONField(
+        label="environment", required=False, help_text='{"FOO": "BAR"}'
+    )
+
+    def create(self, validated_data):
+        logging.info(f"create docker container: {validated_data}")
+        return validated_data
 
 
 class DockerContainerSerializer(ICBaseSerializer):

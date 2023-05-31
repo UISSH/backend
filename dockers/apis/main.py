@@ -100,27 +100,117 @@ class DockerContainerView(GenericViewSet):
             return Response(data[0])
         return Response(data)
 
+    @extend_schema(request=None, responses=OperatingResSerializer)
+    @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
+    def start(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "start docker container"
+        try:
+            self.client.start(container=lookup_field)
+            op.set_success()
+        except Exception as e:
+            op.set_failure(str(e))
+            return Response(op.json())
+        return Response(op.json())
+
+    @extend_schema(request=None, responses=OperatingResSerializer)
+    @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
+    def stop(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "stop docker container"
+        try:
+            self.client.stop(container=lookup_field)
+            op.set_success()
+        except Exception as e:
+            op.set_failure(str(e))
+            return Response(op.json())
+        return Response(op.json())
+
+    @extend_schema(request=None, responses=OperatingResSerializer)
+    @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
+    def restart(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "restart docker container"
+        try:
+            self.client.restart(container=lookup_field)
+            op.set_success()
+        except Exception as e:
+            op.set_failure(str(e))
+            return Response(op.json())
+        return Response(op.json())
+
+    @extend_schema(request=None, responses=OperatingResSerializer)
+    @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
+    def pause(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "pause docker container"
+        try:
+            self.client.pause(container=lookup_field)
+            op.set_success()
+        except Exception as e:
+            op.set_failure(str(e))
+            return Response(op.json())
+        return Response(op.json())
+
+    @extend_schema(request=None, responses=OperatingResSerializer)
+    @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
+    def unpause(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "unpause docker container"
+        try:
+            self.client.unpause(container=lookup_field)
+            op.set_success()
+        except Exception as e:
+            op.set_failure(str(e))
+            return Response(op.json())
+        return Response(op.json())
+
+    @extend_schema(request=None, responses=OperatingResSerializer)
+    @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
+    def kill(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "kill docker container"
+        try:
+            self.client.kill(container=lookup_field)
+            op.set_success()
+        except Exception as e:
+            op.set_failure(str(e))
+            return Response(op.json())
+        return Response(op.json())
+
     @extend_schema(
         request=CreateDockerContainerSerializer, responses=OperatingResSerializer
     )
     @action(methods=["POST"], detail=False)
     def create_container(self, request, *args, **kwargs):
         """create docker container with docker api."""
-        # container = self.client.create_container(
-        #     image="ubuntu:latest",
-        #     command="/bin/sleep 30",
-        #     name="test123",
-        #     host_config=self.client.create_host_config(
-        #         binds=["/home/username:/home/username"],
-        #         port_bindings={22: 2222},
-        #         network_mode="bridge",
-        #         restart_policy={"Name": "always"},
-        #     ),
-        #     volumes=["/home/username"],
-        #     environment={"FOO": "BAR"},
-        #     detach=True,
-        # )
-        pass
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "create docker container"
+        data = request.data
+        try:
+            container = self.client.create_container(
+                image=data["image"],
+                name=data["name"],
+                environment=data.get("environment", None),
+                host_config=self.client.create_host_config(
+                    port_bindings=data.get("port_bindings", None),
+                    binds=data.get("binds", None),
+                ),
+            )
+            container_id = container.get("Id", None)
+            op.msg = container_id
+            op.set_success()
+        except Exception as e:
+            op.set_failure(str(e))
+            return Response(op.json())
+
+        return Response(op.json())
 
     def list(self, request, *args, **kwargs):
         """
