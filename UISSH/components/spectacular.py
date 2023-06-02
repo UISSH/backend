@@ -28,8 +28,8 @@ SPECTACULAR_DEFAULTS = {
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
     },
-    "SWAGGER_UI_DIST": "//fastly.jsdelivr.net/npm/swagger-ui-dist@3.51.1",
-    "SWAGGER_UI_FAVICON_HREF": "//fastly.jsdelivr.net/npm/swagger-ui-dist@3.51.1/favicon-32x32.png",
+    "SWAGGER_UI_DIST": "//fastly.jsdelivr.net/npm/swagger-ui-dist@4.19.0",
+    "SWAGGER_UI_FAVICON_HREF": "//fastly.jsdelivr.net/npm/swagger-ui-dist@4.19.0/favicon-32x32.png",
     # Append OpenAPI objects to path and components in addition to the generated objects
     "APPEND_PATHS": {},
     "APPEND_COMPONENTS": {},

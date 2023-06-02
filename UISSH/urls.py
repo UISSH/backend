@@ -27,6 +27,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 from dockers.apis.images import DockerImageView
+from dockers.apis.volume import DockerVolumeView
 from rest_framework.routers import DefaultRouter
 
 from common import views
@@ -58,6 +59,7 @@ router.register(r"IPTables", IPTablesView, basename="IPTables")
 router.register(r"Crontab", CrontabViewSet)
 router.register(r"DockerContainer", DockerContainerView, basename="DockerContainer")
 router.register(r"DockerImage", DockerImageView, basename="DockerImage")
+router.register(r"DockerVolume", DockerVolumeView, basename="DockerView")
 
 
 admin.site.site_title = "UI-SSH"
