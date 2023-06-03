@@ -11,7 +11,12 @@ class DockerContainerModelSerializer(ICBaseModelSerializer):
 
 
 class CreateDockerContainerSerializer(ICBaseSerializer):
-    name = serializers.CharField(max_length=255, label="name")
+    name = serializers.CharField(
+        max_length=255,
+        label="name",
+        required=False,
+        help_text="container name, default is random",
+    )
     image = serializers.CharField(
         max_length=255, label="image", help_text="nginx:latest"
     )
@@ -26,7 +31,6 @@ class CreateDockerContainerSerializer(ICBaseSerializer):
     )
 
     def create(self, validated_data):
-        logging.info(f"create docker container: {validated_data}")
         return validated_data
 
 

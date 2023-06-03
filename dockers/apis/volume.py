@@ -55,6 +55,9 @@ class DockerVolumeView(GenericViewSet):
     client = None
     lookup_field = "volume_name"
 
+    def get_lookup_content(self, request, *args, **kwargs):
+        return request.parser_context["kwargs"][self.lookup_field]
+
     def get_queryset(self):
         return []
 
@@ -68,14 +71,17 @@ class DockerVolumeView(GenericViewSet):
         super().__init__(**kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        lookup_field = request.parser_context["kwargs"]["volume_name"]
-        self.client.remove_volume(lookup_field)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        lookup_field = self.get_lookup_content(request)
+        try:
+            self.client.remove_volume(lookup_field)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, *args, **kwargs):
-        lookup_field = request.parser_context["kwargs"]["volume_name"]
+        lookup_field = self.get_lookup_content(request)
+
         data = self.client.volumes()["Volumes"]
-        print("lookup_field: ", lookup_field)
         for i in data:
             if lookup_field in i["Name"]:
                 return Response(keys_lower(i))

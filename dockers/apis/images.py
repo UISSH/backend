@@ -20,6 +20,26 @@ from dockers.serializers.image import (
 
 
 def keys_lower(dict_data: dict):
+    """transform dict keys first letter to lower case.
+
+    for example:
+
+    {
+        'DockerImage':{
+        "CreatedAt": "2021-08-04T08:10:00.000000000Z",
+        }
+    }
+
+    to
+
+    {
+        'dockerImage':{
+            "createdAt": "2021-08-04T08:10:00.000000000Z",
+        }
+    }
+
+    """
+
     def first_lower(string: str):
         return string[0].lower() + string[1:]
 
@@ -57,6 +77,9 @@ class DockerImageView(GenericViewSet):
     def get_queryset(self):
         return []
 
+    def get_lookup_content(self, request, *args, **kwargs):
+        return request.parser_context["kwargs"][self.lookup_field]
+
     def __init__(self, **kwargs: Any) -> None:
         try:
             client = docker.APIClient(base_url="unix://var/run/docker.sock")
@@ -83,15 +106,14 @@ class DockerImageView(GenericViewSet):
         return Response(op.json(), status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
-        lookup_field = request.parser_context["kwargs"]["image_id"]
+        lookup_field = self.get_lookup_content(request)
 
         self.client.remove_image(image=lookup_field, force=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, **kwargs):
-        lookup_field = request.parser_context["kwargs"]["image_id"]
+        lookup_field = self.get_lookup_content(request)
         data = self.client.images(all=True)
-
         for i in data:
             if lookup_field in i["Id"]:
                 return Response(keys_lower(i))
@@ -100,10 +122,8 @@ class DockerImageView(GenericViewSet):
 
     @action(methods=["get"], detail=True, serializer_class=DockerImageInspectSerializer)
     def inspect(self, request, *args, **kwargs):
-        lookup_field = request.parser_context["kwargs"]["image_id"]
-
+        lookup_field = self.get_lookup_content(request)
         data = self.client.inspect_image(lookup_field)
-
         return Response(keys_lower(data))
 
     def list(self, request, *args, **kwargs):

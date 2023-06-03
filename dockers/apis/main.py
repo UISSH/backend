@@ -196,7 +196,7 @@ class DockerContainerView(GenericViewSet):
         try:
             container = self.client.create_container(
                 image=data["image"],
-                name=data["name"],
+                name=data.get("name", None),
                 environment=data.get("environment", None),
                 host_config=self.client.create_host_config(
                     port_bindings=data.get("port_bindings", None),
