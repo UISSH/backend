@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "ftpserver.apps.FtpserverConfig",
     "terminal.apps.TerminalConfig",
     "crontab.apps.CrontabConfig",
+    "dockers.apps.DockersConfig",
 ]
 
 SPECTACULAR_SETTINGS = spectacular.SPECTACULAR_DEFAULTS

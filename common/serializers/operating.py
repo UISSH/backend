@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import uuid
 from rest_framework import serializers
 from base.dataclass import BaseOperatingRes
 from base.dataclass import BaseOperatingResEnum
@@ -20,6 +21,15 @@ class OperatingResSerializer(serializers.Serializer):
     )
     msg = serializers.CharField(max_length=256)
     result_text = serializers.CharField(max_length=72)
+
+    @staticmethod
+    def get_operating_res(event_id=None) -> BaseOperatingRes:
+        if event_id is None:
+            event_id = uuid.uuid4().__str__()
+        instance: BaseOperatingRes = BaseOperatingRes.get_instance(event_id)
+        if instance is None:
+            instance = BaseOperatingRes(event_id=event_id)
+        return instance
 
     def update(self, instance, validated_data):
         pass

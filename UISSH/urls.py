@@ -26,21 +26,22 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from dockers.apis.image import DockerImageView
+from dockers.apis.volume import DockerVolumeView
 from rest_framework.routers import DefaultRouter
-
 
 from common import views
 from common.apis import opreating, user
 from common.apis.kv_storage import KVStorageView
-from common.apis.version import VersionView
+from crontab.apis.main import CrontabViewSet
 from database.apis import database
+from dockers.apis.main import DockerContainerView
 from filebrowser.apis.filebrowser import FileBrowserView
 from ftpserver.apis.ftpserver import FtpServerView
 from iptables.apis.main import IPTablesView
 from terminal.apis.main import TerminalView
 from webdav.apis.webdav import WebDAVView
 from website.apis import application, website
-from crontab.apis.main import CrontabViewSet
 
 router = DefaultRouter()
 router.register(r"User", user.UserView)
@@ -56,6 +57,9 @@ router.register(r"KVStorage", KVStorageView)
 router.register(r"Terminal", TerminalView)
 router.register(r"IPTables", IPTablesView, basename="IPTables")
 router.register(r"Crontab", CrontabViewSet)
+router.register(r"DockerContainer", DockerContainerView, basename="DockerContainer")
+router.register(r"DockerImage", DockerImageView, basename="DockerImage")
+router.register(r"DockerVolume", DockerVolumeView, basename="DockerView")
 
 
 admin.site.site_title = "UI-SSH"

@@ -1,3 +1,6 @@
+from upgrade import CURRENT_VERSION
+
+
 SPECTACULAR_DEFAULTS = {
     # path prefix is used for tagging the discovered operations.
     # use '/api/v[0-9]' for tagging apis like '/api/v1/albums' with ['albums']
@@ -25,8 +28,8 @@ SPECTACULAR_DEFAULTS = {
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
     },
-    "SWAGGER_UI_DIST": "//fastly.jsdelivr.net/npm/swagger-ui-dist@3.51.1",
-    "SWAGGER_UI_FAVICON_HREF": "//fastly.jsdelivr.net/npm/swagger-ui-dist@3.51.1/favicon-32x32.png",
+    "SWAGGER_UI_DIST": "//fastly.jsdelivr.net/npm/swagger-ui-dist@4.19.0",
+    "SWAGGER_UI_FAVICON_HREF": "//fastly.jsdelivr.net/npm/swagger-ui-dist@4.19.0/favicon-32x32.png",
     # Append OpenAPI objects to path and components in addition to the generated objects
     "APPEND_PATHS": {},
     "APPEND_COMPONENTS": {},
@@ -62,7 +65,7 @@ SPECTACULAR_DEFAULTS = {
     "CONTACT": {"name": "zmaplex", "email": "zmaplex@gmail.com"},
     # Optional: MUST contain "name", MAY contain URL
     "LICENSE": {"name": "Apache 2.0"},
-    "VERSION": "0.0.1",
+    "VERSION": CURRENT_VERSION,
     # Optional list of servers.
     # Each entry MUST contain "url", MAY contain "description", "variables"
     "SERVERS": [],

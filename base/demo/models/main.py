@@ -38,11 +38,3 @@ class DemoModel(BaseModel):
         unique_together = ["user", "name"]
         verbose_name = "演示"
         verbose_name_plural = "演示"
-
-    @receiver(post_save, sender=User)
-    def __user_create_event_listener(self):
-        """
-        do something's
-        :return:
-        """
-        pass
