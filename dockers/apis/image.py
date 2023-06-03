@@ -2,7 +2,8 @@
 https://docker-py.readthedocs.io/en/stable/api.html
 """
 import logging
-from typing import Any, List
+from typing import Any, List, Sequence
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 import docker
 from drf_spectacular.utils import extend_schema
@@ -16,6 +17,8 @@ from dockers.serializers.image import (
     DockerImageInspectSerializer,
     DockerImageNameSerializer,
     DockerImageSerializer,
+    SearchDockerImageListSerializer,
+    SearchDockerImageSerializer,
 )
 
 
@@ -125,6 +128,26 @@ class DockerImageView(GenericViewSet):
         lookup_field = self.get_lookup_content(request)
         data = self.client.inspect_image(lookup_field)
         return Response(keys_lower(data))
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "name",
+                description="image name",
+                type=str,
+            )
+        ],
+    )
+    @action(
+        methods=["get"], detail=False, serializer_class=SearchDockerImageListSerializer
+    )
+    def search(self, request, *args, **kwargs):
+        name = request.query_params.get("name", None)
+        if name is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        data = self.client.search(name)
+
+        return Response({"images": format_data(data)})
 
     def list(self, request, *args, **kwargs):
         """

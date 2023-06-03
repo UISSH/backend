@@ -26,7 +26,7 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from dockers.apis.images import DockerImageView
+from dockers.apis.image import DockerImageView
 from dockers.apis.volume import DockerVolumeView
 from rest_framework.routers import DefaultRouter
 

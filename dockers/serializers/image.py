@@ -19,6 +19,18 @@ class DockerImageSerializer(ICBaseSerializer):
     virtualsize = serializers.IntegerField(label="virtualsize")
 
 
+class SearchDockerImageSerializer(ICBaseSerializer):
+    description = serializers.CharField(label="description")
+    is_automated = serializers.BooleanField(label="is_automated")
+    is_official = serializers.BooleanField(label="is_official")
+    name = serializers.CharField(label="name")
+    star_count = serializers.IntegerField(label="star_count")
+
+
+class SearchDockerImageListSerializer(ICBaseSerializer):
+    images = SearchDockerImageSerializer(many=True, label="results")
+
+
 class DockerImageInspectSerializer(ICBaseSerializer):
     id = serializers.CharField()
     created = serializers.CharField()
