@@ -1,4 +1,5 @@
 import os
+import sys
 
 # Don't add v prefix
 CURRENT_VERSION = "0.2.6"
@@ -58,5 +59,14 @@ def upgrade_front_project():
 
 
 if __name__ == "__main__":
-    upgrade_front_project()
-    upgrade_backend_project()
+    print("Upgrade script for UISSH")
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "frontend":
+            upgrade_front_project()
+        elif sys.argv[1] == "backend":
+            upgrade_backend_project()
+        else:
+            print("Error: Invalid argument")
+
+    else:
+        print("Error: Missing argument")
