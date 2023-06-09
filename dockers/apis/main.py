@@ -2,9 +2,12 @@
 https://docker-py.readthedocs.io/en/stable/api.html
 """
 import logging
+import os
+import threading
 from typing import Any, List
 
 import docker
+import requests
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -15,7 +18,10 @@ from common.serializers.operating import OperatingResSerializer
 from dockers.serializers.main import (
     CreateDockerContainerSerializer,
     DockerContainerSerializer,
+    DockerInpectSerializer,
 )
+
+logging = logging.getLogger(__name__)
 
 
 def keys_lower(dict_data: dict):
@@ -66,6 +72,37 @@ class DockerContainerView(GenericViewSet):
             logging.error("Docker is not running or not installed. detail: %s", e)
         super().__init__(**kwargs)
 
+    @extend_schema(request=None)
+    @action(methods=["post"], detail=False, serializer_class=OperatingResSerializer)
+    def install(self, request, *args, **kwargs):
+        """
+        install docker
+        """
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "install docker"
+        res = requests.get("https://ischina.org/")
+        res_json = res.json()
+        if res_json["is_china"]:
+            command_text = """
+            curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+            """
+        else:
+            command_text = """
+            curl -fsSL https://get.docker.com | bash
+            """
+
+        def command():
+            res = os.system(command_text)
+            if res == 0:
+                op.set_success()
+            else:
+                op.set_failure("install docker failed.")
+
+        command_thread = threading.Thread(target=command)
+        command_thread.start()
+
+        return Response(op.json())
+
     @action(methods=["get"], detail=False, serializer_class=OperatingResSerializer)
     def ping(self, request, *args, **kwargs):
         """
@@ -98,6 +135,13 @@ class DockerContainerView(GenericViewSet):
         data = format_data(data)
         if len(data) > 0:
             return Response(data[0])
+        return Response(data)
+
+    @action(methods=["get"], detail=True, serializer_class=DockerInpectSerializer)
+    def inpesct(self, request, *args, **kwargs):
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        data = self.client.inspect_container(lookup_field)
+        data = keys_lower(data)
         return Response(data)
 
     @extend_schema(request=None, responses=OperatingResSerializer)

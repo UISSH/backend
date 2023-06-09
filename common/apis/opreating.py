@@ -7,6 +7,7 @@ from rest_framework import serializers
 
 from base.dataclass import BaseOperatingRes
 from common.serializers.operating import (
+    ExecuteCommandAsyncSerializer,
     ExecuteCommandSyncSerializer,
     OperatingResSerializer,
     QueryOperatingResSerializer,
@@ -77,4 +78,6 @@ class OperatingView(GenericViewSet):
         permission_classes=[permissions.IsAuthenticated],
     )
     def excute_command_async(self, request):
-        pass
+        serializer = ExecuteCommandAsyncSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            return Response(serializer.save())
