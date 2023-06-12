@@ -147,7 +147,7 @@ CACHES = {
     },
     "GlobalOperationResCache": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": "/var/tmp/django_gg_cache_GlobalOperationResCache",
+        "LOCATION": "/var/tmp/django_uissh_cache_global_operation_res_cache",
     },
 }
 
