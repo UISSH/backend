@@ -1,3 +1,5 @@
+import time
+import uuid
 import warnings
 
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -13,6 +15,30 @@ from common.serializers.operating import (
     OperatingResSerializer,
     QueryOperatingResSerializer,
 )
+
+msg = """
+import time
+import uuid
+import warnings
+
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import permissions, serializers, views
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet, ViewSetMixin
+
+from base.dataclass import BaseOperatingRes
+from common.serializers.operating import (
+    ExecuteCommandAsyncSerializer,
+    ExecuteCommandSyncSerializer,
+    OperatingResSerializer,
+    QueryOperatingResSerializer,
+)
+"""
+
+
+def random_long_text():
+    return "a" * 10000
 
 
 # class OperatingView(ViewSetMixin, views.APIView):
@@ -41,6 +67,23 @@ class OperatingView(GenericViewSet):
             "result_text": data.result.name,
         }
         return Response(data)
+
+    @action(methods=["GET"], detail=False, serializer_class=OperatingResSerializer)
+    def generate_op(self, request, *args, **kwargs):
+        """
+        This function is only for testing.
+        """
+        for i in range(0, 10):
+            op = BaseOperatingRes(event_id=uuid.uuid4(), msg=msg)
+            if i % 2 == 0:
+                op.set_success()
+            elif i % 3 == 0:
+                op.set_failure("error")
+            elif i % 5 == 0:
+                pass
+            else:
+                op.set_processing()
+        return Response("ok")
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

@@ -58,17 +58,23 @@ class BaseOperatingRes:
             event_id = self.__dict__["event_id"]
             obj = BaseOperatingRes.get_instance(event_id, self)
             obj.__dict__[key] = value
-            data = obj
+            _CACHE.set(event_id, obj, _DEFAULT_TIMEOUT)
+            ALL_KEYS[event_id] = {"expire_at": time.time() + _DEFAULT_TIMEOUT}
 
         else:
             self.__dict__[key] = value
             event_id = self.__dict__["event_id"]
-            data = self
-        _CACHE.set(event_id, data, _DEFAULT_TIMEOUT)
-        ALL_KEYS[event_id] = {"expire_at": time.time() + _DEFAULT_TIMEOUT}
+            _CACHE.set(event_id, self, _DEFAULT_TIMEOUT)
+            ALL_KEYS[event_id] = {"expire_at": time.time() + _DEFAULT_TIMEOUT}
 
     def __getattribute__(self, name: str):
-        skip = ["result_enum", "is_success", "json", "get_instance", "get_all_key"]
+        skip = [
+            "result_enum",
+            "is_success",
+            "json",
+            "get_instance",
+            "get_all_keys",
+        ]
         if name.startswith("_") or name in skip or name.startswith("set_"):
             return object.__getattribute__(self, name)
         event_id = object.__getattribute__(self, "event_id")
@@ -78,6 +84,7 @@ class BaseOperatingRes:
     @classmethod
     def get_all_keys(cls):
         data = [x for x in ALL_KEYS.keys() if ALL_KEYS[x]["expire_at"] > time.time()]
+        data.reverse()
         cache_data = []
         for x in data:
             if x not in ALL_KEYS:
