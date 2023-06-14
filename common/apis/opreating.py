@@ -60,13 +60,7 @@ class OperatingView(GenericViewSet):
             data = BaseOperatingRes(name=name)
             data.set_failure("The operating was not found.")
 
-        data = {
-            "event_id": name,
-            "msg": data.msg,
-            "result": data.result.value,
-            "result_text": data.result.name,
-        }
-        return Response(data)
+        return Response(data.json())
 
     @action(methods=["GET"], detail=False, serializer_class=OperatingResSerializer)
     def generate_op(self, request, *args, **kwargs):
@@ -89,14 +83,7 @@ class OperatingView(GenericViewSet):
         queryset = self.get_queryset()
         data = []
         for i in queryset:
-            data.append(
-                {
-                    "event_id": i.event_id,
-                    "msg": i.msg,
-                    "result": i.result.value,
-                    "result_text": i.result.name,
-                }
-            )
+            data.append(i.json())
 
         page = self.paginate_queryset(data)
         if page is not None:
@@ -134,14 +121,8 @@ class OperatingView(GenericViewSet):
             data.set_failure("The operating was not found.")
         else:
             data.set_success()
-        data = {
-            "event_id": event_id,
-            "msg": data.msg,
-            "result": data.result.value,
-            "result_text": data.result.name,
-        }
 
-        return Response(data)
+        return Response(data.json())
 
     @extend_schema(responses=OperatingResSerializer)
     @action(
@@ -159,7 +140,7 @@ class OperatingView(GenericViewSet):
     @action(
         methods=["POST"],
         detail=False,
-        serializer_class=QueryOperatingResSerializer,
+        serializer_class=ExecuteCommandAsyncSerializer,
         permission_classes=[permissions.IsAuthenticated],
     )
     def excute_command_async(self, request):

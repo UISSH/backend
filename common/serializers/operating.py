@@ -1,9 +1,14 @@
+import logging
 import subprocess
 import sys
+import threading
 import uuid
+
 from rest_framework import serializers
-from base.dataclass import BaseOperatingRes
-from base.dataclass import BaseOperatingResEnum
+
+from base.dataclass import BaseOperatingRes, BaseOperatingResEnum
+
+logger = logging.getLogger(__name__)
 
 
 class EmptySerializer(serializers.Serializer):
@@ -14,13 +19,24 @@ class QueryOperatingResSerializer(serializers.Serializer):
     event_id = serializers.CharField(max_length=72)
 
 
+class OperatingResultSerializer(serializers.Serializer):
+    # BaseOperatingResEnum
+    result = serializers.ChoiceField(
+        choices=[(tag.name, tag.value) for tag in BaseOperatingResEnum], help_text="int"
+    )
+    result_text = serializers.CharField(max_length=72)
+
+
 class OperatingResSerializer(serializers.Serializer):
     event_id = serializers.CharField(max_length=72)
     result = serializers.ChoiceField(
         choices=[(tag.name, tag.value) for tag in BaseOperatingResEnum], help_text="int"
     )
+    name = serializers.CharField(max_length=72)
+
     msg = serializers.CharField(max_length=256)
-    result_text = serializers.CharField(max_length=72)
+    result = OperatingResultSerializer()
+    create_at = serializers.CharField(max_length=72)
 
     @staticmethod
     def get_operating_res(event_id=None) -> BaseOperatingRes:
@@ -43,7 +59,7 @@ class ExecuteCommandSyncSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=1024)
 
     def create(self, validated_data):
-        operator_res = BaseOperatingRes(name="ExecuteCommandSync")
+        operator_res = BaseOperatingRes(uuid.uuid4(), name="ExecuteCommandSync")
         cwd = validated_data.get("cwd")
         command = validated_data.get("command").replace("  ", " ").replace("  ", " ")
 
@@ -80,6 +96,7 @@ class ExecuteCommandAsyncSerializer(serializers.Serializer):
 
     def run_thread(self, event_id, cwd, command):
         try:
+            logging.debug(f"{event_id} {cwd} {command}")
             operator_res = BaseOperatingRes.get_instance(event_id)
             operator_res.set_processing()
             ret = subprocess.Popen(
@@ -106,12 +123,24 @@ class ExecuteCommandAsyncSerializer(serializers.Serializer):
                 operator_res.set_failure()
         except Exception as e:
             msg = f"ExecuteCommandSyncSerializer#{sys._getframe().f_lineno}: {e}"
+            logging.error(msg)
             operator_res.set_failure()
 
         operator_res.msg = msg
-        return operator_res.json()
+        logging.debug(f"op({event_id}) thread end.")
 
     def create(self, validated_data):
-        operator_res = BaseOperatingRes(name="ExecuteCommandAsync")
+        operator_res = BaseOperatingRes(
+            event_id=uuid.uuid4().hex, name="ExecuteCommandAsync"
+        )
+
+        threading.Thread(
+            target=self.run_thread,
+            args=(
+                operator_res.event_id,
+                validated_data.get("cwd"),
+                validated_data.get("command"),
+            ),
+        ).start()
 
         return operator_res.json()

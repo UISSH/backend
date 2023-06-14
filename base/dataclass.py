@@ -53,6 +53,10 @@ class BaseOperatingRes:
     msg: str = ""
     create_at: str = datetime.now().__str__()
 
+    def __post_init__(self):
+        if self.event_id == BaseOperatingRes.event_id:
+            raise Exception("event_id need to be set")
+
     def __setattr__(self, key, value):
         if "event_id" in self.__dict__:
             event_id = self.__dict__["event_id"]
