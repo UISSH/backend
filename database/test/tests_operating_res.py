@@ -1,3 +1,4 @@
+import uuid
 from django.test import TestCase
 
 
@@ -9,7 +10,7 @@ class GlobalOperatingTests(TestCase):
         """
         from base.dataclass import BaseOperatingRes
 
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         _op = BaseOperatingRes.get_instance(op.event_id)
         _op.msg = "update new msg"
         self.assertEqual(op, _op)
@@ -23,7 +24,7 @@ class GlobalOperatingTests(TestCase):
         """
         from base.dataclass import BaseOperatingRes
 
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
 
         def _do(event_id: str):
             _op = BaseOperatingRes.get_instance(event_id)
@@ -40,7 +41,9 @@ class GlobalOperatingTests(TestCase):
         """
         from base.dataclass import BaseOperatingRes
 
-        op = BaseOperatingRes(result=BaseOperatingRes.result_enum().PROCESSING)
+        op = BaseOperatingRes(
+            uuid.uuid4().hex, result=BaseOperatingRes.result_enum().PROCESSING
+        )
         _op = BaseOperatingRes.get_instance(op.event_id)
 
         self.assertIs(_op.result, op.result_enum().PROCESSING)
@@ -51,7 +54,7 @@ class GlobalOperatingTests(TestCase):
     def test_data_consistency_3(self):
         from base.dataclass import BaseOperatingRes
 
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         op.set_failure()
         _op = BaseOperatingRes.get_instance(op.event_id)
         self.assertEqual(op, _op)

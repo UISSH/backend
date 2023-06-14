@@ -20,7 +20,7 @@ def resolve_domain(domain):
             if i["type"] == 1:
                 return i["data"]
     except:
-        return 
+        return
 
 
 def find_local_public_ip():
@@ -59,7 +59,7 @@ def domain_is_resolved(domain, request):
     from base.utils.cache import IBaseCache
 
     _cache = IBaseCache()
-    op = BaseOperatingRes()
+    op = BaseOperatingRes(uuid.uuid4().hex)
     op.set_processing()
 
     random_str = "".join(
@@ -70,23 +70,22 @@ def domain_is_resolved(domain, request):
     token = Token.objects.get(user=request.user)
 
     remote_ip = resolve_domain(domain)
-    
+
     if remote_ip is None:
         op.msg = "The domain name has not been resolved to this host."
         op.set_failure()
         return op
-        
+
     host = find_domain_in_nginx()
     url = f"https://{remote_ip}/api/Website/domain_records"
-      
+
     headers = {"Authorization": f"token {token.key}", "host": f"{host}"}
     try:
         data = requests.get(
             url, params=params, headers=headers, timeout=5, verify=False
         )
-        
+
         logging.info(data.text)
-        
 
         if data.json()["msg"] == random_str:
             op.set_success()

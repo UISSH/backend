@@ -92,7 +92,7 @@ class FileBrowserView(mixins.ListModelMixin, GenericViewSet):
     )
     @action(methods=["get"], detail=False)
     def request_download_file(self, request, *args, **kwargs):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         path = request.query_params.get("path", None)
         if path:
             _key = hashlib.md5(path.encode()).hexdigest()

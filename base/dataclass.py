@@ -149,4 +149,4 @@ class BaseOperatingResTest:
 
 if __name__ == "__main__":
     print(BaseOperatingResTest().json())
-    print(BaseOperatingRes().json())
+    print(BaseOperatingRes(uuid.uuid4().hex).json())

@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from django.test import TestCase
 
@@ -27,7 +28,7 @@ class TestDBDatabase(TestCase):
         self.db_new_username = f"test_new_username"
 
     def __create(self):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         create_new_database(
             op.event_id,
             self.db_name,
@@ -36,10 +37,10 @@ class TestDBDatabase(TestCase):
             root_username=root_username,
             root_password=root_password,
         )
-        self.assertTrue(op.is_success())
+        self.assertTrue(op.is_success(), "Create database failed")
 
     def __update_username(self):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
 
         update_username_database(
             op.event_id,
@@ -51,7 +52,7 @@ class TestDBDatabase(TestCase):
         self.assertTrue(op.is_success())
 
     def __update_password(self):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         update_password_database(
             op.event_id,
             self.db_new_username,
@@ -62,7 +63,7 @@ class TestDBDatabase(TestCase):
         self.assertTrue(op.is_success())
 
     def __delete(self):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
 
         delete_database(
             op.event_id,
@@ -74,7 +75,7 @@ class TestDBDatabase(TestCase):
         self.assertTrue(op.is_success())
 
     def __export(self):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         export_backup_db(
             op.event_id,
             self.db_name,
@@ -85,7 +86,7 @@ class TestDBDatabase(TestCase):
         # self.assertTrue(op.is_success())
 
     def __import(self):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         import_backup_db(
             op.event_id,
             self.db_name,
