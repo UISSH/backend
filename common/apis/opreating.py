@@ -57,7 +57,7 @@ class OperatingView(GenericViewSet):
         name = kwargs.get("pk")
         data = BaseOperatingRes.get_instance(name)
         if data is None:
-            data = BaseOperatingRes(name=name)
+            data = BaseOperatingRes(event_id=uuid.uuid4().hex, name=name)
             data.set_failure("The operating was not found.")
 
         return Response(data.json())
@@ -68,7 +68,7 @@ class OperatingView(GenericViewSet):
         This function is only for testing.
         """
         for i in range(0, 10):
-            op = BaseOperatingRes(event_id=uuid.uuid4(), msg=msg)
+            op = BaseOperatingRes(event_id=uuid.uuid4().hex, msg=msg)
             if i % 2 == 0:
                 op.set_success()
             elif i % 3 == 0:

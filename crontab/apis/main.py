@@ -1,3 +1,4 @@
+import uuid
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -45,7 +46,7 @@ class CrontabViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def sync(self, request, *args, **kwargs):
-        op = BaseOperatingRes(name="sync iptables")
+        op = BaseOperatingRes(event_id=uuid.uuid4().hex, name="sync iptables")
         try:
             CrontabModel.sync()
             op.set_success()

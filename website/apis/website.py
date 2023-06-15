@@ -3,6 +3,7 @@ import os
 import pathlib
 import time
 import traceback
+import uuid
 
 from django.db import transaction
 from database.models import DataBaseModel
@@ -56,7 +57,9 @@ class WebsiteView(BaseModelViewSet):
 
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def allocating_resources(self, request, *args, **kwargs):
-        op = BaseOperatingRes(name="WebsiteModel:Allocating Resources")
+        op = BaseOperatingRes(
+            event_id=uuid.uuid4().hex, name="WebsiteModel:Allocating Resources"
+        )
         instance: WebsiteModel = self.get_object()
         app: Application = instance.get_application()
 
