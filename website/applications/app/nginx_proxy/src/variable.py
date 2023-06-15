@@ -2,10 +2,13 @@ app_parameter = [
     {
         "attr": {},
         "name": "proxy_pass",
-        "label": {"default": "title", "en-US": "title"},
+        "label": {"default": "proxy pass", "en-US": "proxy pass"},
         "value": "http://127.0.0.1:32768",
         "required": True,
-        "description": {"default": "proxy_pass", "en-US": "proxy_pass"},
+        "description": {
+            "default": "It is possible to proxy requests to an HTTP server (another NGINX server or any other server) or a non-HTTP server (which can run an application developed with a specific framework, such as PHP or Python) using a specified protocol. Supported protocols include FastCGI, uwsgi, SCGI, and memcached.",
+            "en-US": "It is possible to proxy requests to an HTTP server (another NGINX server or any other server) or a non-HTTP server (which can run an application developed with a specific framework, such as PHP or Python) using a specified protocol. Supported protocols include FastCGI, uwsgi, SCGI, and memcached.",
+        },
     },
 ]
 
