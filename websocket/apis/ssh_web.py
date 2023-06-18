@@ -66,7 +66,15 @@ class SshWebConsumer(WebsocketConsumer):
     def __init_ssh(self, _format):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
-        auth_info = format_ssh_auth_data(_format)
+        hostname = _format.get("hostname")
+        if hostname == "localhost":
+            auth_info = {
+                "hostname": hostname,
+                "port": _format.get("port", 22),
+                "username": _format.get("username", None),
+            }
+        else:
+            auth_info = format_ssh_auth_data(_format)
         logging.debug(auth_info)
         msg = "connection succeeded\r\n"
         try:
