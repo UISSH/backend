@@ -29,7 +29,6 @@ def upgrade_backend_project(version=CURRENT_VERSION):
     mv /usr/local/uissh/db.sqlite3.bak {BACKEND_DIR}/db.sqlite3
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations --noinput
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput
-    {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py collectstatic --noinput
     systemctl restart ui-ssh
     """

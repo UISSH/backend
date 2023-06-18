@@ -39,19 +39,19 @@ class NginxApplication(Application, ApplicationToolMinx):
         title = self._app_config.get("name", "default")
         text = self._app_config.get("text", "与君初相识，犹如故人归。嗨，别来无恙！<br>Hello World!")
         email = self._app_config.get("email", "")
+        if not os.path.exists(self._config.root_dir):
+            with open(f"{self._config.root_dir}/index.html", "w") as f:
+                index_html = (
+                    html.replace("{title}", title)
+                    .replace("{domain}", self._config.domain)
+                    .replace("{text}", text)
+                )
+                if email:
+                    index_html = index_html.replace("{contact}", email)
+                else:
+                    index_html = index_html.replace("{contact}", "")
 
-        with open(f"{self._config.root_dir}/index.html", "w") as f:
-            index_html = (
-                html.replace("{title}", title)
-                .replace("{domain}", self._config.domain)
-                .replace("{text}", text)
-            )
-            if email:
-                index_html = index_html.replace("{contact}", email)
-            else:
-                index_html = index_html.replace("{contact}", "")
-
-            f.write(index_html)
+                f.write(index_html)
         os.system(f"chown www-data.www-data -R {self._config.root_dir}")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
