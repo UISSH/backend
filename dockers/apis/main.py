@@ -1,10 +1,14 @@
 """
 https://docker-py.readthedocs.io/en/stable/api.html
 """
+
 import logging
 import os
 import threading
+from datetime import datetime, timedelta
 from typing import Any, List
+
+from django.http import FileResponse
 
 import docker
 import requests
@@ -226,6 +230,31 @@ class DockerContainerView(GenericViewSet):
         except Exception as e:
             op.set_failure(str(e))
             return Response(op.json())
+        return Response(op.json())
+
+    @action(methods=["get"], detail=True, serializer_class=OperatingResSerializer)
+    def logs(self, request, *args, **kwargs):
+        """show docker container logs in last 60 minutes."""
+        op = OperatingResSerializer.get_operating_res()
+        op.set_processing
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        since_time = datetime.now() - timedelta(minutes=60)
+        data = self.client.logs(container=lookup_field, since=since_time.timestamp())
+        op.msg = data
+        op.set_success()
+        return Response(op.json())
+
+    @action(methods=["get"], detail=True, serializer_class=OperatingResSerializer)
+    def donwloadLogs(self, request, *args, **kwargs):
+        """download  docker container logs"""
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        op = OperatingResSerializer.get_operating_res()
+        op.name = "download docker container logs"
+        op.set_processing()
+        with open(f"/tmp/{lookup_field}.log", "wb") as f:
+            f.write(self.client.logs(container=lookup_field))
+        op.set_success()
+        op.msg = f"/tmp/{lookup_field}.log"
         return Response(op.json())
 
     @extend_schema(

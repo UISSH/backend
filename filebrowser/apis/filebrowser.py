@@ -2,6 +2,7 @@ import hashlib
 import pathlib
 import shlex
 import subprocess
+import uuid
 
 from django.db import models
 from django.http import FileResponse
