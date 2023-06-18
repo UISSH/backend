@@ -23,8 +23,10 @@ def upgrade_backend_project(version=CURRENT_VERSION):
         return
 
     shell_script = f"""
-    cd {BACKEND_DIR} && git reset --hard HEAD && git fetch && git checkout v{version}
+    cd {BACKEND_DIR} && cp db.sqlite3 /usr/local/uissh/db.sqlite3.bak
+    cd {BACKEND_DIR} && git reset --hard HEAD && git fetch && git checkout v{version} -f
     cd {BACKEND_DIR} && venv/bin/pip install -r requirements.txt
+    mv /usr/local/uissh/db.sqlite3.bak {BACKEND_DIR}/db.sqlite3
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations --noinput
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput
