@@ -13,8 +13,13 @@ from common.config import DB_SETTINGS
 from common.models import User
 from common.serializers.operating import OperatingResSerializer
 from database.models import DataBaseModel
-from database.models.database_utils import export_backup_db, import_backup_db
-from database.serializers.database import DataBaseModelSerializer
+from database.models.database_utils import (
+    export_backup_db,
+    get_database_password,
+    get_database_username,
+    import_backup_db,
+)
+from database.serializers.database import DataBaseModelSerializer, RootInfoSerializer
 
 
 class DataBaseView(BaseModelViewSet):
@@ -109,14 +114,12 @@ class DataBaseView(BaseModelViewSet):
             op_res.set_failure()
             return Response(op_res.json())
 
-        root_username = DB_SETTINGS.database_value()["database"]["root_username"]
-        root_password = DB_SETTINGS.database_value()["database"]["root_password"]
         import_backup_db(
             op_res.event_id,
             backup_db_path=path,
             name=self.get_object().name,
-            root_username=root_username,
-            root_password=root_password,
+            root_username=get_database_username(),
+            root_password=get_database_password(),
         )
         return Response(op_res.json())
 
@@ -137,6 +140,15 @@ class DataBaseView(BaseModelViewSet):
         op_res.msg = backup_db_path
 
         return Response(op_res.json())
+
+    @action(methods=["get"], detail=False, serializer_class=RootInfoSerializer)
+    def root_info(self, request: Request, *args, **kwargs):
+        return Response(
+            {
+                "username": get_database_username(),
+                "password": get_database_password(),
+            }
+        )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

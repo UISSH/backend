@@ -12,6 +12,11 @@ class DockerContainerModelSerializer(ICBaseModelSerializer):
         fields = "__all__"
 
 
+class DockerContainerRestartPolicySerializer(ICBaseSerializer):
+    name = serializers.CharField(help_text="restart policy name")
+    maximum_retry_count = serializers.IntegerField(help_text="maximum retry count")
+
+
 class DockerInpectSerializer(ICBaseSerializer):
     """{
         "id": "9505f78242a87e69415e506558a4274aaa8a53c1e0550d9d83bb644ad2f33525",

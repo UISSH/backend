@@ -21,6 +21,7 @@ from rest_framework.viewsets import GenericViewSet
 from common.serializers.operating import OperatingResSerializer
 from dockers.serializers.main import (
     CreateDockerContainerSerializer,
+    DockerContainerRestartPolicySerializer,
     DockerContainerSerializer,
     DockerInpectSerializer,
 )
@@ -141,8 +142,34 @@ class DockerContainerView(GenericViewSet):
             return Response(data[0])
         return Response(data)
 
+    @extend_schema(request=DockerContainerRestartPolicySerializer)
+    @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
+    def set_restart_policy(self, request, *args, **kwargs):
+        op = OperatingResSerializer.get_operating_res()
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+
+        policy_name = request.data["name"]
+        maximum_retry_count = int(request.data["maximum_retry_count"])
+
+        if policy_name != "on-failure":
+            maximum_retry_count = 0
+
+        self.client.update_container(
+            lookup_field,
+            restart_policy={
+                "Name": request.data["name"],
+                "MaximumRetryCount": maximum_retry_count,
+            },
+        )
+
+        op.set_success()
+        op.name = "set restart policy"
+        op.msg = "set restart policy success."
+        logging.info(request.data)
+        return Response(op.json())
+
     @action(methods=["get"], detail=True, serializer_class=DockerInpectSerializer)
-    def inpesct(self, request, *args, **kwargs):
+    def inspect(self, request, *args, **kwargs):
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         data = self.client.inspect_container(lookup_field)
         data = keys_lower(data)
