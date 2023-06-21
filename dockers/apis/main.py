@@ -24,6 +24,7 @@ from dockers.serializers.main import (
     DockerContainerRestartPolicySerializer,
     DockerContainerSerializer,
     DockerInpectSerializer,
+    DockerStatsSerializer,
 )
 
 logging = logging.getLogger(__name__)
@@ -129,12 +130,17 @@ class DockerContainerView(GenericViewSet):
         return Response(op.json())
 
     def destroy(self, request, *args, **kwargs):
+        """
+        Delete docker container. (force)
+        """
         lookup_field = request.parser_context["kwargs"]["docker_id"]
-
         self.client.remove_container(container=lookup_field, force=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Get docker container info.
+        """
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         data = self.client.containers(all=True, filters={"id": lookup_field})
         data = format_data(data)
@@ -142,9 +148,20 @@ class DockerContainerView(GenericViewSet):
             return Response(data[0])
         return Response(data)
 
+    @action(methods=["get"], detail=True, serializer_class=DockerStatsSerializer)
+    def stats(self, request, *args, **kwargs):
+        """Get docker container stats."""
+        lookup_field = request.parser_context["kwargs"]["docker_id"]
+        data = self.client.stats(lookup_field, stream=False)
+        return Response(data)
+
     @extend_schema(request=DockerContainerRestartPolicySerializer)
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def set_restart_policy(self, request, *args, **kwargs):
+        """
+        Set docker container restart policy.
+        if policy name is not "on-failure", maximum_retry_count will be ignored.
+        """
         op = OperatingResSerializer.get_operating_res()
         lookup_field = request.parser_context["kwargs"]["docker_id"]
 
@@ -170,6 +187,7 @@ class DockerContainerView(GenericViewSet):
 
     @action(methods=["get"], detail=True, serializer_class=DockerInpectSerializer)
     def inspect(self, request, *args, **kwargs):
+        """Get docker container inspect info."""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         data = self.client.inspect_container(lookup_field)
         data = keys_lower(data)
@@ -178,6 +196,7 @@ class DockerContainerView(GenericViewSet):
     @extend_schema(request=None, responses=OperatingResSerializer)
     @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
     def start(self, request, *args, **kwargs):
+        """Start docker container."""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         op = OperatingResSerializer.get_operating_res()
         op.name = "start docker container"
@@ -192,6 +211,7 @@ class DockerContainerView(GenericViewSet):
     @extend_schema(request=None, responses=OperatingResSerializer)
     @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
     def stop(self, request, *args, **kwargs):
+        """Stop docker container."""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         op = OperatingResSerializer.get_operating_res()
         op.name = "stop docker container"
@@ -206,6 +226,7 @@ class DockerContainerView(GenericViewSet):
     @extend_schema(request=None, responses=OperatingResSerializer)
     @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
     def restart(self, request, *args, **kwargs):
+        """Restart docker container."""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         op = OperatingResSerializer.get_operating_res()
         op.name = "restart docker container"
@@ -220,6 +241,7 @@ class DockerContainerView(GenericViewSet):
     @extend_schema(request=None, responses=OperatingResSerializer)
     @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
     def pause(self, request, *args, **kwargs):
+        """Pause docker container."""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         op = OperatingResSerializer.get_operating_res()
         op.name = "pause docker container"
@@ -234,6 +256,7 @@ class DockerContainerView(GenericViewSet):
     @extend_schema(request=None, responses=OperatingResSerializer)
     @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
     def unpause(self, request, *args, **kwargs):
+        """Unpause docker container."""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         op = OperatingResSerializer.get_operating_res()
         op.name = "unpause docker container"
@@ -248,6 +271,7 @@ class DockerContainerView(GenericViewSet):
     @extend_schema(request=None, responses=OperatingResSerializer)
     @action(methods=["POST"], detail=True, serializer_class=OperatingResSerializer)
     def kill(self, request, *args, **kwargs):
+        """Kill docker container."""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         op = OperatingResSerializer.get_operating_res()
         op.name = "kill docker container"
@@ -261,7 +285,7 @@ class DockerContainerView(GenericViewSet):
 
     @action(methods=["get"], detail=True, serializer_class=OperatingResSerializer)
     def logs(self, request, *args, **kwargs):
-        """show docker container logs in last 60 minutes."""
+        """Show docker container logs in last 60 minutes."""
         op = OperatingResSerializer.get_operating_res()
         op.set_processing
         lookup_field = request.parser_context["kwargs"]["docker_id"]
@@ -273,7 +297,7 @@ class DockerContainerView(GenericViewSet):
 
     @action(methods=["get"], detail=True, serializer_class=OperatingResSerializer)
     def donwloadLogs(self, request, *args, **kwargs):
-        """download  docker container logs"""
+        """Download  docker container logs"""
         lookup_field = request.parser_context["kwargs"]["docker_id"]
         op = OperatingResSerializer.get_operating_res()
         op.name = "download docker container logs"
@@ -289,7 +313,7 @@ class DockerContainerView(GenericViewSet):
     )
     @action(methods=["POST"], detail=False)
     def create_container(self, request, *args, **kwargs):
-        """create docker container with docker api."""
+        """Create docker container with docker api."""
         op = OperatingResSerializer.get_operating_res()
         op.name = "create docker container"
         data = request.data
@@ -314,7 +338,7 @@ class DockerContainerView(GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         """
-        get docker container with docker api.
+        List all docker containers, include running and stopped containers.
         """
         if self.client is None:
             msg = "docker daemon is not running."

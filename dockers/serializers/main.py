@@ -12,6 +12,21 @@ class DockerContainerModelSerializer(ICBaseModelSerializer):
         fields = "__all__"
 
 
+class DockerStatsSerializer(ICBaseSerializer):
+    id = serializers.CharField(help_text="container id")
+    name = serializers.CharField(help_text="container name")
+    read = serializers.DateTimeField(help_text="read time")
+    preread = serializers.DateTimeField(help_text="preread time")
+    num_procs = serializers.IntegerField(help_text="num procs")
+    pids_stats = serializers.DictField(help_text="pids stats")
+    cpu_stats = serializers.DictField(help_text="cpu stats")
+    precpu_stats = serializers.DictField(help_text="precpu stats")
+    memory_stats = serializers.DictField(help_text="memory stats")
+    blkio_stats = serializers.DictField(help_text="blkio stats")
+    storage_stats = serializers.DictField(help_text="storage stats")
+    networks = serializers.DictField(help_text="networks")
+
+
 class DockerContainerRestartPolicySerializer(ICBaseSerializer):
     name = serializers.CharField(help_text="restart policy name")
     maximum_retry_count = serializers.IntegerField(help_text="maximum retry count")
