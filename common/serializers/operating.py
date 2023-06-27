@@ -108,12 +108,12 @@ class ExecuteCommandAsyncSerializer(serializers.Serializer):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
-
-            if ret.stdout:
+            msg = ""
+            if ret.returncode == 0:
                 stdout = ret.stdout.read().decode("utf-8")
                 if stdout != "":
                     msg = stdout
-                    operator_res.set_success()
+                operator_res.set_success()
 
             if ret.stderr:
                 stderr = ret.stderr.read().decode("utf-8")
