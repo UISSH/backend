@@ -72,7 +72,7 @@ class ActionFileSerializer(serializers.Serializer):
     operation_command = serializers.CharField(max_length=1024)
 
     def create(self, validated_data):
-        operator_res = BaseOperatingRes()
+        operator_res = BaseOperatingRes(uuid.uuid4().hex)
 
         current_directory = validated_data.get("current_directory")
         operation_command = (

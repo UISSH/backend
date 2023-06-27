@@ -1,3 +1,4 @@
+import os
 import subprocess
 from iptables.serializers.main import IPTablesRuleSerializer
 from rest_framework import permissions
@@ -17,24 +18,27 @@ class IPTablesView(GenericViewSet):
     def get_rules(self, request):
         result = subprocess.run(["ufw", "status"], capture_output=True, text=True)
         output = result.stdout
-        lines = output.splitlines()
-        first = lines[2].find("To")
-        second = lines[2].find("Action")
-        third = lines[2].find("From")
-        area = []
-        for index, line in enumerate(lines[4:]):
-            if not line:
-                continue
-            To = line[first:second]
-            Action = line[second:third]
-            From = line[third:]
-            data = {
-                "id": index + 1,
-                "to": To.strip(),
-                "action": Action.strip(),
-                "from_src": From.strip(),
-            }
-            area.append(data)
+        if "inactive" in output:
+            area = []
+        else:
+            lines = output.splitlines()
+            first = lines[2].find("To")
+            second = lines[2].find("Action")
+            third = lines[2].find("From")
+            area = []
+            for index, line in enumerate(lines[4:]):
+                if not line:
+                    continue
+                To = line[first:second]
+                Action = line[second:third]
+                From = line[third:]
+                data = {
+                    "id": index + 1,
+                    "to": To.strip(),
+                    "action": Action.strip(),
+                    "from_src": From.strip(),
+                }
+                area.append(data)
         return Response(
             {
                 "pagination": {

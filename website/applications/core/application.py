@@ -34,7 +34,10 @@ class Storage(metaclass=ABCMeta):
 
 
 class LocalStorage(Storage):
-    warnings.warn("LocalStorage is not recommended for production environments.")
+    warnings.warn(
+        "LocalStorage is not recommended for production environments.",
+        FutureWarning,
+    )
 
     def __init__(self, unique, dir_path: pathlib.Path = pathlib.Path("local_storage")):
         if not dir_path.exists():

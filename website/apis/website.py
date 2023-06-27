@@ -3,6 +3,7 @@ import os
 import pathlib
 import time
 import traceback
+import uuid
 
 from django.db import transaction
 from database.models import DataBaseModel
@@ -56,7 +57,9 @@ class WebsiteView(BaseModelViewSet):
 
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def allocating_resources(self, request, *args, **kwargs):
-        op = BaseOperatingRes(name="WebsiteModel:Allocating Resources")
+        op = BaseOperatingRes(
+            event_id=uuid.uuid4().hex, name="WebsiteModel:Allocating Resources"
+        )
         instance: WebsiteModel = self.get_object()
         app: Application = instance.get_application()
 
@@ -135,7 +138,7 @@ class WebsiteView(BaseModelViewSet):
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def enable_ssl(self, request, *args, **kwargs):
         obj: WebsiteModel = self.get_object()
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
 
         p = issuing_certificate(obj)
         if p.returncode != 0:
@@ -151,7 +154,7 @@ class WebsiteView(BaseModelViewSet):
 
     @action(methods=["post"], detail=True, serializer_class=OperatingResSerializer)
     def disable_ssl(self, request, *args, **kwargs):
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         obj: WebsiteModel = self.get_object()
         obj.ssl_enable = False
         obj.sync_web_config(save=True)
@@ -168,7 +171,7 @@ class WebsiteView(BaseModelViewSet):
         otherwise, the domain name resolution and verification process are carried out.
         """
         if not find_domain_in_nginx():
-            op = BaseOperatingRes()
+            op = BaseOperatingRes(uuid.uuid4().hex)
             # op.set_failure("UISSH 没有启用SSL，无法进行域名解析判断。")
             op.set_failure(
                 "Without enabling SSL "
@@ -188,7 +191,7 @@ class WebsiteView(BaseModelViewSet):
         It is used in the second step of the domain name resolution judgment process to obtain random strings for checking.
         """
         _cache = IBaseCache()
-        op = BaseOperatingRes()
+        op = BaseOperatingRes(uuid.uuid4().hex)
         op.set_processing()
         domain = request.query_params.get("domain")
         random_str = _cache.get(domain, "null")

@@ -5,6 +5,11 @@ from base.serializer import ICBaseModelSerializer
 from database.models import DataBaseModel
 
 
+class RootInfoSerializer(serializers.Serializer):
+    username = serializers.CharField(read_only=True)
+    password = serializers.CharField(read_only=True)
+
+
 class DataBaseModelSerializer(ICBaseModelSerializer):
     own_username = serializers.SerializerMethodField(
         "_own_username", help_text="own username", label="own username"

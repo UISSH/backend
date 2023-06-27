@@ -36,7 +36,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname:5s} {asctime} {pathname}:{lineno} -> {message}",
+            "format": "\033[1;32m{levelname:5s}\033[0m  \033[0;32m{asctime}\033[0m {name} {pathname}:{lineno} \n\033[0;32m{message}\033[0m",
             "style": "{",
         },
         "simple": {
@@ -49,12 +49,32 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose" if DEBUG else "simple",
         },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "DEBUG" if DEBUG else "INFO",
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "logging.StreamHandler",
+        },
     },
     "loggers": {
+        "asyncio": {
+            "level": "WARNING",
+            "class": "logging.StreamHandler",
+        },
+        "daphne": {
+            "level": "WARNING",
+            "class": "logging.StreamHandler",
+        },
+        "urllib3": {
+            "level": "WARNING",
+            "class": "logging.StreamHandler",
+        },
+        "docker": {
+            "level": "WARNING",
+            "class": "logging.StreamHandler",
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+        },
         "django": {
             "handlers": ["console"],
             "level": "WARNING",
@@ -127,7 +147,7 @@ CACHES = {
     },
     "GlobalOperationResCache": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": "/var/tmp/django_gg_cache_GlobalOperationResCache",
+        "LOCATION": "/var/tmp/django_uissh_cache_global_operation_res_cache",
     },
 }
 

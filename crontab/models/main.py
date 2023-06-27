@@ -52,15 +52,14 @@ class CrontabModel(BaseModel):
             )
             shellscript_sh.chmod(0o755)
             self.command = f"{shellscript_sh}"
+            self.save()
 
     @classmethod
     def sync(cls):
         # diff system crontab and database crontab
         system_crontab = CronTab().list()
-        logging.debug(f"system crontab: {system_crontab}")
         database_crontab = cls.objects.all()
         for i in system_crontab:
-            logging.debug(f"system crontab: {i}")
             schedule, command = i.split("    ")
             schedule = schedule.strip()
             command = command.strip()
@@ -73,9 +72,13 @@ class CrontabModel(BaseModel):
         database_crontab = cls.objects.all()
         for i in database_crontab:
             i.update_shell_script()
-            i.save()
             lastest_crontab.add(i.schedule, i.command)
 
+        lastest_crontab.save()
+
+    def remove_from_system_crontab(self):
+        lastest_crontab = CronTab()
+        lastest_crontab.remove(self.schedule, self.command)
         lastest_crontab.save()
 
 
@@ -88,12 +91,11 @@ def signal_receiver_post_save(sender, instance: CrontabModel, **kwargs):
 
 @receiver(post_delete, sender=CrontabModel)
 def signal_receiver_post_delete(sender, instance: CrontabModel, using, **kwargs):
-    lastest_crontab = CronTab()
-    lastest_crontab.remove(instance.schedule, instance.command)
+    instance.remove_from_system_crontab()
     shellscript_folder = pathlib.Path("/usr/local/uissh/crontab")
     shellscript_sh = shellscript_folder / pathlib.Path(f"{instance.uuid.hex}.sh")
     try:
         shellscript_sh.unlink()
     except Exception as e:
         logging.error(f"failed to remove {shellscript_sh}: {e}")
-    lastest_crontab.save()
+    instance.sync()

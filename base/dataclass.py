@@ -1,15 +1,27 @@
+import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Type
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+CACHE_NAME_SPACE = "GlobalOperationResCache"
+
+
+ALL_KEYS = {}
+
 try:
     from django.core.cache import caches, cache
 
+    # 1 day
     _DEFAULT_TIMEOUT = 60 * 60 * 24
-    _CACHE: cache = caches["GlobalOperationResCache"]
+    _CACHE: cache = caches[CACHE_NAME_SPACE]
 except:
+    logger.warning("django.core.cache not found, use dict as cache")
 
     class Cache(dict):
         def set(self, k, v):
@@ -21,7 +33,7 @@ except:
             else:
                 return default
 
-    _CACHE = Cache()
+    _CACHE: cache = Cache()
 
 
 class BaseOperatingResEnum(Enum):
@@ -41,24 +53,50 @@ class BaseOperatingRes:
     msg: str = ""
     create_at: str = datetime.now().__str__()
 
+    def __post_init__(self):
+        if self.event_id == BaseOperatingRes.event_id:
+            raise Exception("event_id need to be set")
+
     def __setattr__(self, key, value):
         if "event_id" in self.__dict__:
             event_id = self.__dict__["event_id"]
             obj = BaseOperatingRes.get_instance(event_id, self)
             obj.__dict__[key] = value
-            _CACHE.set(event_id, obj)
+            _CACHE.set(event_id, obj, _DEFAULT_TIMEOUT)
+            ALL_KEYS[event_id] = {"expire_at": time.time() + _DEFAULT_TIMEOUT}
+
         else:
             self.__dict__[key] = value
             event_id = self.__dict__["event_id"]
-            _CACHE.set(event_id, self)
+            _CACHE.set(event_id, self, _DEFAULT_TIMEOUT)
+            ALL_KEYS[event_id] = {"expire_at": time.time() + _DEFAULT_TIMEOUT}
 
     def __getattribute__(self, name: str):
-        skip = ["result_enum", "is_success", "json", "get_instance"]
+        skip = [
+            "result_enum",
+            "is_success",
+            "json",
+            "get_instance",
+            "get_all_keys",
+        ]
         if name.startswith("_") or name in skip or name.startswith("set_"):
             return object.__getattribute__(self, name)
         event_id = object.__getattribute__(self, "event_id")
         data: BaseOperatingRes = _CACHE.get(event_id, self)
         return data.__dict__[name]
+
+    @classmethod
+    def get_all_keys(cls):
+        data = [x for x in ALL_KEYS.keys() if ALL_KEYS[x]["expire_at"] > time.time()]
+        data.reverse()
+        cache_data = []
+        for x in data:
+            if x not in ALL_KEYS:
+                ALL_KEYS.pop(x)
+            v = _CACHE.get(x, None)
+            if v:
+                cache_data.append(v)
+        return cache_data
 
     @classmethod
     def get_instance(cls, event_id: str, default=None) -> "BaseOperatingRes":
@@ -111,4 +149,4 @@ class BaseOperatingResTest:
 
 if __name__ == "__main__":
     print(BaseOperatingResTest().json())
-    print(BaseOperatingRes().json())
+    print(BaseOperatingRes(uuid.uuid4().hex).json())

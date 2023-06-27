@@ -21,14 +21,14 @@ from .src.variable import app_parameter
 
 abs_folder_path = pathlib.Path(__file__).parent.absolute()
 
-with open(abs_folder_path / "home.html", "r") as f:
-    html = f.read()
 
 app_parameter = app_parameter
 
 
-class NginxApplication(Application, ApplicationToolMinx):
-    """ """
+class NginxReverseProxyApplication(Application, ApplicationToolMinx):
+    """
+    https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/
+    """
 
     def create(self):
         if self._config.web_server_type != WebServerTypeEnum.Nginx:
@@ -36,22 +36,6 @@ class NginxApplication(Application, ApplicationToolMinx):
                 f"This app does not support {self._config.web_server_type.name} web server."
             )
 
-        title = self._app_config.get("name", "default")
-        text = self._app_config.get("text", "与君初相识，犹如故人归。嗨，别来无恙！<br>Hello World!")
-        email = self._app_config.get("email", "")
-        if not os.path.exists(self._config.root_dir):
-            with open(f"{self._config.root_dir}/index.html", "w") as f:
-                index_html = (
-                    html.replace("{title}", title)
-                    .replace("{domain}", self._config.domain)
-                    .replace("{text}", text)
-                )
-                if email:
-                    index_html = index_html.replace("{contact}", email)
-                else:
-                    index_html = index_html.replace("{contact}", "")
-
-                f.write(index_html)
         os.system(f"chown www-data.www-data -R {self._config.root_dir}")
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
@@ -66,11 +50,17 @@ class NginxApplication(Application, ApplicationToolMinx):
         return OperatingRes(uuid.uuid4().hex, OperatingResEnum.SUCCESS)
 
     def read(self, *args, **kwargs) -> ApplicationWebServerConfig:
-        nginx = """
-    index index.html;
-    location / {
-        try_files $uri $uri/ =404;
-    }
+        proxy_pass = self._app_config.get("proxy_pass", "http://127.0.0.1:32768")
+        nginx = f"""
+    location / {{
+        proxy_pass  {proxy_pass};
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   Host $host;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+    }}
     """
         return ApplicationWebServerConfig(nginx)
 
@@ -93,13 +83,13 @@ class NginxApplication(Application, ApplicationToolMinx):
 
     @classmethod
     def version(cls) -> ApplicationVersion:
-        name = "Nginx"
+        name = "NginxReverseProxy"
         return ApplicationVersion(
             name=name,
             name_version="0.0.1 alpha",
             code_version=1,
             author="zmaplex@gmail.com",
-            description="用于创建基本的 Nginx 网页",
+            description="When NGINX proxies a request, it sends the request to a specified proxied server, fetches the response, and sends it back to the client.",
         )
 
     def get_data(self) -> dict:

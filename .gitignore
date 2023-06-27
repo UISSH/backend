@@ -1,5 +1,6 @@
 test.sql
 test.pem
+local_test.py
 /.script/
 /install_script/
 .env

@@ -1,8 +1,9 @@
 import os
+import sys
 
 # Don't add v prefix
-CURRENT_VERSION = "0.2.6"
-FRONTED_MINIMUM_VERSION = "0.2.6"
+CURRENT_VERSION = "0.2.7"
+FRONTED_MINIMUM_VERSION = "0.2.7"
 MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
 FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
@@ -22,10 +23,11 @@ def upgrade_backend_project(version=CURRENT_VERSION):
         return
 
     shell_script = f"""
-    cd {BACKEND_DIR} && git reset --hard HEAD && git fetch && git checkout v{version}
+    cd {BACKEND_DIR} && cp db.sqlite3 /usr/local/uissh/db.sqlite3.bak
+    cd {BACKEND_DIR} && git reset --hard HEAD && git fetch && git checkout v{version} -f
     cd {BACKEND_DIR} && venv/bin/pip install -r requirements.txt
+    mv /usr/local/uissh/db.sqlite3.bak {BACKEND_DIR}/db.sqlite3
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py makemigrations --noinput
-    {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py migrate --noinput
     {PYTHON_INTERPRETER} {BACKEND_DIR}/manage.py collectstatic --noinput
     systemctl restart ui-ssh
@@ -58,5 +60,14 @@ def upgrade_front_project():
 
 
 if __name__ == "__main__":
-    upgrade_front_project()
-    upgrade_backend_project()
+    print("Upgrade script for UISSH")
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "frontend":
+            upgrade_front_project()
+        elif sys.argv[1] == "backend":
+            upgrade_backend_project()
+        else:
+            print("Error: Invalid argument")
+
+    else:
+        print("Error: Missing argument")
