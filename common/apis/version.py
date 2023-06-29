@@ -1,9 +1,12 @@
 import logging
+import time
+
 import pkg_resources
+from django.core import cache
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
-from django.core import cache
+
 import upgrade
 
 
@@ -15,11 +18,11 @@ def get_github_last_version():
         if data:
             return data
 
-        url = "https://api.github.com/repos/UISSH/backend/tags"
+        url = f"https://api.github.com/repos/UISSH/backend/tags?v={time.time()}"
         res = requests.get(url)
         logging.info(res.json())
         data = res.json()[0]["name"]
-        cache.set("github_last_version", data, 60 * 60 * 24)
+        cache.set("github_last_version", data, 60 * 60)
         return data
     except Exception as e:
         return upgrade.CURRENT_VERSION

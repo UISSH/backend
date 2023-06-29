@@ -1,10 +1,17 @@
 import os
 import sys
+import urllib3
+
 
 # Don't add v prefix
-CURRENT_VERSION = "0.2.7"
+CURRENT_VERSION = "0.2.8"
 FRONTED_MINIMUM_VERSION = "0.2.7"
-MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
+resp = urllib3.request("GET", "https://ischina.org/")
+
+
+MIRROR_URL = ""
+if resp.json()["is_china"]:
+    MIRROR_URL = "https://mirror-cloudflare.uissh.com/"
 FRONTEND_URL = f"{MIRROR_URL}https://github.com/UISSH/react-frontend/releases/download/v{FRONTED_MINIMUM_VERSION}/django_spa.zip"
 
 PROJECT_DIR = "/usr/local/uissh"
