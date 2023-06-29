@@ -1,13 +1,12 @@
 import os
 import sys
-import urllib3
-
+import requests
 
 # Don't add v prefix
 CURRENT_VERSION = "0.2.8"
 FRONTED_MINIMUM_VERSION = "0.2.7"
-resp = urllib3.request("GET", "https://ischina.org/")
 
+resp = requests.get("https://ischina.org/")
 
 MIRROR_URL = ""
 if resp.json()["is_china"]:
