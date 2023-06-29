@@ -11,7 +11,7 @@ from paramiko.channel import Channel
 from rest_framework.authtoken.models import Token
 
 from common.models import User
-from websocket.utils import format_ssh_auth_data
+from websocket.utils import format_ssh_auth_data, generate_ssh_key
 
 
 class SshWebConsumer(WebsocketConsumer):
@@ -68,11 +68,7 @@ class SshWebConsumer(WebsocketConsumer):
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
         hostname = _format.get("hostname")
         if hostname == "localhost":
-            auth_info = {
-                "hostname": hostname,
-                "port": _format.get("port", 22),
-                "username": _format.get("username", None),
-            }
+            auth_info = generate_ssh_key()
         else:
             auth_info = format_ssh_auth_data(_format)
         logging.debug(auth_info)

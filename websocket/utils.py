@@ -4,6 +4,34 @@ from io import StringIO
 import paramiko
 
 
+logger = logging.getLogger(__name__)
+
+
+def generate_ssh_key():
+    """
+    Generate ssh key, the public key will be added to the authorized_keys file.
+    it will be used to connect to the local ssh service that only allow from localhost.
+    """
+
+    with open("/root/.ssh/authorized_keys", "r") as f:
+        old_data = f.read()
+
+    if "by_uissh" not in old_data:
+        logging.info("generate ssh key...")
+        key = paramiko.RSAKey.generate(4096)
+        pub = key.get_base64()
+        key.write_private_key_file("./uissh.pem")
+        append_data = f'from="127.0.0.1" ssh-rsa {pub} by_uissh\n\n'
+        with open("/root/.ssh/authorized_keys", "w") as f:
+            f.write(append_data + old_data)
+
+    return {
+        "pkey": paramiko.RSAKey.from_private_key(open("./uissh.pem")),
+        "username": "root",
+        "hostname": "localhost",
+    }
+
+
 def format_ssh_auth_data(_format):
     """{
     hostname: "127.0.0.1",

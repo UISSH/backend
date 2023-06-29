@@ -40,12 +40,7 @@ class CronTab:
         os.system(f"touch {self.crontab_file}")
 
     def list(self):
-        data = list_by_osquery()
-
-        if data:
-            return data
-        else:
-            raise Exception("failed to get crontab list")
+        return list_by_osquery()
 
     def add(
         self,
