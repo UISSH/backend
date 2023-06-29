@@ -3,8 +3,28 @@ name: Django CI
 on:
   push:
     branches: ["master", "develop"]
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "requirements.txt"
+      - "manage.py"
+      - "db.sqlite3"
+      - ".env.template"
+      - ".github/**"
+      - ".vscode/**"
+      
   pull_request:
     branches: ["master", "develop"]
+
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "requirements.txt"
+      - "manage.py"
+      - "db.sqlite3"
+      - ".env.template"
+      - ".github/**"
+      - ".vscode/**"
 
 env:
   DB_PASSWORD: ${{ vars.DB_PASSWORD }}
