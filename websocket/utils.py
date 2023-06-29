@@ -1,10 +1,18 @@
 import logging
 from io import StringIO
+import os
 
 import paramiko
 
 
 logger = logging.getLogger(__name__)
+
+folder = "/usr/local/uissh/data"
+
+
+def mkdir_data():
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 
 def generate_ssh_key():
@@ -20,13 +28,13 @@ def generate_ssh_key():
         logging.info("generate ssh key...")
         key = paramiko.RSAKey.generate(4096)
         pub = key.get_base64()
-        key.write_private_key_file("./uissh.pem")
+        key.write_private_key_file(f"{folder}/uissh.pem")
         append_data = f'from="127.0.0.1" ssh-rsa {pub} by_uissh\n\n'
         with open("/root/.ssh/authorized_keys", "w") as f:
             f.write(append_data + old_data)
 
     return {
-        "pkey": paramiko.RSAKey.from_private_key(open("./uissh.pem")),
+        "pkey": paramiko.RSAKey.from_private_key(open(f"{folder}/uissh.pem")),
         "username": "root",
         "hostname": "localhost",
     }
