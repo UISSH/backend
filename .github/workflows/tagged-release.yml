@@ -1,19 +1,18 @@
 name: "tagged-release"
 
-
 on:
   push:
-    branches: [ "master" ]
-    tags:        
+    branches: ["master"]
+    tags:
       - v*
-      
+
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-        max-parallel: 4
-        matrix:
-          python-version: [3.9, "3.10", 3.11]
+      max-parallel: 4
+      matrix:
+        python-version: [3.9, "3.10", 3.11]
 
     steps:
       - uses: actions/checkout@v3
