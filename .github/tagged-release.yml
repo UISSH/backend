@@ -1,0 +1,24 @@
+name: "tagged-release"
+
+on:
+  workflow_run:
+    workflows: ["Django CI"]
+    types: [requested]
+    tags:        
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+        max-parallel: 4
+        matrix:
+          python-version: [3.9, "3.10", 3.11]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
