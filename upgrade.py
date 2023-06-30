@@ -3,7 +3,7 @@ import sys
 import requests
 
 # Don't add v prefix
-CURRENT_VERSION = "0.2.9"
+CURRENT_VERSION = "0.2.10"
 FRONTED_MINIMUM_VERSION = "0.2.7"
 
 resp = requests.get("https://ischina.org/")
