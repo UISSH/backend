@@ -21,6 +21,8 @@ def generate_ssh_key():
     it will be used to connect to the local ssh service that only allow from localhost.
     """
 
+    mkdir_data()
+
     with open("/root/.ssh/authorized_keys", "r") as f:
         old_data = f.read()
 
@@ -36,7 +38,7 @@ def generate_ssh_key():
     return {
         "pkey": paramiko.RSAKey.from_private_key(open(f"{folder}/uissh.pem")),
         "username": "root",
-        "hostname": "localhost",
+        "hostname": "127.0.0.1",
     }
 
 
