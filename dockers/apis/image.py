@@ -2,6 +2,7 @@
 https://docker-py.readthedocs.io/en/stable/api.html
 """
 import logging
+import traceback
 from typing import Any, List, Sequence
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
@@ -110,9 +111,11 @@ class DockerImageView(GenericViewSet):
 
     def destroy(self, request, *args, **kwargs):
         lookup_field = self.get_lookup_content(request)
-
-        self.client.remove_image(image=lookup_field, force=True)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            self.client.remove_image(image=lookup_field)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(f"{e}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, *args, **kwargs):
         lookup_field = self.get_lookup_content(request)

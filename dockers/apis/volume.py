@@ -2,6 +2,7 @@
 https://docker-py.readthedocs.io/en/stable/api.html
 """
 import logging
+from pprint import pprint
 from typing import Any, List
 
 import docker
@@ -11,13 +12,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from common.serializers.operating import OperatingResSerializer
-from dockers.serializers.image import (
-    DockerImageInspectSerializer,
-    DockerImageNameSerializer,
-    DockerImageSerializer,
+from dockers.serializers.volume import (
+    DockerVolumeDeleteSerializer,
+    DockerVolumeSerializer,
 )
-from dockers.serializers.volume import DockerVolumeSerializer
 
 
 def keys_lower(dict_data: dict):
@@ -82,11 +80,25 @@ class DockerVolumeView(GenericViewSet):
         lookup_field = self.get_lookup_content(request)
 
         data = self.client.volumes()["Volumes"]
+
+        pprint(self.client.inspect_volume(lookup_field))
         for i in data:
             if lookup_field in i["Name"]:
                 return Response(keys_lower(i))
 
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @extend_schema(responses={200: DockerVolumeDeleteSerializer, 500: str})
+    @action(detail=False, methods=["get"])
+    def prune_volumes(self, request, *args, **kwargs):
+        """
+        Delete unused volumes
+        """
+        try:
+            data = self.client.prune_volumes()
+            return Response(keys_lower(data))
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def list(self, request, *args, **kwargs):
         """
@@ -95,7 +107,9 @@ class DockerVolumeView(GenericViewSet):
         if self.client is None:
             msg = "docker daemon is not running."
             return Response(msg, status=500)
-        data = self.client.volumes()["Volumes"]
+        data = self.client.volumes()
+        pprint(data)
+        data = data["Volumes"]
 
         return Response(
             {
