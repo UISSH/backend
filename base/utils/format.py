@@ -1,7 +1,8 @@
 from subprocess import CompletedProcess
+from typing import Tuple
 
 
-def format_bytes(size) -> (int, str):
+def format_bytes(size) -> Tuple[int, str]:
     # 2**10 = 1024
     power = 2**10
     n = 0
