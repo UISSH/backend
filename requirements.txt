@@ -7,7 +7,7 @@ django-debug-toolbar==4.1.0
 django-extensions==3.2.3
 django-filter==23.2
 django-json-widget==1.1.1
-drf-spectacular==0.26.3
+drf-spectacular==0.26.5
 gunicorn==20.1.0
 nginxfmt==1.2.2
 paramiko==3.2.0
